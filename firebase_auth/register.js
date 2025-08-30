@@ -4,7 +4,7 @@
 
   // Firebase configuration
   const firebaseConfig = {
-    apiKey: "AIzaSyA8N5mQYQ9JWVklHwsl25K234aipBhR5M8",
+    apiKey: "Your API key",
     authDomain: "loginexample-21a86.firebaseapp.com",
     projectId: "loginexample-21a86",
     storageBucket: "loginexample-21a86.firebasestorage.app",
