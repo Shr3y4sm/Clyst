@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auth - Login / Create</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="register.js" defer></script>
+  </head>
+  <body>
+    <div class="bg"></div>
+    <main class="container">
+      <div class="brand-hero">Clyst</div>
+      <section class="card">
+        <h1 class="title">Login or Create Account</h1>
+
+        <!-- Step 1: Choose Role -->
+        <div id="role-step" class="form" style="gap: 16px">
+          <label class="label">Select your role</label>
+          <div style="display: flex; gap: 12px">
+            <button
+              id="choose-user"
+              class="primary-btn"
+              type="button"
+              style="flex: 1"
+            >
+              I'm a User
+            </button>
+            <button
+              id="choose-artist"
+              class="primary-btn"
+              type="button"
+              style="flex: 1"
+            >
+              I'm an Artisan
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2A: User email/password auth (Login) -->
+        <form id="auth-form" class="form" novalidate style="display: none">
+          <label class="label" for="email">Email</label>
+          <input
+            class="input"
+            id="email"
+            name="email"
+            type="email"
+            placeholder="name@email.com"
+            required
+          />
+
+          <label class="label" for="password">Password</label>
+          <input
+            class="input"
+            id="password"
+            name="password"
+            type="password"
+            placeholder="Password"
+            minlength="6"
+            required
+          />
+
+          <button class="primary-btn" type="submit">Continue</button>
+
+          <div style="text-align: center; color: #555; margin-top: 8px">
+            Don't have an account?
+            <button
+              id="show-signup"
+              type="button"
+              style="
+                background: none;
+                border: none;
+                color: #1d4ed8;
+                cursor: pointer;
+              "
+            >
+              Create one
+            </button>
+          </div>
+
+          <p class="error" id="error-text" hidden></p>
+        </form>
+
+        <!-- Step 2A (alt): User email/password Sign Up -->
+        <form id="signup-form" class="form" novalidate style="display: none">
+          <label class="label" for="full-name">Full name</label>
+          <input
+            class="input"
+            id="full-name"
+            name="full-name"
+            type="text"
+            placeholder="Your full name"
+            required
+          />
+
+          <label class="label" for="phone-user">Phone number</label>
+          <input
+            class="input"
+            id="phone-user"
+            name="phone-user"
+            type="tel"
+            placeholder="Optional"
+          />
+
+          <label class="label" for="gender">Gender</label>
+          <select
+            id="gender"
+            name="gender"
+            class="input"
+            style="background: #fff; color: #111"
+          >
+            <option value="">Prefer not to say</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label class="label" for="email-signup">Email</label>
+          <input
+            class="input"
+            id="email-signup"
+            name="email-signup"
+            type="email"
+            placeholder="name@email.com"
+            required
+          />
+
+          <label class="label" for="password1">Password</label>
+          <input
+            class="input"
+            id="password1"
+            name="password1"
+            type="password"
+            placeholder="At least 6 characters"
+            minlength="6"
+            required
+          />
+
+          <label class="label" for="password2">Confirm password</label>
+          <input
+            class="input"
+            id="password2"
+            name="password2"
+            type="password"
+            placeholder="Re-enter password"
+            minlength="6"
+            required
+          />
+
+          <button class="primary-btn" type="submit">Create Account</button>
+
+          <div style="text-align: center; color: #e5e7eb; margin-top: 8px">
+            Already have an account?
+            <button
+              id="show-login"
+              type="button"
+              style="
+                background: none;
+                border: none;
+                color: #93c5fd;
+                cursor: pointer;
+              "
+            >
+              Login
+            </button>
+          </div>
+
+          <p class="error" id="error-text-signup" hidden></p>
+        </form>
+
+        <!-- Step 2B: Artisan phone auth -->
+        <div id="artist-form" class="form" style="display: none">
+          <label class="label" for="phone">Phone number</label>
+          <input
+            class="input"
+            id="phone"
+            name="phone"
+            type="tel"
+            placeholder="+91 98765 43210"
+          />
+          <div id="recaptcha-container"></div>
+          <button id="send-otp" class="primary-btn" type="button">
+            Send OTP
+          </button>
+
+          <div id="otp-section" style="display: none">
+            <label class="label" for="otp">Enter OTP</label>
+            <input
+              class="input"
+              id="otp"
+              name="otp"
+              type="text"
+              placeholder="6-digit code"
+            />
+            <button id="verify-otp" class="primary-btn" type="button">
+              Verify & Continue
+            </button>
+          </div>
+
+          <p class="error" id="error-text-artist" hidden></p>
+
+          <div style="text-align: center; color: #555; margin-top: 8px">
+            Don't have an account?
+            <button
+              id="show-artist-signup"
+              type="button"
+              style="
+                background: none;
+                border: none;
+                color: #1d4ed8;
+                cursor: pointer;
+              "
+            >
+              Create one
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2B (alt): Artisan Sign Up with phone -->
+        <div id="artist-signup-form" class="form" style="display: none">
+          <label class="label" for="full-name-artist">Full name</label>
+          <input
+            class="input"
+            id="full-name-artist"
+            name="full-name-artist"
+            type="text"
+            placeholder="Your full name"
+          />
+
+          <label class="label" for="gender-artist">Gender</label>
+          <select
+            id="gender-artist"
+            name="gender-artist"
+            class="input"
+            style="background: #fff; color: #111"
+          >
+            <option value="">Prefer not to say</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+          </select>
+
+          <label class="label" for="phone-artist-signup">Phone number</label>
+          <input
+            class="input"
+            id="phone-artist-signup"
+            name="phone-artist-signup"
+            type="tel"
+            placeholder="+91 98765 43210"
+          />
+
+          <button id="artist-send-otp" class="primary-btn" type="button">
+            Send OTP
+          </button>
+
+          <div id="artist-otp-section" style="display: none">
+            <label class="label" for="artist-otp">Enter OTP</label>
+            <input
+              class="input"
+              id="artist-otp"
+              name="artist-otp"
+              type="text"
+              placeholder="6-digit code"
+            />
+            <button id="artist-verify-otp" class="primary-btn" type="button">
+              Verify & Create
+            </button>
+          </div>
+
+          <div style="text-align: center; color: #e5e7eb; margin-top: 8px">
+            Already have an account?
+            <button
+              id="show-artist-login"
+              type="button"
+              style="
+                background: none;
+                border: none;
+                color: #93c5fd;
+                cursor: pointer;
+              "
+            >
+              Login
+            </button>
+          </div>
+
+          <p class="error" id="error-text-artist-signup" hidden></p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
