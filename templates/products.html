@@ -134,6 +134,8 @@
       .nav-center{ display:none; }
       .search-pill{ width: calc(100vw - 32px); }
     }
+    .fab{ position:fixed; bottom:60px; right:40px; width:55px; height:55px; border-radius:50%; text-decoration: none; background:#111; color:#fff; font-size:28px; display:flex; justify-content:center; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,.2); cursor:pointer; transition:background .2s, transform .2s; z-index:200;}
+    .fab:hover{ background:#333; transform:scale(1.1); }
   </style>
   </head>
   <body>
@@ -199,15 +201,16 @@
       <h3 style="margin:0 0 10px; font-size:1.2rem; color:#222;">{{ product.title }}</h3>
       <p style="color:#555; font-size:15px; margin-bottom:12px; text-align:center;">{{ product.description }}</p>
       <p style="font-weight:600; color:#111; margin-bottom:10px;">₹{{product.price}}</p>
-      <a href="{{url_for('product_buy', id=product.id)}}" style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer;">Buy Now</a>
+      <a href="{{url_for('product_buy', id=product.product_id)}}" style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer;">Buy Now</a>
       <a href="{{url_for('profile', id=product.artist.id)}}" style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer;">View Artisan</a>
     </div>
     {% endfor %}
-    {% else %}
+    {% elif current_user.is_authenticated %}
     <div style="padding:20px; text-align:center; color:#555;">Add products to start</div>
     {% endif %}
   </div>
 </div>
+<a href="{{ url_for('add_products') }}" class="fab">+</a>
 
 <script>
     function toggleMenu(e){

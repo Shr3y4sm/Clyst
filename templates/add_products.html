@@ -337,7 +337,6 @@
                   name="description"
                   class="form-textarea"
                   placeholder="Describe your product, including materials, dimensions, etc..."
-                  required
                 ></textarea>
                 <div class="form-help">
                   Provide detailed information about your product
@@ -345,7 +344,7 @@
               </div>
 
               <div class="form-group">
-                <label for="price" class="form-label">Price ($)</label>
+                <label for="price" class="form-label">Price (Rs.)</label>
                 <input
                   type="number"
                   id="price"
@@ -400,15 +399,142 @@
     </div>
 
   <script>
+              function hasImageSelected() {
+                const url = document
+                  .getElementById("product_image")
+                  .value.trim();
+                const file =
+                  document.getElementById("product_image_file").files[0];
+                return (url && url.length > 0) || !!file;
+              }
+
               // Debug file upload
               document
-                .getElementById("post_image_file")
+                .getElementById("product_image_file")
                 .addEventListener("change", function (e) {
                   console.log("File selected:", e.target.files[0]);
                   if (e.target.files[0]) {
                     console.log("File name:", e.target.files[0].name);
                     console.log("File size:", e.target.files[0].size);
                     console.log("File type:", e.target.files[0].type);
+                  }
+                });
+
+              // Enforce image presence & debug form submission
+              document
+                .querySelector("form")
+                .addEventListener("submit", function (e) {
+                  console.log("Form submitting...");
+                  if (!hasImageSelected()) {
+                    e.preventDefault();
+                    alert(
+                      "Please provide an image URL or upload an image before submitting."
+                    );
+                    return;
+                  }
+                  const fileInput =
+                    document.getElementById("product_image_file");
+                  if (fileInput.files[0]) {
+                    console.log(
+                      "File being submitted:",
+                      fileInput.files[0].name
+                    );
+                  } else {
+                    console.log("No file selected");
+                  }
+                });
+
+              // AI generation logic
+              document
+                .getElementById("generate_ai")
+                .addEventListener("click", async function () {
+                  if (!hasImageSelected()) {
+                    alert(
+                      "Please provide an image URL or upload an image to generate suggestions."
+                    );
+                    return;
+                  }
+
+                  const suggestionsDiv =
+                    document.getElementById("ai_suggestions");
+                  suggestionsDiv.innerHTML = "Generating suggestions...";
+
+                  const imageUrl = document
+                    .getElementById("product_image")
+                    .value.trim();
+                  const payload = {
+                    type: "product",
+                    prompt: document.getElementById("ai_prompt").value.trim(),
+                    description: document
+                      .getElementById("description")
+                      .value.trim(),
+                    image_url: imageUrl,
+                  };
+
+                  // Include base64 if local file is selected and no URL
+                  const file =
+                    document.getElementById("product_image_file").files[0];
+                  if (!imageUrl && file) {
+                    const b64 = await new Promise((resolve, reject) => {
+                      const reader = new FileReader();
+                      reader.onload = () =>
+                        resolve(reader.result.split(",")[1]);
+                      reader.onerror = reject;
+                      reader.readAsDataURL(file);
+                    });
+                    payload.image_base64 = b64;
+                    payload.image_mime = file.type || "image/jpeg";
+                  }
+
+                  try {
+                    const res = await fetch("/api/generate_copy", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(payload),
+                    });
+                    const data = await res.json();
+                    if (!data.ok) {
+                      suggestionsDiv.innerHTML = `<div style="color:#c62828;">${
+                        data.error || "Failed to generate suggestions"
+                      }</div>`;
+                      return;
+                    }
+                    const items = data.suggestions || [];
+                    suggestionsDiv.innerHTML = items
+                      .map(
+                        (s, idx) => `
+                    <div style=\"border:1px solid #e9ecef; border-radius:8px; padding:12px; margin-bottom:8px;\">
+                      <div style=\"font-weight:600; margin-bottom:6px;\">Suggestion ${
+                        idx + 1
+                      }</div>
+                      <div style=\"margin-bottom:6px;\"><strong>Title:</strong> ${
+                        s.title
+                      }</div>
+                      <div style=\"margin-bottom:10px;\"><strong>Description:</strong> ${
+                        s.description
+                      }</div>
+                      <button type=\"button\" class=\"btn btn-primary\" data-idx=\"${idx}\">Use this</button>
+                    </div>
+                  `
+                      )
+                      .join("");
+
+                    // Attach handlers
+                    Array.from(
+                      suggestionsDiv.querySelectorAll("button[data-idx]")
+                    ).forEach((btn) => {
+                      btn.addEventListener("click", () => {
+                        const i = parseInt(btn.getAttribute("data-idx"));
+                        const chosen = items[i];
+                        document.getElementById("product_name").value =
+                          chosen.title;
+                        const descEl = document.getElementById("description");
+                        if (descEl) descEl.value = chosen.description;
+                      });
+                    });
+                  } catch (err) {
+                    console.error(err);
+                    suggestionsDiv.innerHTML = `<div style=\"color:#c62828;\">Error generating suggestions.</div>`;
                   }
                 });
 

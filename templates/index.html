@@ -38,7 +38,7 @@
     .search-close{ width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#444; transition: background .2s;}
     .search-close:hover{ background:#e1e1e1; }
     @keyframes slideDown{ from{ transform: translateY(-8px); opacity: 0; } to{ transform: translateY(0); opacity: 1; } }
-    .mobile-menu{ display:none; flex-direction:column; background:#fff; padding:10px var(--nav-pad-x); box-shadow:0 2px 6px rgba(0,0,0,.05);}
+    .mobile-menu{ display:none; flex-direction:column; position: sticky; background:#fff; padding:10px var(--nav-pad-x); box-shadow:0 2px 6px rgba(0,0,0,.05);}
     .mobile-menu a{ text-decoration:none; color:#333; padding:10px 0; font-size:15px; border-bottom:1px dashed #eee;}
     .mobile-menu a:last-child{ border-bottom:none; }
     .mobile-menu a.active{ font-weight:600; color:#000; }
@@ -124,7 +124,7 @@
   {% for post in posts %}
   <div class="post">
     <div class="post-info">      
-      <a href="{{url_for('delete', id=post.id)}}">Delete</a>
+      <a href="{{url_for('delete_posts', id=post.post_id)}}">Delete</a>
       
       <div class="post-header">{{post.artist.name}} ✔ ({{post.created_at}})</div>
       <div class="item-title">{{post.post_title}}</div>

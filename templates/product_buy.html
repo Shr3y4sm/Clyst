@@ -119,16 +119,20 @@
   </div>
 
   <div class="post">
-    <div class="post-info">      
-      <a href="{{url_for('delete_products', id=product.id)}}">Delete</a>
-
+    <div class="post-info">
+      {% if current_user.is_authenticated and current_user.id == 1 %}      
+      <a 
+      href="{{url_for('delete_products', id=product.product_id)}}"
+      style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#ff4f4f; color:#ffffff; cursor:pointer;"
+      ><i class="fas fa-trash"></i> Delete</a>
+      {% endif %}
       <div class="post-header">{{product.artist.name}} ✔ ({{product.created_at}})</div>
       <div class="item-title">{{product.title}}</div>
       <div class="item-desc">{{product.description}}</div>
       <p><strong>Posted By:</strong> {{product.artist.name}}</p>
       <p style="font-weight:600; color:#111; margin-bottom:10px;">₹{{product.price}}</p>
       <p><strong>Year:</strong> {{product.created_at}}</p>
-      <a href="{{url_for('purchase', id=product.id)}}" style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer;">Purchase</a>
+      <a href="javascript:void(0)" onclick="handlePurchase()" style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer;">Purchase</a>
       <a href="{{url_for('profile', id=product.artist.id)}}" style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer;">View Artisan</a>
     </div>
     {% if product.img_url %}
@@ -187,6 +191,13 @@
       }
     });
   });
+
+  function handlePurchase() {
+        // Show a modal or redirect to payment gateway
+        alert(
+          "Payment gateway integration would go here!\n\nThis would typically redirect to:\n- Stripe\n- PayPal\n- Razorpay\n- Or other payment processors"
+        );
+      }
 </script>
   </body>
 </html>
