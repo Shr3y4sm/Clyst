@@ -158,18 +158,67 @@
       <i class="fa-solid fa-language"></i>
     </button>
 
-    <script src="../static/js/app.js"></script>
-    <script>
+   <script>
+      function toggleMenu(e) {
+        e?.stopPropagation?.();
+        const menu = document.getElementById("mobileMenu");
+        const now = menu.style.display === "flex" ? "none" : "flex";
+        menu.style.display = now;
+        if (now === "flex")
+          document.getElementById("searchBelow").classList.remove("open");
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const path = window.location.pathname.split("/").pop();
+        document
+          .querySelectorAll(".nav-center a, .mobile-menu a")
+          .forEach((link) => {
+            if (link.getAttribute("href") === path) {
+              link.classList.add("active");
+            } else {
+              link.classList.remove("active");
+            }
+          });
+      });
+
       function handlePurchase() {
         // Show a modal or redirect to payment gateway
         alert(
           "Payment gateway integration would go here!\n\nThis would typically redirect to:\n- Stripe\n- PayPal\n- Razorpay\n- Or other payment processors"
         );
       }
-</script>
+
+      function sayAloud(text) {
+        const message = new SpeechSynthesisUtterance();
+        message.text = `The title of the artwork is ${text.title}. It is created by ${text.artist}. The price of the artwork is Rs.${text.price}. The description says it is ${text.description}.`;
+        window.speechSynthesis.speak(message); // Start speaking
+      }
+
+      async function copyToClipboard(textToCopy) {
+        try {
+          await navigator.clipboard.writeText(textToCopy);
+          alert("Text copied to clipboard");
+        } catch (err) {
+          alert("Failed to copy text: " + err);
+        }
+      }
+    </script>
     <script
       type="text/javascript"
       src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
     ></script>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: "en", // Set your website's default language
+            includedLanguages:
+              "en,hi,bi,ta,te,mr,gu,kn,ml,pa,ur,es,fr,de,zh,ja,ko", // Optional: Specify languages to include in the dropdown
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE, // Optional: Customize widget layout
+          },
+          "google_translate_element"
+        );
+      }
+    </script>
   </body>
 </html>
