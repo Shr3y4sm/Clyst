@@ -263,11 +263,11 @@ The application features an advanced natural language search system that underst
 *The marketplace page displaying products with price filtering and natural language search capabilities.*
 
 ### Add Post Page with AI Suggestions & Translation
-![Add Post Page with AI Suggestions](screenshots/add_post_page_with_AI_suggestions.png)
+![Add Post Page with AI Suggestions](screenshots/add_post_with_ai&translate.png)
 *Create post form featuring AI-powered title and description suggestions based on uploaded artwork and multilingual translation capabilities.*
 
 ### Add Product Page with AI & Translation
-![Add Product Page with AI & Translation](screenshots/add_product_page_with_AI&translate.png)
+![Add Product Page with AI & Translation](screenshots/add_product_with_ai&translate.png)
 *Add product form showcasing AI content generation and multilingual translation capabilities.*
 
 ### Login Page
@@ -277,6 +277,10 @@ The application features an advanced natural language search system that underst
 ### Registration Page
 ![Registration Page](screenshots/register_page.png)
 *User registration form with comprehensive profile setup including location and contact information.*
+
+### Profile Page
+![Profile Page](screenshots/profile_page.png)
+*User profile page showcasing portfolio with AI-generated narrative and management options for posts and products.*
 
 ## 🔒 Security Features
 

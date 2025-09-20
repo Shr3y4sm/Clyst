@@ -295,6 +295,12 @@
 }
 
 .btn-danger {
+<<<<<<< HEAD
+	background: #f8f9fa;
+	color: #dc3545;
+	border: 1px solid #dc3545;
+	min-width: 120px;
+=======
 	color: #111;
 	display: flex;
 	align-items: center;
@@ -303,6 +309,7 @@
 	border: 1px solid #c4c4c4;
 	width: 100%;
 	padding: 20px;
+>>>>>>> 9ed0a038664633175bab7058424521b725eecb81
 }
 
 .btn-danger:hover {
