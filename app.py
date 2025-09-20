@@ -449,8 +449,8 @@ def profile():
     )
     
     return render_template("profile.html", 
-                         current_user=current_user, 
-                         profile_user=current_user,
+                         current_user=current_user,
+                         profile_user=current_user, 
                          posts=user_posts, 
                          products=user_products,
                          portfolio_narrative=portfolio_narrative)

@@ -227,7 +227,7 @@
               </div>
               {% else %}
               <div class="empty-state">
-                <i class="fas fa-images"></i>
+                <i class="fas fa-image"></i>
                 <h3>No posts yet</h3>
                 <p>Start sharing your artwork with the community!</p>
               </div>
@@ -296,7 +296,7 @@
               </div>
               {% else %}
               <div class="empty-state">
-                <i class="fas fa-store"></i>
+                <i class="fa-solid fa-box-open"></i>
                 <h3>No products yet</h3>
                 <p>Start selling your artwork in the marketplace!</p>
               </div>
@@ -316,8 +316,28 @@
       <i class="fa-solid fa-language"></i>
     </button>
 
-    <script src="../static/js/app.js"></script>
     <script>
+          function toggleMenu(e) {
+        e?.stopPropagation?.();
+        const menu = document.getElementById("mobileMenu");
+        const now = menu.style.display === "flex" ? "none" : "flex";
+        menu.style.display = now;
+            if (now === "flex")
+              document.getElementById("searchBelow").classList.remove("open");
+      }
+
+          function toggleSearch() {
+        const bar = document.getElementById("searchBelow");
+        bar.classList.toggle("open");
+        const menu = document.getElementById("mobileMenu");
+            if (menu.style.display === "flex") menu.style.display = "none";
+            if (bar.classList.contains("open")) {
+              requestAnimationFrame(() =>
+                document.getElementById("globalSearchInput").focus()
+              );
+        }
+      }
+
       // Highlight active nav link
           document.addEventListener("DOMContentLoaded", function () {
             const path = window.location.pathname.split("/").pop();
@@ -348,10 +368,330 @@
             event.target.classList.add("active");
           }
 
-</script>
+          function sayAloud(text) {
+            const message = new SpeechSynthesisUtterance();
+            message.text = `The title of the artwork is ${text.title}. It is created by ${text.artist}. The price of the artwork is Rs.${text.price}. The description says it is ${text.description}.`;
+            window.speechSynthesis.speak(message); // Start speaking
+          }
+
+          async function copyToClipboard(textToCopy) {
+            try {
+              await navigator.clipboard.writeText(textToCopy);
+              alert("Text copied to clipboard");
+            } catch (err) {
+              alert("Failed to copy text: " + err);
+            }
+          }
+
+       // Text-to-Speech functionality
+       let speechSynthesis = window.speechSynthesis;
+       let currentUtterance = null;
+       let isPlaying = false;
+
+       // Function to detect current language from Google Translate
+       function getCurrentLanguage() {
+         // Method 1: Check if page has been translated by Google Translate
+         const body = document.body;
+         if (body.classList.contains('translated-ltr') || body.classList.contains('translated-rtl')) {
+           // Try to get language from Google Translate's iframe
+           const translateFrame = document.querySelector('iframe[src*="translate.google"]');
+           if (translateFrame) {
+             try {
+               const frameDoc = translateFrame.contentDocument || translateFrame.contentWindow.document;
+               const langSelect = frameDoc.querySelector('select');
+               if (langSelect && langSelect.value) {
+                 return langSelect.value;
+               }
+             } catch (e) {
+               // Cross-origin access blocked
+             }
+           }
+
+           // Try to detect from URL parameters
+           const urlParams = new URLSearchParams(window.location.search);
+           const lang = urlParams.get('hl');
+           if (lang) return lang;
+
+           // Check for Google Translate's language indicator
+           const langIndicator = document.querySelector('[data-google-lang]');
+           if (langIndicator) {
+             return langIndicator.getAttribute('data-google-lang');
+           }
+
+           // Try to detect from Google Translate's global state
+           if (window.google && window.google.translate && window.google.translate.TranslateElement) {
+             const translateElement = document.querySelector('.goog-te-combo');
+             if (translateElement && translateElement.value) {
+               return translateElement.value;
+             }
+           }
+         }
+
+         // Method 2: Check for Google Translate's language selector
+         const langSelect = document.querySelector('.goog-te-combo');
+         if (langSelect && langSelect.value && langSelect.value !== 'en') {
+           return langSelect.value;
+         }
+
+         // Method 3: Check for Google Translate's banner frame
+         const googleBanner = document.querySelector('.goog-te-banner-frame');
+         if (googleBanner) {
+           const bannerSelect = googleBanner.querySelector('select');
+           if (bannerSelect && bannerSelect.value) {
+             return bannerSelect.value;
+           }
+         }
+
+         // Default to English if no translation detected
+         return 'en';
+       }
+
+       // Function to detect language from Google Translate's actual implementation
+       function detectGoogleTranslateLanguage() {
+         // Check if Google Translate is active
+         const body = document.body;
+         if (body.classList.contains('translated-ltr') || body.classList.contains('translated-rtl')) {
+           // Try to get language from Google Translate's iframe
+           const translateFrame = document.querySelector('iframe[src*="translate.google"]');
+           if (translateFrame) {
+             try {
+               const frameDoc = translateFrame.contentDocument || translateFrame.contentWindow.document;
+               const langSelect = frameDoc.querySelector('select');
+               if (langSelect && langSelect.value) {
+                 return langSelect.value;
+               }
+             } catch (e) {
+               // Cross-origin access blocked
+             }
+           }
+
+           // Try to detect from URL parameters
+           const urlParams = new URLSearchParams(window.location.search);
+           const lang = urlParams.get('hl');
+           if (lang) return lang;
+
+           // Check for Google Translate's language indicator
+           const langIndicator = document.querySelector('[data-google-lang]');
+           if (langIndicator) {
+             return langIndicator.getAttribute('data-google-lang');
+           }
+
+           // Try to detect from Google Translate's global state
+           if (window.google && window.google.translate && window.google.translate.TranslateElement) {
+             const translateElement = document.querySelector('.goog-te-combo');
+             if (translateElement && translateElement.value) {
+               return translateElement.value;
+             }
+           }
+         }
+
+         // Check for Google Translate's language selector
+         const langSelect = document.querySelector('.goog-te-combo');
+         if (langSelect && langSelect.value && langSelect.value !== 'en') {
+           return langSelect.value;
+         }
+
+         // Check for Google Translate's banner frame
+         const googleBanner = document.querySelector('.goog-te-banner-frame');
+         if (googleBanner) {
+           const bannerSelect = googleBanner.querySelector('select');
+           if (bannerSelect && bannerSelect.value) {
+             return bannerSelect.value;
+           }
+         }
+
+         // Default to English if no translation detected
+         return 'en';
+       }
+
+       // Function to get the actual translated text
+       function getTranslatedText() {
+         const narrativeElement = document.getElementById('narrativeText');
+         if (!narrativeElement) return '';
+
+         // Check if the page has been translated
+         const body = document.body;
+         if (body.classList.contains('translated-ltr') || body.classList.contains('translated-rtl')) {
+           // Return the translated text that's currently displayed
+           return narrativeElement.textContent || narrativeElement.innerText;
+         }
+
+         // Return original text if not translated
+         return narrativeElement.textContent || narrativeElement.innerText;
+       }
+
+           function speakNarrative() {
+             const narrativeText = document.getElementById('narrativeText');
+             const speakBtn = document.getElementById('speakNarrative');
+
+             if (!narrativeText) return;
+
+             // Stop any current speech
+             if (isPlaying) {
+               stopSpeech();
+               return;
+             }
+
+         // Get the actual translated text
+         const translatedText = getTranslatedText();
+
+         // Create enhanced narrative for speech
+         const artistName = "{{ profile_user.name if profile_user else current_user.name }}";
+         const postsCount = {{ posts|length }};
+         const productsCount = {{ products|length }};
+         const totalWorks = postsCount + productsCount;
+         const location = "{{ profile_user.location if profile_user else current_user.location }}";
+
+         const enhancedNarrative = `${translatedText} This collection features ${totalWorks} unique works, including ${postsCount} community posts and ${productsCount} marketplace products, each telling a part of ${artistName}'s creative story.`;
+
+             // Create utterance
+             currentUtterance = new SpeechSynthesisUtterance(enhancedNarrative);
+
+             // Configure voice settings
+             currentUtterance.rate = 0.9;
+             currentUtterance.pitch = 1.0;
+             currentUtterance.volume = 0.8;
+
+         // Detect current language from Google Translate
+         const currentLang = detectGoogleTranslateLanguage();
+         console.log('Detected language:', currentLang);
+
+         // Try to use a pleasant voice in the current language
+         const voices = speechSynthesis.getVoices();
+         console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
+
+         const preferredVoice = voices.find(function(voice) {
+           return voice.lang.startsWith(currentLang) &&
+             (voice.name.includes('Google') || voice.name.includes('Microsoft') || voice.name.includes('Samantha') || voice.name.includes('Natural'));
+         });
+
+         // Fallback to any voice in the current language
+         const fallbackVoice = voices.find(function(voice) {
+           return voice.lang.startsWith(currentLang);
+         });
+
+         if (preferredVoice) {
+           currentUtterance.voice = preferredVoice;
+           console.log('Using preferred voice:', preferredVoice.name);
+         } else if (fallbackVoice) {
+           currentUtterance.voice = fallbackVoice;
+           console.log('Using fallback voice:', fallbackVoice.name);
+         } else {
+           console.log('No voice found for language:', currentLang);
+         }
+
+         // Set language for the utterance
+         currentUtterance.lang = currentLang;
+
+             // Event handlers
+             currentUtterance.onstart = function() {
+               isPlaying = true;
+               speakBtn.classList.add('playing');
+               speakBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+             };
+
+             currentUtterance.onend = function() {
+               stopSpeech();
+             };
+
+         currentUtterance.onerror = function(event) {
+           console.error('Speech synthesis error:', event.error);
+           stopSpeech();
+         };
+
+             // Start speaking
+             speechSynthesis.speak(currentUtterance);
+           }
+
+           function stopSpeech() {
+             if (currentUtterance) {
+               speechSynthesis.cancel();
+             }
+
+             isPlaying = false;
+             const speakBtn = document.getElementById('speakNarrative');
+
+             if (speakBtn) {
+               speakBtn.classList.remove('playing');
+               speakBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+             }
+           }
+
+       // Event listeners
+       document.addEventListener('DOMContentLoaded', function() {
+         const speakBtn = document.getElementById('speakNarrative');
+
+         if (speakBtn) {
+           speakBtn.addEventListener('click', speakNarrative);
+         }
+
+         // Listen for Google Translate events
+         const observer = new MutationObserver(function(mutations) {
+           mutations.forEach(function(mutation) {
+             if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+               const target = mutation.target;
+               if (target === document.body &&
+                   (target.classList.contains('translated-ltr') || target.classList.contains('translated-rtl'))) {
+                 console.log('Page translated, language detection updated');
+               }
+             }
+           });
+         });
+
+         // Start observing
+         observer.observe(document.body, {
+           attributes: true,
+           attributeFilter: ['class']
+         });
+
+         // Also listen for Google Translate's language change events
+         if (window.google && window.google.translate) {
+           window.google.translate.TranslateElement.prototype.onLanguageChange = function() {
+             console.log('Google Translate language changed');
+           };
+         }
+
+         // Override Google Translate's language change function
+         if (window.google && window.google.translate) {
+           const originalOnLanguageChange = window.google.translate.TranslateElement.prototype.onLanguageChange;
+           window.google.translate.TranslateElement.prototype.onLanguageChange = function() {
+             console.log('Google Translate language changed - intercepted');
+             if (originalOnLanguageChange) {
+               originalOnLanguageChange.call(this);
+             }
+           };
+         }
+
+         // Add a more direct approach - listen for clicks on Google Translate elements
+         document.addEventListener('click', function(event) {
+           if (event.target.closest('.goog-te-combo')) {
+             setTimeout(function() {
+               console.log('Google Translate combo clicked, checking language...');
+               const langSelect = document.querySelector('.goog-te-combo');
+               if (langSelect && langSelect.value) {
+                 console.log('Current Google Translate language:', langSelect.value);
+               }
+             }, 100);
+           }
+         });
+       });
+    </script>
     <script
       type="text/javascript"
       src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
     ></script>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: "en", // Set your website's default language
+            includedLanguages:
+              "en,hi,bi,ta,te,mr,gu,kn,ml,pa,ur,es,fr,de,zh,ja,ko", // Optional: Specify languages to include in the dropdown
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE, // Optional: Customize widget layout
+          },
+          "google_translate_element"
+        );
+      }
+    </script>
   </body>
 </html>
