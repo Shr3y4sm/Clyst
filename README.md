@@ -263,11 +263,11 @@ The application features an advanced natural language search system that underst
 *The marketplace page displaying products with price filtering and natural language search capabilities.*
 
 ### Add Post Page with AI Suggestions & Translation
-![Add Post Page with AI Suggestions](screenshots/add_post_with_ai&translate.png)
+![Add Post Page with AI Suggestions](screenshots/add_posts.png)
 *Create post form featuring AI-powered title and description suggestions based on uploaded artwork and multilingual translation capabilities.*
 
 ### Add Product Page with AI & Translation
-![Add Product Page with AI & Translation](screenshots/add_product_with_ai&translate.png)
+![Add Product Page with AI & Translation](screenshots/add_products.png)
 *Add product form showcasing AI content generation and multilingual translation capabilities.*
 
 ### Login Page
