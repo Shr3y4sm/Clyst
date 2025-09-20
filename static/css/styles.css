@@ -409,6 +409,10 @@ nav#topNav {
 	color: #dbdbdb;
 }
 
+.empty-state .btn {
+	margin-top: 10px;
+}
+
 /* Responsive Styles */
 @media (min-width: 768px) {
 	.mobile-menu {
