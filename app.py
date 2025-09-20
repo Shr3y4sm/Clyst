@@ -1,17 +1,12 @@
+# type: ignore[import]
 from datetime import date
 import os
+import natural_search 
+import ai
 import uuid
 from werkzeug.utils import secure_filename
 from flask import Flask, abort, render_template, redirect, url_for, flash, request, jsonify
-import base64
-import mimetypes
 import json
-import requests
-try:
-    import google.generativeai as genai
-except Exception:
-    genai = None
-
 # Type hints for better IDE support
 from typing import Optional, Dict, Any, List
 from flask_bootstrap5 import Bootstrap
@@ -40,7 +35,7 @@ ckeditor = CKEditor(app)
 Bootstrap(app)
 
 # Configure Flask-Login
-login_manager = LoginManager()
+login_manager = LoginManager()  
 login_manager.init_app(app)
 
 # Configure Gravatar (commented out due to compatibility issues)
@@ -76,6 +71,7 @@ def admin_only(f):
 
     return decorated_function
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -99,7 +95,6 @@ def save_uploaded_file(file, folder_name):
         url_path = f"/static/uploads/{folder_name}/{unique_filename}"
         return url_path
     return None
-
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -142,19 +137,60 @@ class Product(db.Model):
 
 
 @app.route('/', methods=["GET", "POST"])
-@admin_only
 def home():
-    result = db.session.execute(db.select(Posts))
-    all_posts = result.scalars().all()
-    return render_template("index.html", posts=all_posts, current_user=current_user)
+    # Optional natural language query parsing for posts
+    q = (request.args.get('q') or '').strip()
+    posts_query = db.select(Posts)
+    if q:
+        parsed = natural_search.parse_search_query(q)
+        tokens = parsed.get('keywords', [])
+        # Apply text filters across title/description
+        joined_artist = False
+        for tk in tokens:
+            like = f"%{tk}%"
+            if not joined_artist:
+                posts_query = posts_query.join(Posts.artist)
+                joined_artist = True
+            posts_query = posts_query.where(
+                (Posts.post_title.ilike(like)) | (Posts.description.ilike(like)) | (User.name.ilike(like))
+            )
+    result = db.session.execute(posts_query)
+    posts = result.scalars().all()
+    return render_template("index.html", posts=posts, current_user=current_user, q=q)
 
-
-@app.route("/products", methods=["GET", "POST"])
-@admin_only
-def products():
-    result = db.session.execute(db.select(Product))
+@app.route('/products')
+def products_page():
+    # Optional natural language query parsing for products
+    q = (request.args.get('q') or '').strip()
+    prod_query = db.select(Product)
+    if q:
+        parsed = natural_search.parse_search_query(q)
+        tokens = parsed.get('keywords', [])
+        max_price = parsed.get('max_price')
+        min_price = parsed.get('min_price')
+        joined_artist = False
+        for tk in tokens:
+            like = f"%{tk}%"
+            if not joined_artist:
+                prod_query = prod_query.join(Product.artist)
+                joined_artist = True
+            prod_query = prod_query.where(
+                (Product.title.ilike(like)) | (Product.description.ilike(like)) | (User.name.ilike(like))
+            )
+        if max_price is not None:
+            try:
+                # Product.price is Numeric; cast comparison directly
+                prod_query = prod_query.where(Product.price <= max_price)
+            except Exception:
+                pass
+        if min_price is not None:
+            try:
+                prod_query = prod_query.where(Product.price >= min_price)
+            except Exception:
+                pass
+    result = db.session.execute(prod_query)
     products = result.scalars().all()
-    return render_template("products.html", products=products, current_user=current_user)
+    return render_template('products.html', products=products, current_user=current_user, q=q)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -163,7 +199,7 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         user = db.session.execute(db.select(User).where(User.email == email)).scalar()
-
+        
         if user and password and check_password_hash(user.password_hash, password):
             login_user(user)
             return redirect(url_for('home'))
@@ -199,7 +235,8 @@ def register():
         if not password:
             flash('Password is required')
             return render_template("register.html", current_user=current_user)
-        
+            
+        # type: ignore[call-arg]
         new_user = User(
             name=name,
             email=email,
@@ -219,7 +256,6 @@ def register():
 
 @app.route("/add", methods=["GET", "POST"])
 @login_required
-@admin_only
 def add_posts():
     if request.method == 'POST':
         # Handle image upload
@@ -237,7 +273,7 @@ def add_posts():
             flash('Please provide an image URL or upload an image for the post.')
             return render_template("add_posts.html", current_user=current_user)
         
-        # Create new post
+        # type: ignore[call-arg]
         new_post = Posts(
             artist_id=current_user.id,
             post_title=request.form['post_title'],
@@ -248,12 +284,11 @@ def add_posts():
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('home'))
-    return render_template("add_posts.html", posts=Posts, current_user=current_user)
+    return render_template("add_posts.html", current_user=current_user)
 
 
 @app.route("/add_products", methods=["GET", "POST"])
 @login_required
-@admin_only
 def add_products():
     if request.method == 'POST':
         # Handle image upload
@@ -271,18 +306,18 @@ def add_products():
             flash('Please provide an image URL or upload an image for the product.')
             return render_template("add_products.html", current_user=current_user)
         
-        # Create new product
+        # type: ignore[call-arg]
         new_product = Product(
             artist_id=current_user.id,
             title=request.form['product_name'],
             description=request.form.get('description', ''),
             price=request.form['price'],
-            img_url=request.form.get('product_image', ''),
+            img_url=img_url,
             created_at=date.today().strftime("%B %d, %Y")
         )
         db.session.add(new_product)
         db.session.commit()
-        return redirect(url_for('products'))
+        return redirect(url_for('products_page'))
     return render_template("add_products.html", current_user=current_user)
 
 
@@ -290,194 +325,84 @@ def add_products():
 @login_required
 def generate_copy():
     """
-    Lightweight stub endpoint to generate title/description suggestions
-    based on provided prompt/description and optional image url/base64.
-    This can be replaced with a real AI provider.
+    Endpoint to generate title/description suggestions using AI.
     """
     try:
         data = request.get_json(silent=True) or {}
-        content_type = (data.get('type') or 'post').lower()
-        prompt = (data.get('prompt') or '').strip()
-        description = (data.get('description') or '').strip()
-        image_url = (data.get('image_url') or '').strip()
+        content_type = data.get('type', 'post')
+        prompt = data.get('prompt', '')
+        description = data.get('description', '')
+        image_url = data.get('image_url', '')
         image_base64 = data.get('image_base64')
         image_mime = data.get('image_mime')
-        image_present = bool(image_url or image_base64)
 
-        # Require image presence for generation to align with UX
-        if not image_present:
-            return jsonify({
-                'ok': False,
-                'error': 'Image is required (URL or file) to generate suggestions.'
-            }), 400
+        # Call AI function
+        result = ai.generate_copy_suggestions(
+            content_type=content_type,
+            prompt=prompt,
+            description=description,
+            image_url=image_url,
+            image_base64=image_base64,
+            image_mime=image_mime,
+            api_key=GEMINI_API_KEY
+        )
 
-        # If Gemini is configured, use it; otherwise fallback to simple stub
-        api_key = GEMINI_API_KEY
-        if genai and api_key and api_key != "your_gemini_api_key_here":
-            try:
-                genai.configure(api_key=api_key)  # type: ignore
-                # Encourage variation and ask for JSON output directly
-                model = genai.GenerativeModel(  # type: ignore
-                    model_name='gemini-1.5-flash',
-                    generation_config={
-                        'temperature': 0.9,
-                        'top_p': 0.95,
-                        'response_mime_type': 'application/json'
-                    }
-                )
-
-                # Prepare image bytes
-                image_part = None
-                if image_base64:
-                    try:
-                        image_bytes = base64.b64decode(image_base64)
-                        mime_type = image_mime or 'image/jpeg'
-                        image_part = {
-                            'mime_type': mime_type,
-                            'data': image_bytes
-                        }
-                    except Exception:
-                        image_part = None
-                elif image_url:
-                    try:
-                        # Best-effort fetch; limit size
-                        resp = requests.get(image_url, timeout=10)
-                        resp.raise_for_status()
-                        content = resp.content
-                        # Basic size guard (16MB already enforced server-wide)
-                        mime_type = resp.headers.get('Content-Type') or mimetypes.guess_type(image_url)[0] or 'image/jpeg'
-                        image_part = {
-                            'mime_type': mime_type,
-                            'data': content
-                        }
-                    except Exception:
-                        image_part = None
-
-                user_goal = 'product listing' if content_type == 'product' else 'social post'
-                guidance = prompt or ''
-                base_text = description or ''
-                instruction = (
-                    "You are a creative copy assistant for artists. "
-                    f"Given an artwork image and optional context for a {user_goal}, "
-                    "generate exactly 3 varied suggestions as strict JSON array under key suggestions, "
-                    "each item with keys 'title' and 'description'. Keep titles under 60 chars; descriptions under 280 chars. "
-                    "Return ONLY JSON with shape: {\"suggestions\":[{\"title\":\"...\",\"description\":\"...\"}, ...]}"
-                )
-
-                # Put image first to ground the response in the artwork
-                parts: List[Any] = []
-                if image_part:
-                    parts.append(image_part)
-                parts.append(instruction)
-                if guidance:
-                    parts.append(f"Prompt: {guidance}")
-                if base_text:
-                    parts.append(f"Context: {base_text}")
-
-                result = model.generate_content(parts)
-
-                # Robustly extract text
-                text = ''
-                try:
-                    text = (getattr(result, 'text', '') or '').strip()
-                except Exception:
-                    text = ''
-                if not text:
-                    try:
-                        for cand in getattr(result, 'candidates', []) or []:  # type: ignore[attr-defined]
-                            content = getattr(cand, 'content', None)
-                            for p in getattr(content, 'parts', []) or []:
-                                pt = getattr(p, 'text', None)
-                                if pt:
-                                    text += str(pt)
-                        text = text.strip()
-                    except Exception:
-                        text = ''
-                suggestions = []
-                try:
-                    # If extra text surrounds JSON, isolate the outermost JSON object
-                    candidate = text
-                    if '{' in text and '}' in text:
-                        candidate = text[text.find('{'): text.rfind('}') + 1]
-                    parsed = json.loads(candidate)
-                    for item in (parsed.get('suggestions') or [])[:3]:
-                        title = str(item.get('title', '')).strip()
-                        desc = str(item.get('description', '')).strip()
-                        if title and desc:
-                            suggestions.append({'title': title, 'description': desc})
-                except Exception:
-                    # Fallback: derive multiple variants from lines
-                    lines = [ln.strip('- •\t ') for ln in (text or '').split('\n') if ln.strip()]
-                    if lines:
-                        for i, ln in enumerate(lines[:3]):
-                            suggestions.append({
-                                'title': (ln[:60] or 'Artwork Suggestion'),
-                                'description': (ln[:280] or 'A unique piece blending technique and emotion.')
-                            })
-
-                if not suggestions:
-                    # Final fallback simple templates
-                    base_context = (prompt or description or 'artwork').strip() or 'artwork'
-                    is_product = content_type == 'product'
-                    titles = [
-                        f"{base_context.capitalize()}: A Visual Story",
-                        f"{base_context.capitalize()} — Limited Edition",
-                        f"The Essence of {base_context.capitalize()}"
-                    ]
-                    descs = [
-                        "Handcrafted piece with meticulous detail.",
-                        "Original work. Premium materials, gallery-ready finish.",
-                        "Expressive composition. Ships safely, ready to display."
-                    ] if is_product else [
-                        "An exploration through texture, light, and color.",
-                        "Captures movement and mood with layered technique.",
-                        "A contemplative blend of technique and emotion."
-                    ]
-                    suggestions = [{ 'title': titles[i], 'description': descs[i]} for i in range(3)]
-
-                return jsonify({'ok': True, 'suggestions': suggestions})
-            except Exception as e:
-                return jsonify({'ok': False, 'error': f'Gemini error: {str(e)}'}), 500
-
-        # Fallback stub generation when Gemini not configured
-        base_context = (prompt or description or 'artwork').strip() or 'artwork'
-        titles = [
-            f"{base_context.capitalize()}: A Visual Story",
-            f"{base_context.capitalize()} — Limited Edition",
-            f"The Essence of {base_context.capitalize()}"
-        ]
-        is_product = content_type == 'product'
-        descriptions = [
-            "Handcrafted piece with meticulous detail.",
-            "Original work. Premium materials, gallery-ready finish.",
-            "Expressive composition. Ships safely, ready to display."
-        ] if is_product else [
-            "An exploration through texture, light, and color.",
-            "Captures movement and mood with layered technique.",
-            "A contemplative blend of technique and emotion."
-        ]
-        suggestions = [{'title': titles[i], 'description': descriptions[i]} for i in range(3)]
-        return jsonify({'ok': True, 'suggestions': suggestions})
+        if result['ok']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 400
     except Exception as e:
         return jsonify({'ok': False, 'error': str(e)}), 500
 
 
-@app.route("/delete")
+@app.route('/api/translate_listing', methods=['POST'])
 @login_required
-@admin_only
+def translate_listing():
+    """
+    Translate a listing's title/description into a target language and suggest SEO phrases.
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        content_type = data.get('type', 'post')
+        title = data.get('title', '')
+        description = data.get('description', '')
+        target_lang = data.get('target_lang', '')
+        locale = data.get('locale', '')
+        source_lang = data.get('source_lang', '')
+
+        # Call AI function
+        result = ai.translate_listing(
+            content_type=content_type,
+            title=title,
+            description=description,
+            target_lang=target_lang,
+            locale=locale,
+            source_lang=source_lang,
+            api_key=GEMINI_API_KEY
+        )
+
+        if result['ok']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 400
+    except Exception as e:
+        return jsonify({'ok': False, 'error': str(e)}), 500
+
+
+@app.route("/delete_post")
+@login_required
 def delete_posts():
-    post_id = request.args.get('id')
+    post_id = request.args.get('post_id')
     post_to_delete = db.get_or_404(Posts, post_id)
     db.session.delete(post_to_delete)
     db.session.commit()
     return redirect(url_for('home'))
 
 
-@app.route("/delete_products")
+@app.route("/delete_product")
 @login_required
-@admin_only
 def delete_products():
-    product_id = request.args.get('id')
+    product_id = request.args.get('product_id')
     product_to_delete = db.get_or_404(Product, product_id)
     db.session.delete(product_to_delete)
     db.session.commit()
@@ -491,29 +416,94 @@ def profile():
     user_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == current_user.id)).scalars().all()
     user_products = db.session.execute(db.select(Product).where(Product.artist_id == current_user.id)).scalars().all()
     
+    # Generate portfolio narrative
+    from ai import generate_enhanced_portfolio_narrative
+    
+    # Convert posts to dictionaries for AI analysis
+    posts_data = []
+    for post in user_posts:
+        posts_data.append({
+            'post_title': post.post_title,
+            'post_description': post.description,
+            'media_url': post.media_url,
+            'created_at': post.created_at
+        })
+    
+    # Convert products to dictionaries for AI analysis
+    products_data = []
+    for product in user_products:
+        products_data.append({
+            'title': product.title,
+            'description': product.description,
+            'price': product.price,
+            'img_url': product.img_url,
+            'created_at': product.created_at
+        })
+    
+    # Generate the portfolio narrative
+    portfolio_narrative = generate_enhanced_portfolio_narrative(
+        artist_name=current_user.name,
+        posts=posts_data,
+        products=products_data,
+        user_location=current_user.location
+    )
+    
     return render_template("profile.html", 
-                         user=current_user, 
+                         current_user=current_user, 
+                         profile_user=current_user,
                          posts=user_posts, 
-                         products=user_products)
+                         products=user_products,
+                         portfolio_narrative=portfolio_narrative)
 
 
 @app.route("/profile/<int:user_id>")
-@admin_only
 def view_profile(user_id):
     # Get user's posts and products for public profile view
     user = db.get_or_404(User, user_id)
     user_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == user_id)).scalars().all()
     user_products = db.session.execute(db.select(Product).where(Product.artist_id == user_id)).scalars().all()
     
+    # Generate portfolio narrative
+    from ai import generate_enhanced_portfolio_narrative
+    
+    # Convert posts to dictionaries for AI analysis
+    posts_data = []
+    for post in user_posts:
+        posts_data.append({
+            'post_title': post.post_title,
+            'post_description': post.description,
+            'media_url': post.media_url,
+            'created_at': post.created_at
+        })
+    
+    # Convert products to dictionaries for AI analysis
+    products_data = []
+    for product in user_products:
+        products_data.append({
+            'title': product.title,
+            'description': product.description,
+            'price': product.price,
+            'img_url': product.img_url,
+            'created_at': product.created_at
+        })
+    
+    # Generate the portfolio narrative
+    portfolio_narrative = generate_enhanced_portfolio_narrative(
+        artist_name=user.name,
+        posts=posts_data,
+        products=products_data,
+        user_location=user.location
+    )
+    
     return render_template("profile.html", 
                          current_user=current_user, 
                          profile_user=user,
                          posts=user_posts, 
-                         products=user_products)
+                         products=user_products,
+                         portfolio_narrative=portfolio_narrative)
 
 
 @app.route("/product/<int:product_id>")
-@admin_only
 def product_buy(product_id):
     product = db.get_or_404(Product, product_id)
     return render_template("product_buy.html", 

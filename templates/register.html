@@ -4,33 +4,65 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register - Clyst</title>
-    <style>
+    
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/auth.css">
+    <!-- <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
-      :root{
-      --nav-pad-y: 10px;
-      --nav-pad-x: 20px;
-      --gap: 20px;
-      --accent: #111;
-      --muted: #555;
-      --bg: #f5f5f5;
-      --card: #fff;
-    }
-
-      body {font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; background: var(--bg); margin: 0; 
-      height: 100vh;
+      :root {
+        --nav-pad-y: 10px;
+        --nav-pad-x: 20px;
+        --gap: 20px;
+        --accent: #111;
+        --muted: #555;
+        --bg: #f5f5f5;
+        --card: #fff;
       }
 
-      nav#topNav{ position: sticky; top:0; z-index:1000; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.05); padding: var(--nav-pad-y) var(--nav-pad-x); display: grid; grid-template-columns: auto 1fr auto auto; align-items:center; column-gap: var(--gap); margin-bottom: 30px;}
-    .nav-left{ display:flex; align-items:center; gap:10px; font-weight:700; font-size:20px; color:var(--accent);}
-    
-    @media (max-width: 768px){
-      nav#topNav{ grid-template-columns: auto 1fr auto; column-gap: 12px;}
-    }
+      body {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        margin: 0;
+        height: 100vh;
+      }
+
+      nav#topNav {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        padding: var(--nav-pad-y) var(--nav-pad-x);
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: center;
+        column-gap: var(--gap);
+        margin-bottom: 30px;
+      }
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 20px;
+        color: var(--accent);
+      }
+
+      @media (max-width: 768px) {
+        nav#topNav {
+          grid-template-columns: auto 1fr auto;
+          column-gap: 12px;
+        }
+      }
 
       .container {
         display: flex;
@@ -38,7 +70,7 @@
         margin: 0 auto 10px auto;
         min-height: 100vh;
       }
-     /* Main Content */
+      /* Main Content */
       .main-content {
         flex: 1;
         margin-left: 50px;
@@ -111,21 +143,21 @@
         cursor: pointer;
       }
 
-      .form-input[type="file"]::-webkit-file-upload-button{
-        padding:8px 18px;
+      .form-input[type="file"]::-webkit-file-upload-button {
+        padding: 8px 18px;
         text-decoration: none;
         border: 1px solid #111;
-        border-radius:6px;
-        background:none;
-        color:#111;
-        cursor:pointer;
+        border-radius: 6px;
+        background: none;
+        color: #111;
+        cursor: pointer;
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         transition: all 0.2s;
       }
 
-      .form-input[type="file"]::-webkit-file-upload-button:hover{
-        background:#111;
-        color:#fff;      
+      .form-input[type="file"]::-webkit-file-upload-button:hover {
+        background: #111;
+        color: #fff;
       }
 
       .form-input[type="file"]:hover {
@@ -176,6 +208,7 @@
         cursor: pointer;
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
       }
 
@@ -206,19 +239,50 @@
           flex-direction: column;
         }
       }
-    </style>
+
+      .translate-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 40px;
+        width: 55px;
+        height: 55px;
+        border: none;
+        border-radius: 50%;
+        text-decoration: none;
+        background: #005c61;
+        color: #fff;
+        font-size: 28px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+        z-index: 200;
+      }
+      .translate-btn:hover {
+        background: #00676c;
+        transform: scale(1.1);
+      }
+
+      .translate-element {
+        position: fixed;
+        bottom: 220px;
+        right: 40px;
+        z-index: 1000;
+      }
+    </style> -->
   </head>
   <body>
-    
-     <!-- ===== NAVBAR ===== -->
-  <nav id="topNav">
-    <div class="nav-left">
-      <div class="hamburger" onclick="toggleMenu(event)">
-        <span></span><span></span><span></span>
+    <!-- ===== NAVBAR ===== -->
+    <nav id="topNav">
+      <div class="nav-left">
+        <div class="hamburger" onclick="toggleMenu(event)">
+          <span></span><span></span><span></span>
+        </div>
+        <a href="{{ url_for('home') }}">Clyst</a>
       </div>
-      <a href="{{ url_for('home') }}" style="text-decoration:none; color:inherit;">Clyst</a>
-    </div>
-  </nav>
+    </nav>
 
     <div class="auth-container">
       <div class="auth-card">
@@ -227,59 +291,54 @@
           <p>Join to show your creativity</p>
         </div>
 
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            {% for message in messages %}
-              <div style="color: #dc3545; text-align: center; margin-bottom: 16px; padding: 8px; background: #ffd2d2; border-radius: 6px;">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+        {% with messages = get_flashed_messages() %} {% if messages %} {% for
+        message in messages %}
+        <div class="flash-message" style="display: block;">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
 
-        <form method="POST" action="{{ url_for('register') }}" class="auth-form">
+        <form method="POST" action="{{ url_for('register') }}">
           <div class="form-group">
             <label for="name" class="form-label">Full Name</label>
-            <input 
-              type="text" 
-              id="name" 
-              name="name" 
+            <input
+              type="text"
+              id="name"
+              name="name"
               class="form-input"
               placeholder="Enter your full name"
-              required 
+              required
             />
           </div>
 
           <div class="form-group">
             <label for="email" class="form-label">Email</label>
-            <input 
-              type="email" 
-              id="email" 
-              name="email" 
+            <input
+              type="email"
+              id="email"
+              name="email"
               class="form-input"
               placeholder="Enter your email"
-              required 
+              required
             />
           </div>
 
           <div class="form-group">
             <label for="password" class="form-label">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              name="password" 
+            <input
+              type="password"
+              id="password"
+              name="password"
               class="form-input"
               placeholder="Create a password"
-              required 
+              required
             />
           </div>
 
           <div class="form-group">
             <label for="phone" class="form-label">Phone (Optional)</label>
-            <input 
-              type="tel" 
-              id="phone" 
-              name="phone" 
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
               class="form-input"
               placeholder="Enter your phone number"
             />
@@ -287,31 +346,51 @@
 
           <div class="form-group">
             <label for="location" class="form-label">Location (Optional)</label>
-            <input 
-              type="text" 
-              id="location" 
-              name="location" 
+            <input
+              type="text"
+              id="location"
+              name="location"
               class="form-input"
               placeholder="Enter your location"
             />
           </div>
 
-          <div class="form-actions" style="margin-top: 24px;">
-            <button type="submit" class="btn btn-primary" style="padding:8px 18px; text-decoration: none; border:none; border-radius:6px; background:#111; color:#fff; cursor:pointer; font-size:16px; font-weight:500; transition: all 0.2s;">
+          <div class="form-actions" style="margin-top: 24px">
+            <button
+              type="submit"
+              class="btn btn-primary">
               Create Account
             </button>
           </div>
         </form>
 
-        <div style="text-align: center; margin-top: 24px;">
-          <p style="color: #8e8e8e;">
-            Already have an account? 
-            <a href="{{ url_for('login') }}" style="color: #111; text-decoration: none; font-weight: 500;">
+        <div class="not-registered">
+          <p>
+            Already have an account?
+            <a
+              href="{{ url_for('login') }}"
+              class="register-link"
+            >
               Login
             </a>
           </p>
         </div>
       </div>
     </div>
+
+    <div id="google_translate_element" class="translate-element"></div>
+    <button
+      id="translateButton"
+      onclick="googleTranslateElementInit()"
+      class="translate-btn"
+    >
+      <i class="fa-solid fa-language"></i>
+    </button>
+
+    <script src="../static/js/app.js"></script>
+    <script
+      type="text/javascript"
+      src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    ></script>
   </body>
 </html>

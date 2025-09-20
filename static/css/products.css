@@ -1,0 +1,213 @@
+/* ================================
+   CONTAINER
+   ================================ */
+.container {
+	display: flex;
+	margin: 0 auto;
+	flex-direction: column;
+}
+
+/* ================================
+   PRODUCT GRID
+   ================================ */
+.products-grid {
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+	gap: 24px;
+}
+
+/* ================================
+   PRODUCT CARD
+   ================================ */
+.product-card {
+	position: relative;
+	background: white;
+	border-radius: 0.2em;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	overflow: hidden;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ================================
+   PRODUCT IMAGE
+   ================================ */
+.product-image {
+	width: 100%;
+	height: 250px;
+	object-fit: cover;
+}
+
+.product-image.placeholder {
+	background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #999;
+	font-size: 48px;
+}
+
+/* ================================
+   PRODUCT CONTENT
+   ================================ */
+.product-content {
+	padding: 20px;
+}
+
+.product-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+}
+
+.product-title {
+	font-size: 18px;
+	font-weight: 600;
+	color: #262626;
+	margin-bottom: 4px;
+}
+
+.product-price {
+	font-size: 20px;
+	font-weight: 700;
+	color: #25a18e;
+}
+
+.product-artist {
+	color: #8e8e8e;
+	font-size: 14px;
+	margin-bottom: 12px;
+	text-transform: capitalize;
+}
+
+.product-description {
+	color: #262626;
+	line-height: 1.5;
+	margin-bottom: 16px;
+	font-size: 14px;
+}
+
+/* ================================
+   PRODUCT ACTIONS & BUTTONS
+   ================================ */
+.product-actions {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.btn {
+	padding: 8px 16px;
+	border-radius: 0.2em;
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.2s;
+	border: none;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.btn-primary {
+	background: #111;
+	color: white;
+	padding: 8px 16px;
+	border-radius: 0.2em;
+	text-decoration: none;
+	font-size: 14px;
+	font-weight: 500;
+	transition: transform 0.2s;
+	padding: 8px 18px;
+	border: none;
+	cursor: pointer;
+}
+
+.btn-primary:hover {
+	opacity: 0.8;
+	transform: translateY(-1px);
+}
+
+.btn-secondary {
+	padding: 8px 18px;
+	text-decoration: none;
+	border: 1px solid #c4c4c4;
+	border-radius: 0.2em;
+	background: #fff;
+	color: #111;
+	cursor: pointer;
+}
+
+.btn-secondary:hover {
+	opacity: 0.5;
+	transform: translateY(-1px);
+}
+
+/* ================================
+   SAY ALOUD & SHARE BUTTONS
+   ================================ */
+.say-aloud-btn {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	background: #ffffffd3;
+	border: none;
+	width: 35px;
+	height: 35px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.2em;
+	cursor: pointer;
+	font-size: 16px;
+	color: #111;
+	transition: opacity 0.2s;
+}
+
+.say-aloud-btn:hover {
+	background-color: #d8feff;
+	color: #005c61;
+	transform: translateY(-1px);
+}
+
+.share-btn {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	background: #ffffffd3;
+	border: none;
+	width: 35px;
+	height: 35px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 0.2em;
+	cursor: pointer;
+	font-size: 16px;
+	color: #111;
+	transition: opacity 0.2s;
+}
+
+.share-btn:hover {
+	background-color: #d8feff;
+	color: #005c61;
+	transform: translateY(-1px);
+}
+
+/* ================================
+   RESPONSIVE STYLES
+   ================================ */
+@media (max-width: 768px) {
+	.main-content {
+		margin-left: 0;
+	}
+	.products-grid {
+		grid-template-columns: 1fr;
+	}
+}

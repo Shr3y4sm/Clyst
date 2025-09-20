@@ -1,0 +1,13 @@
+{
+  // Tell Pyright where virtual environments live and which one to use
+  "venvPath": ".",
+  "venv": ".venv",
+
+  // Standard include path
+  "include": [
+    "."
+  ],
+
+  // Relax diagnostics for third-party libraries without type hints
+  "typeCheckingMode": "off"
+}

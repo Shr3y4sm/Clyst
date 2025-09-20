@@ -1,0 +1,239 @@
+/* ================================
+   NAVIGATION BAR
+   ================================ */
+nav#topNav {
+	position: sticky;
+	top: 0;
+	z-index: 1000;
+	background: #fff;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+	padding: var(--nav-pad-y) var(--nav-pad-x);
+	display: grid;
+	grid-template-columns: auto 1fr auto auto;
+	align-items: center;
+	column-gap: var(--gap);
+	margin-bottom: 50px;
+}
+
+/* ================================
+   MAIN CONTENT
+   ================================ */
+.main-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+	padding: 20px;
+}
+
+/* ================================
+   AUTH CONTAINER & FORM
+   ================================ */
+.auth-container {
+	max-width: 600px;
+	margin: 0 auto;
+}
+
+.auth-header {
+	background: none;
+	padding: 0 24px 24px 24px;
+	text-align: center;
+}
+
+.auth-header h1 {
+	font-size: 28px;
+	font-weight: 600;
+	color: #262626;
+	margin-bottom: 8px;
+}
+
+.auth-header p {
+	color: #8e8e8e;
+	font-size: 16px;
+}
+
+.auth-card {
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	padding: 32px;
+	margin-bottom: 24px;
+}
+
+.auth-group {
+	margin-bottom: 24px;
+}
+
+.flash-message {
+	display: none;
+	color: #dc3545;
+	text-align: center;
+	margin-bottom: 16px;
+	padding: 8px;
+	background: #ffd2d2;
+	border-radius: 0.2em;
+}
+
+/* ================================
+   FORM LABELS & INPUTS
+   ================================ */
+.form-label {
+	display: block;
+	font-size: 16px;
+	font-weight: 500;
+	color: #262626;
+	margin: 8px 0;
+}
+
+.form-input {
+	width: 100%;
+	padding: 12px 16px;
+	border: 2px solid #e9ecef;
+	border-radius: 0.2em;
+	font-size: 16px;
+	transition: border-color 0.2s;
+	background: #fafafa;
+}
+
+.form-input:focus {
+	outline: none;
+	border-color: #111;
+	background: white;
+}
+
+.form-input[type="file"] {
+	padding: 8px 12px;
+	background: white;
+	border: 2px solid #e9ecef;
+	cursor: pointer;
+}
+
+.form-input[type="file"]::-webkit-file-upload-button {
+	padding: 8px 18px;
+	text-decoration: none;
+	border: 1px solid #111;
+	border-radius: 6px;
+	background: none;
+	color: #111;
+	cursor: pointer;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	transition: all 0.2s;
+}
+
+.form-input[type="file"]::-webkit-file-upload-button:hover {
+	background: #111;
+	color: #fff;
+}
+
+.form-input[type="file"]:hover {
+	border-color: #111;
+	background: #f8f9fa;
+}
+
+/* ================================
+   TEXTAREA STYLES
+   ================================ */
+.form-textarea {
+	width: 100%;
+	padding: 12px 16px;
+	border: 2px solid #e9ecef;
+	border-radius: 8px;
+	font-size: 16px;
+	font-family: inherit;
+	resize: vertical;
+	min-height: 70px;
+	transition: border-color 0.2s;
+	background: #fafafa;
+}
+
+.form-textarea:focus {
+	outline: none;
+	border-color: #111;
+	background: white;
+}
+
+/* ================================
+   FORM HELPER & ACTIONS
+   ================================ */
+.form-help {
+	font-size: 14px;
+	color: #8e8e8e;
+	margin-top: 4px;
+}
+
+.form-actions {
+	display: flex;
+	gap: 12px;
+	justify-content: center;
+	margin-top: 32px;
+}
+
+/* ================================
+   BUTTON STYLES
+   ================================ */
+.btn {
+	padding: 12px 24px;
+	border-radius: 5px;
+	text-decoration: none;
+	font-size: 16px;
+	font-weight: 500;
+	transition: all 0.2s;
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.btn-primary {
+	background: #111;
+	color: white;
+}
+
+.btn-secondary {
+	background: #f8f9fa;
+	color: #262626;
+	border: 1px solid #e9ecef;
+}
+
+.btn-secondary:hover {
+	background: #e9ecef;
+}
+
+/* ================================
+   RESPONSIVE STYLES
+   ================================ */
+@media (max-width: 768px) {
+	.sidebar {
+		display: none;
+	}
+	.main-content {
+		margin-left: 0;
+	}
+	.form-actions {
+		flex-direction: column;
+	}
+}
+
+/* ================================
+   TRANSLATE BUTTON
+   ================================ */
+.translate-btn {
+	bottom: 30px;
+}
+
+.not-registered {
+	text-align: center;
+	margin-top: 24px;
+}
+
+.not-registered p {
+	color: #8e8e8e;
+}
+
+.register-link {
+	color: #111;
+	text-decoration: none;
+	font-weight: 500;
+}
