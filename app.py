@@ -1,9 +1,13 @@
 # type: ignore[import]
 from datetime import date
 import os
+from dotenv import load_dotenv
 import natural_search 
 import ai
 import uuid
+
+# Load environment variables from .env file
+load_dotenv()
 from werkzeug.utils import secure_filename
 from flask import Flask, abort, render_template, redirect, url_for, flash, request, jsonify
 import json
@@ -50,7 +54,17 @@ class Base(DeclarativeBase):
     pass
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clyst.db'
+# Database configuration for production
+if os.getenv('FLASK_ENV') == 'production':
+    # Use PostgreSQL for production (Railway, Render)
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    if DATABASE_URL:
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://')
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clyst.db'
+else:
+    # Use SQLite for development
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clyst.db'
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
@@ -512,7 +526,17 @@ def product_buy(product_id):
 
 
 if __name__ == "__main__":
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+    try:
+        # Create database tables
+        with app.app_context():
+            db.create_all()
+            print("✅ Database tables created successfully")
+        
+        # Run the app
+        port = int(os.getenv('PORT', 5000))
+        debug_mode = os.getenv('FLASK_ENV') != 'production'
+        print(f"🚀 Starting app on port {port}, debug={debug_mode}")
+        app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    except Exception as e:
+        print(f"❌ Error starting app: {e}")
+        raise

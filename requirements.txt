@@ -11,3 +11,7 @@ Werkzeug==3.0.1
 
 # Load env vars from .env
 python-dotenv>=1.0.1
+
+# Production dependencies
+gunicorn>=21.2.0
+psycopg2-binary>=2.9.0
