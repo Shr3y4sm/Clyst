@@ -321,15 +321,6 @@ The application features an advanced natural language search system that underst
 - `created_at`: Product creation date (String, 250 chars)
 - **Relationships**: Many-to-one with User
 
-## 🚀 Deployment
-
-### Production Considerations
-1. **Environment Variables**: Use environment variables for sensitive data
-2. **Database**: Consider PostgreSQL for production
-3. **File Storage**: Use cloud storage for uploaded files
-4. **HTTPS**: Enable SSL/TLS for secure communication
-5. **Caching**: Implement Redis for session storage
-6. **Load Balancing**: Use Gunicorn or similar WSGI server
 
 ### Environment Setup
 ```bash
@@ -354,12 +345,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🔮 Future Enhancements
 
 - **Payment Integration**: Stripe/PayPal integration for transactions
-- **Advanced AI**: More sophisticated content generation and image analysis
+- **Advanced AI**: More sophisticated content generation, image analysis and smart price assist for artisans
 - **Social Features**: Comments, likes, and following system
 - **Mobile App**: Native mobile application
-- **Advanced Search**: Image-based search and recommendation system
-- **Analytics Dashboard**: Artist performance metrics and insights
-- **Messaging System**: Direct communication between artists and buyers
+- **Advanced Search**: Recommendation system
 - **Order Management**: Complete e-commerce functionality
 - **Review System**: Product reviews and ratings
 - **Categories**: Art categorization and filtering
