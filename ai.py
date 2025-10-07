@@ -39,7 +39,7 @@ def generate_copy_suggestions(content_type: str, prompt: str = '', description: 
                 genai.configure(api_key=api_key)
                 # Encourage variation and ask for JSON output directly
                 model = genai.GenerativeModel(
-                    model_name='gemini-1.5-flash',
+                    model_name='gemini-2.5-pro',
                     generation_config={
                         'temperature': 0.9,
                         'top_p': 0.95,
@@ -250,7 +250,7 @@ def translate_listing(content_type: str, title: str = '', description: str = '',
             try:
                 genai.configure(api_key=api_key)
                 model = genai.GenerativeModel(
-                    model_name='gemini-1.5-flash',
+                    model_name='gemini-2.5-pro',
                     generation_config={
                         'temperature': 0.3,
                         'top_p': 0.8,
@@ -366,7 +366,7 @@ def generate_enhanced_portfolio_narrative(artist_name: str, posts: List[Dict], p
         # Configure Gemini
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
+            model_name='gemini-2.5-pro',
             generation_config={
                 'temperature': 0.7,
                 'top_p': 0.9,
