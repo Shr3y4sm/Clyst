@@ -1,61 +1,3 @@
-/* Post Card */
-.post {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 30px;
-	padding: 30px;
-	margin: 40px auto;
-	max-width: 1000px;
-	background: var(--card);
-	border-radius: 14px;
-	border: 1px solid #eee;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-	transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.post:hover {
-	transform: translateY(-4px);
-	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
-}
-
-.post-info {
-	flex: 1;
-	max-width: 360px;
-}
-
-.post-header {
-	text-transform: capitalize;
-}
-
-.item-title {
-	font-size: 22px;
-	font-weight: 600;
-	margin: 6px 0 14px;
-}
-
-.item-desc {
-	font-size: 15px;
-	line-height: 1.5;
-	color: #444;
-	margin-bottom: 16px;
-}
-
-.post-image {
-	flex: 1;
-	display: flex;
-	justify-content: flex-end;
-}
-
-.post-image img {
-	width: 100%;
-	max-width: 420px;
-	aspect-ratio: 3/4;
-	object-fit: cover;
-	border-radius: 10px;
-	border: 1px solid #ddd;
-}
-
 /* Bottom nav for mobile */
 .bottom-nav {
 	display: none;
@@ -63,7 +5,7 @@
 	bottom: 0;
 	left: 0;
 	width: 100%;
-	background: #fff;
+	background: var(--card);
 	box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
 	justify-content: space-around;
 	align-items: center;
@@ -84,9 +26,9 @@
 .bottom-nav .plus-btn {
 	width: 45px;
 	height: 45px;
-	border-radius: 50%;
-	background: #111;
-	color: #fff;
+	border-radius: 2px;
+	background: var(--card);
+	color: var(--text);
 	font-size: 24px;
 	display: flex;
 	justify-content: center;
@@ -100,7 +42,7 @@
 	font-size: 24px;
 	font-weight: bold;
 	margin-bottom: 30px;
-	color: #262626;
+	color: var(--text);
 }
 
 .nav-menu {
@@ -116,13 +58,13 @@
 	align-items: center;
 	padding: 12px 16px;
 	text-decoration: none;
-	color: #262626;
-	border-radius: 8px;
+	color: var(--text);
+	border-radius: 2px;
 	transition: background-color 0.2s;
 }
 
 .nav-link:hover {
-	background-color: #f8f9fa;
+	background-color: var(--muted);
 }
 
 .nav-link i {
@@ -137,6 +79,7 @@
 
 /* Main Content */
 .main-content {
+	width: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -158,22 +101,29 @@
 }
 
 .form-header h1 {
+	text-align: center;
 	font-size: 28px;
 	font-weight: 600;
-	color: #262626;
-	margin-bottom: 8px;
+	color: var(--text);
+	margin: 0;
 }
 
 .form-header p {
-	color: #8e8e8e;
+	color: var(--muted);
 	font-size: 16px;
 }
 
 .form-card {
-	background: white;
-	border-radius: 12px;
+	width: 100%;
+	background: var(--card);
+	border: light-dark(#ddd, #222) 1px solid;
+	border-radius: 2px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	padding: 32px;
+}
+
+.form-card svg {
+	width: 24px;
 }
 
 .form-group {
@@ -184,61 +134,61 @@
 	display: block;
 	font-size: 16px;
 	font-weight: 500;
-	color: #262626;
-	margin-bottom: 8px;
+	color: var(--text);
+	margin-bottom: 2px;
 }
 
 .form-input {
 	width: 100%;
 	padding: 12px 16px;
-	border: 2px solid #e9ecef;
-	border-radius: 0.2em;
+	border: light-dark(#ddd, #222) 1px solid;
+	border-radius: 2px;
 	font-size: 16px;
-	transition: border-color 0.2s;
-	background: #fafafa;
+	transition: all 0.2s;
+	background: light-dark(#dbdbdb, #2a2a2a);
 }
 
 .form-input:focus {
 	outline: none;
-	border-color: #111;
-	background: white;
+	border-color: light-dark(#ddd, #222);
+	background: light-dark(#dbdbdb, #2a2a2a);
 }
 
 .form-input[type="file"] {
 	padding: 8px 12px;
-	background: white;
-	border: 2px solid #e9ecef;
+	background: light-dark(#dbdbdb, #2a2a2a);
+	border: light-dark(#ddd, #222) 1px solid;
 	cursor: pointer;
 }
 
 .form-input[type="file"]:hover {
-	border-color: #111;
-	background: #f8f9fa;
+	border-color: light-dark(#ddd, #222);
+	background: light-dark(#dbdbdb, #2a2a2a);
 }
 
 .form-textarea {
 	width: 100%;
 	padding: 12px 16px;
-	border: 2px solid #e9ecef;
-	border-radius: 0.2em;
+	border: light-dark(#ddd, #222) 1px solid;
+	border-radius: 2px;
 	font-size: 16px;
 	font-family: inherit;
 	resize: vertical;
 	min-height: 120px;
-	transition: border-color 0.2s;
-	background: #fafafa;
+	transition: all 0.2s;
+	background: light-dark(#dbdbdb, #2a2a2a);
 }
 
 .form-textarea:focus {
 	outline: none;
-	border-color: #111;
-	background: white;
+	border-color: light-dark(#ddd, #222);
+	background: light-dark(#dbdbdb, #2a2a2a);
 }
 
 .form-help {
 	font-size: 14px;
-	color: #8e8e8e;
-	margin-top: 4px;
+	color: var(--muted);
+	margin-top: 2px;
 }
 
 .form-actions {
@@ -249,11 +199,9 @@
 	margin-top: 32px;
 }
 
-/* Buttons */
-.btn,
 .form-input[type="file"]::file-selector-button {
 	padding: 12px 24px;
-	border-radius: 0.2em;
+	border-radius: 2px;
 	text-decoration: none;
 	font-size: 16px;
 	font-weight: 500;
@@ -267,55 +215,15 @@
 	gap: 8px;
 }
 
-.btn-primary,
 .form-input[type="file"]::file-selector-button {
-	background: #111;
-	color: white;
+	text-transform: uppercase;
+	border: 1px solid light-dark(#151515, #efefef);
+	background: light-dark(#e6e6e6, #222222);
+	color: var(--text);
 }
 
 .form-input[type="file"]::file-selector-button:hover {
 	opacity: 0.8;
-}
-
-.btn-primary:hover {
-	transform: translateY(-2px);
-}
-
-.btn-secondary {
-	background: #f8f9fa;
-	color: #262626;
-	border: 1px solid #e9ecef;
-}
-
-.btn-secondary:hover {
-	opacity: 1;
-	background: #45ecff;
-	color: #003b3e;
-	border: 1px solid #63ddff;
-}
-
-.btn-danger {
-<<<<<<< HEAD
-	background: #f8f9fa;
-	color: #dc3545;
-	border: 1px solid #dc3545;
-	min-width: 120px;
-=======
-	color: #111;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 0.2em;
-	border: 1px solid #c4c4c4;
-	width: 100%;
-	padding: 20px;
->>>>>>> 9ed0a038664633175bab7058424521b725eecb81
-}
-
-.btn-danger:hover {
-	background-color: #ffd8d8;
-	color: #b52515;
-	border: 1px solid #ff6363;
 }
 
 /* AI suggestion section */
@@ -336,12 +244,12 @@
 .mic {
 	position: absolute;
 	right: 5px;
-	top: 31.5px;
-	color: #111;
+	top: 25px;
+	color: var(--text);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 0.2em;
+	border-radius: 2px;
 	border: none;
 	font-size: 20px;
 	width: 36px;
@@ -352,7 +260,16 @@
 .mic:hover {
 	background-color: #d8feff;
 	color: #005c61;
-	transform: translateY(-1px);
+}
+
+.btn-secondary {
+	color: light-dark(#006d77, #63ddff);
+	border-color: light-dark(#006d77, #63ddff);
+}
+
+.cancel-btn {
+	color: light-dark(#ef233c, #ff6b6b);
+	border-color: light-dark(#ef233c, #ff6b6b);
 }
 
 @media (max-width: 768px) {

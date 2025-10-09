@@ -3,12 +3,11 @@
    ================================ */
 h1 {
 	text-align: left;
+	padding: 0;
 }
 
-/* ================================
-   POST STYLES
-   ================================ */
-.post {
+.post,
+.comments-card {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
@@ -17,8 +16,8 @@ h1 {
 	margin: 40px auto;
 	max-width: 1000px;
 	background: var(--card);
-	border-radius: 0.2em;
-	border: 1px solid #eee;
+	border-radius: 2px;
+	border: 1px solid light-dark(#d4d4d4, #222);
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 	transition: transform 0.3s, box-shadow 0.3s;
 }
@@ -42,7 +41,7 @@ h1 {
 	font-family: monospace;
 	font-size: 13px;
 	margin-bottom: 10px;
-	color: #555;
+	color: var(--text);
 }
 
 .item-title {
@@ -54,7 +53,7 @@ h1 {
 .item-desc {
 	font-size: 15px;
 	line-height: 1.5;
-	color: #444;
+	color: var(--muted);
 	margin-bottom: 16px;
 }
 
@@ -70,8 +69,8 @@ h1 {
 	max-width: 420px;
 	aspect-ratio: 3/4;
 	object-fit: cover;
-	border-radius: 0.2em;
-	border: 1px solid #ddd;
+	border-radius: 2px;
+	border: none;
 }
 
 /* ================================
@@ -115,8 +114,8 @@ h1 {
    PRODUCT DETAIL
    ================================ */
 .product-detail {
-	background: white;
-	border-radius: 0.2em;
+	background: var(--card);
+	border-radius: 2px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	overflow: hidden;
 	max-width: 800px;
@@ -125,7 +124,7 @@ h1 {
 
 .product-gallery {
 	position: relative;
-	background: #f8f9fa;
+	background: var(--card);
 }
 
 .product-image {
@@ -138,11 +137,11 @@ h1 {
 .image-placeholder {
 	width: 100%;
 	height: 400px;
-	background: #111;
+	background: var(--text);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #999;
+	color: var(--muted);
 	font-size: 64px;
 }
 
@@ -157,8 +156,8 @@ h1 {
 .product-title {
 	font-size: 28px;
 	font-weight: 600;
-	color: #262626;
-	margin-bottom: 8px;
+	color: var(--text);
+	margin: 0;
 }
 
 .product-price {
@@ -173,9 +172,10 @@ h1 {
 	align-items: center;
 	justify-content: space-between;
 	padding: 16px;
-	background: #f8f9fa;
-	border-radius: 8px;
-	color: #8e8e8e;
+	background: var(--card);
+	border: 1px solid light-dark(#d4d4d4, #404040);
+	border-radius: 2px;
+	color: var(--muted);
 	font-size: 14px;
 	margin-bottom: 12px;
 	text-transform: capitalize;
@@ -189,30 +189,30 @@ h1 {
 .artist-avatar {
 	width: 48px;
 	height: 48px;
-	border-radius: 50%;
-	background: #111;
+	font-size: 28px;
+	border-radius: 2px;
+	background: var(--text);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: white;
+	color: var(--card);
 	font-weight: bold;
 	margin-right: 12px;
 }
 
 .artist-info h3 {
-	font-size: 16px;
+	font-size: 24px;
 	font-weight: 600;
-	color: #262626;
-	margin-bottom: 4px;
+	color: var(--text);
 }
 
 .artist-info p {
 	font-size: 14px;
-	color: #8e8e8e;
+	color: var(--muted);
 }
 
 .product-description {
-	color: #262626;
+	color: var(--text);
 	line-height: 1.6;
 	margin-bottom: 24px;
 	font-size: 16px;
@@ -220,11 +220,12 @@ h1 {
 
 .product-meta {
 	display: flex;
-	gap: 16px;
+	gap: 40px;
 	margin-bottom: 12px;
 	padding: 16px;
-	background: #f8f9fa;
-	border-radius: 8px;
+	background: var(--card);
+	border: 1px solid light-dark(#d4d4d4, #404040);
+	border-radius: 2px;
 }
 
 .meta-item {
@@ -233,14 +234,15 @@ h1 {
 
 .meta-label {
 	font-size: 12px;
-	color: #8e8e8e;
+	text-transform: uppercase;
+	color: var(--muted);
 	margin-bottom: 4px;
 }
 
 .meta-value {
 	font-size: 14px;
 	font-weight: 500;
-	color: #262626;
+	color: var(--text);
 }
 
 .product-actions {
@@ -250,7 +252,7 @@ h1 {
 }
 
 .btn-danger {
-	color: #111;
+	color: var(--text);
 	font-size: 15px;
 }
 
@@ -264,8 +266,126 @@ h1 {
 	margin-top: 12px;
 }
 
+.share-btn,
+.icon {
+	display: flex;
+	align-items: center;
+	justify-content: start;
+	transition: all ease-in 0.2s;
+	border: none;
+	padding: 0;
+	background: none;
+	font-family: inherit;
+	font-size: 18px;
+	color: var(--text);
+}
+
+.share-btn:hover,
+.icon:hover {
+	cursor: pointer;
+	opacity: 0.7;
+}
+
 .say-aloud-btn {
-	border-radius: 0.2em;
+	border-radius: 2px;
+}
+
+.comments-card {
+	width: 85%;
+	display: flex;
+	flex-direction: column;
+	padding: 0;
+	margin: 0 0 40px 0;
+	align-items: start;
+	justify-content: space-between;
+	gap: 0;
+	border-top: 1px solid light-dark(#d4d4d4, #222);
+}
+
+.comments-card h3 {
+	text-transform: uppercase;
+}
+
+.card-header,
+.comment-section {
+	padding: 20px;
+}
+
+.comments .user-id-info {
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: start;
+	gap: 12px;
+}
+
+.comments-list {
+	width: 100%;
+}
+
+.comments .icon-set {
+	width: 100%;
+	padding: 0;
+	justify-content: space-between;
+	border: none;
+}
+
+.comments .icon-set .icons,
+.comments .icon-set .icons svg {
+	fill: light-dark(#4f4f4f, #bababa);
+	color: light-dark(#4f4f4f, #bababa);
+}
+.comment-section {
+	display: flex;
+	width: 100%;
+	border-top: 1px solid light-dark(#d4d4d4, #222);
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 60px;
+}
+
+.comment-section .artist-avatar {
+	margin: 0;
+	width: 36px;
+	height: 36px;
+	font-size: 20px;
+	border-radius: 2px;
+	background: var(--text);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--card);
+	font-weight: bold;
+}
+
+input {
+	/* width: 80%; */
+	height: 41px;
+	padding: 5px 5px 5px 10px;
+	border: none;
+	border-radius: 2px;
+	font-size: 16px;
+	transition: all 0.2s;
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+
+.input:focus-visible {
+	border: none;
+}
+
+.comments .artist-avatar {
+	width: 36px;
+	height: 36px;
+	font-size: 20px;
+	border-radius: 2px;
+	background: var(--text);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--card);
+	font-weight: bold;
+	margin: 0;
 }
 
 /* ================================
@@ -302,5 +422,8 @@ h1 {
 	}
 	.product-actions {
 		flex-direction: column;
+	}
+	.comments-card {
+		width: 100%;
 	}
 }

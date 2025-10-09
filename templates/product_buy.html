@@ -7,9 +7,12 @@
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
-    />
+    /><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/product_page.css" />
+  <link rel="stylesheet" href="../static/css/index.css" />
+  <link rel="stylesheet" href="../static/css/product_page.css" />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -17,7 +20,7 @@
       <div class="nav">
       <div class="nav-left">
         <div class="hamburger" onclick="toggleMenu(event)">
-          <span></span><span></span><span></span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path></svg>
         </div>
         <a href="{{url_for('home')}}">Clyst</a>
       </div>
@@ -69,12 +72,12 @@
           {% if current_user.is_authenticated and current_user.id ==
           product.artist_id %}
           <button
-            class="btn btn-danger product-delete-btn"
+            class="delete-btn"
             onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_posts', product_id=product.product_id) }}'"
             title="Delete Post"
           >
-            <i class="fas fa-trash"></i>
-          </button>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path></svg>
+                    </button>
           {% endif %}
 
           <div class="product-header">
@@ -86,7 +89,7 @@
           <!-- Product Meta -->
           <div class="product-meta">
             <div class="meta-item">
-              <div class="meta-label">Added</div>
+              <div class="meta-label">Added on</div>
               <div class="meta-value">{{ product.created_at }}</div>
             </div>
             <div class="meta-item">
@@ -118,7 +121,7 @@
           <a
             href="javascript:void(0)"
             onclick="handlePurchase()"
-            class="btn-primary"
+            class="btn btn-primary"
             >Purchase</a
           >
           <div class="product-options">
@@ -126,15 +129,19 @@
               class="share-btn"
               onclick="copyToClipboard(window.location.host + '{{ url_for('product_buy', product_id=product.product_id) }}')"
             >
-              <i class="fa-solid fa-link"></i>
-            </button>
-            <button
-              class="btn say-aloud-btn"
-              onclick="sayAloud({title: '{{ product.title }}', artist: '{{ product.artist.name }}', price: '{{ product.price }}', description: '{{ product.description | default('No description available') }}' })"
-              title="Say Aloud"
-            >
-              <i class="fa-solid fa-volume-high"></i>
-            </button>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"></path></svg>
+              </button>
+              <button
+                class="btn icon say-aloud-btn"
+                title="Say Aloud"
+                data-title="{{ product.title|e }}"
+                data-artist="{{ product.artist.name|e }}"
+                data-price="{{ product.price|string|e }}"
+                data-description="{{ product.description|default('No description available')|e }}"
+                onclick="sayAloudFromEl(this)"
+              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"></path></svg>
+              </button>
           </div>
         </div>
         {% if product.img_url %}
@@ -147,6 +154,53 @@
         </div>
         {% endif %}
       </div>
+      <div class="card comments-card" id="product-{{ product.product_id }}-comments">
+        <div class="card-header"><h3>Comments</h3></div>
+        {% if current_user.is_authenticated %}
+        <form action="{{ url_for('add_product_comment', product_id=product.product_id) }}" method="POST" class="comment-section">
+          <input type="hidden" name="anchor" value="product-{{ product.product_id }}-comments" />
+          <div class="artist-avatar">{{ current_user.name[0].upper() }}</div>
+          <input type="text" name="comment" placeholder="Write a comment..." required />
+          <button class="btn btn-primary">Comment</button>
+        </form>
+        {% else %}
+        <p><a href="{{ url_for('login') }}">Login</a> to leave a comment.</p>
+        {% endif %}
+
+  <div class="comments-list">
+          {% if product.comments %}
+            {% for comment in product.comments %}
+              <div class="comments" id="product-comment-{{ comment.id }}">
+                <div class="user-id-info">
+                  <div class="artist-avatar">{{ comment.artist.name[0].upper() if comment.artist.name else 'U' }}</div>
+                  <div class="artist-name">
+                    {% if comment.artist.id %}
+                      <a href="{{ url_for('view_profile', user_id=comment.artist.id) }}" class="post-username">{{ comment.artist.name }}</a>
+                    {% else %}
+                      <span class="post-username">{{ comment.artist.name }}</span>
+                    {% endif %}
+                    <p class="post-user-email">{{ comment.artist.email }} - {{ comment.created_at }}</p>
+                  </div>
+                  {% if current_user.is_authenticated and current_user.id == comment.artist.id %}
+                  <form action="{{ url_for('delete_product_comment', comment_id=comment.id) }}" method="POST" style="display:inline;margin-left:8px;">
+                    <input type="hidden" name="anchor" value="product-{{ product.product_id }}" />
+                    <button class="delete-btn" onclick="return confirm('Delete this comment?')">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path></svg>
+                    </button>
+                  </form>
+                  {% endif %}
+                </div>
+                <p>{{ comment.content }}</p>
+                <div class="icon-set">
+                  <button class="say-aloud-btn" title="Say Aloud" data-comment="{{ comment.content|e }}" data-author="{{ comment.artist.name|e if comment.artist.name else '' }}" onclick="sayCommentFromEl(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"></path></svg>
+              </button>
+                </div>
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
     </div>
 
     <div id="google_translate_element" class="translate-element"></div>
@@ -155,7 +209,7 @@
       onclick="googleTranslateElementInit()"
       class="translate-btn"
     >
-      <i class="fa-solid fa-language"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"></path></svg>
     </button>
 
    <script>
@@ -201,6 +255,26 @@
         } catch (err) {
           alert("Failed to copy text: " + err);
         }
+      }
+      function sayAloudFromEl(el) {
+        const title = el.getAttribute('data-title') || '';
+        const artist = el.getAttribute('data-artist') || '';
+        const price = el.getAttribute('data-price') || '';
+        const description = el.getAttribute('data-description') || '';
+        const message = new SpeechSynthesisUtterance();
+        message.text = `The title of the artwork is ${title}. It is created by ${artist}. The price of the artwork is Rs.${price}. The description says: ${description}.`;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(message);
+      }
+      // Speak a specific comment provided by data attributes on the element
+      function sayCommentFromEl(el) {
+        const text = el.getAttribute('data-comment') || '';
+        const author = el.getAttribute('data-author') || '';
+        if (!text) return;
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = author ? `${author} says: ${text}` : text;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(msg);
       }
     </script>
     <script

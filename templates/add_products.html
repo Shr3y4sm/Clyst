@@ -7,7 +7,9 @@
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
-    />
+    /><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="../static/css/add.css">
     </head>
@@ -17,7 +19,7 @@
       <div class="nav">
               <div class="nav-left">
         <div class="hamburger" onclick="toggleMenu(event)">
-          <span></span><span></span><span></span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path></svg>
         </div>
         <a href="{{ url_for('home') }}">Clyst</a>
       </div>
@@ -156,27 +158,28 @@
                   class="form-input"
                   placeholder="Optional prompt to guide AI (e.g., target buyer, style)"
                 />
-                <button onclick="getPrompt()" class="mic"><i class="fa-solid fa-microphone"></i></button>
+                <button onclick="getPrompt()" class="mic">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9998 1C14.7612 1 16.9998 3.23858 16.9998 6V10C16.9998 12.7614 14.7612 15 11.9998 15C9.23833 15 6.99976 12.7614 6.99976 10V6C6.99976 3.23858 9.23833 1 11.9998 1ZM3.05469 11H5.07065C5.55588 14.3923 8.47329 17 11.9998 17C15.5262 17 18.4436 14.3923 18.9289 11H20.9448C20.4837 15.1716 17.1714 18.4839 12.9998 18.9451V23H10.9998V18.9451C6.82814 18.4839 3.51584 15.1716 3.05469 11Z"></path></svg>
+                </button>
                 <div class="form-actions form-actions-ai">
                   <button
                     type="button"
                     id="generate_ai"
                     class="btn btn-secondary"
                   >
-                    <i class="fas fa-wand-magic-sparkles"></i>
-                    Generate Suggestions
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.0007 1.20825 18.3195 3.68108 20.7923 4.99992 18.3195 6.31876 17.0007 8.79159 15.6818 6.31876 13.209 4.99992 15.6818 3.68108 17.0007 1.20825ZM8.00065 4.33325 10.6673 9.33325 15.6673 11.9999 10.6673 14.6666 8.00065 19.6666 5.33398 14.6666.333984 11.9999 5.33398 9.33325 8.00065 4.33325ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"></path></svg> Generate Suggestions
                   </button>
                 </div>
                 <div id="ai_suggestions" class="ai-suggestions"></div>
               </div>
 
               <div class="form-actions">
-                <a href="{{ url_for('products_page') }}" class="btn btn-danger">
-                  <i class="fas fa-times"></i>
+                <a href="{{ url_for('products_page') }}" class="btn btn-secondary cancel-btn">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg>
                   Cancel
                 </a>
                 <button type="submit" class="btn btn-primary">
-                  <i class="fas fa-plus"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path></svg>
                   Add Product
                 </button>
               </div>
@@ -193,7 +196,7 @@
       onclick="googleTranslateElementInit()"
       class="translate-btn"
     >
-      <i class="fa-solid fa-language"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"></path></svg>
     </button>
 
     <script>
@@ -310,17 +313,17 @@
                     suggestionsDiv.innerHTML = items
                       .map(
                         (s, idx) => `
-                    <div style=\"border:1px solid #e9ecef; border-radius:8px; padding:12px; margin-bottom:8px;\">
-                      <div style=\"font-weight:300; margin-bottom:6px; color: #8e8e8e\">Suggestion ${
+                    <div style=\"border:1px solid light-dark(#ddd, #222); background: var(--bg); border-radius: 2px; padding:12px; margin-bottom:8px;\">
+                      <div style=\"font-weight:300;color: #8e8e8e\">Suggestion ${
                         idx + 1
                       }</div>
-                      <div style=\"margin-bottom:6px; font-weight:600;\">${
+                      <div style=\"font-weight:600; text-transform:uppercase;\">${
                         s.title
                       }</div>
-                      <div style=\"margin-bottom:10px; color: #202020\">${
+                      <div style=\"margin-bottom:10px; color: var(--text)\">${
                         s.description
                       }</div>
-                      <button type=\"button\" class=\"btn btn-primary\" data-idx=\"${idx}\">Use this</button>
+                      <button type=\"button\" class=\"btn btn-primary\" data-idx=\"${idx}\">Choose</button>
                     </div>
                   `
                       )

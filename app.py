@@ -2,7 +2,7 @@
 from datetime import date
 import os
 from dotenv import load_dotenv
-import natural_search 
+import natural_search
 import ai
 import uuid
 
@@ -39,8 +39,9 @@ ckeditor = CKEditor(app)
 Bootstrap(app)
 
 # Configure Flask-Login
-login_manager = LoginManager()  
+login_manager = LoginManager()
 login_manager.init_app(app)
+
 
 # Configure Gravatar (commented out due to compatibility issues)
 # gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
@@ -68,6 +69,7 @@ else:
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
+
 # Database creation will be done at the end
 
 
@@ -88,7 +90,7 @@ def admin_only(f):
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def save_uploaded_file(file, folder_name):
@@ -96,19 +98,20 @@ def save_uploaded_file(file, folder_name):
         # Generate unique filename
         filename = secure_filename(file.filename)
         unique_filename = f"{uuid.uuid4()}_{filename}"
-        
+
         # Create folder if it doesn't exist
         folder_path = os.path.join(app.config['UPLOAD_FOLDER'], folder_name)
         os.makedirs(folder_path, exist_ok=True)
-        
+
         # Save file
         file_path = os.path.join(folder_path, unique_filename)
         file.save(file_path)
-        
+
         # Return URL path for database storage
         url_path = f"/static/uploads/{folder_name}/{unique_filename}"
         return url_path
     return None
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -150,6 +153,43 @@ class Product(db.Model):
     created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
 
 
+class Comments(db.Model):
+    __tablename__ = 'comments'
+
+    comment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_id = db.Column(
+        db.Integer,
+        db.ForeignKey('posts.post_id', ondelete='CASCADE'),
+        nullable=False
+    )
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False
+    )
+    content = db.Column(db.Text)
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+
+class PostLike(db.Model):
+    __tablename__ = 'post_likes'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+
+class ProductComments(db.Model):
+    __tablename__ = 'product_comments'
+
+    comment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.product_id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    content = db.Column(db.Text)
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+
+
 @app.route('/', methods=["GET", "POST"])
 def home():
     # Optional natural language query parsing for posts
@@ -170,7 +210,28 @@ def home():
             )
     result = db.session.execute(posts_query)
     posts = result.scalars().all()
+
+    # Load comments per post and attach a simple comments list (with author info)
+    for post in posts:
+        comments_rows = db.session.execute(db.select(Comments).where(Comments.post_id == post.post_id)).scalars().all()
+        comments_data = []
+        for c in comments_rows:
+            author = db.session.get(User, c.user_id)
+            comments_data.append({
+                'id': c.comment_id,
+                'content': c.content,
+                'created_at': c.created_at,
+                'artist': {
+                    'name': getattr(author, 'name', 'Unknown') if author else 'Unknown',
+                    'email': getattr(author, 'email', '') if author else '',
+                    'id': getattr(author, 'id', None) if author else None,
+                }
+            })
+        # Attach to post object so template can use post.comments
+        setattr(post, 'comments', comments_data)
+
     return render_template("index.html", posts=posts, current_user=current_user, q=q)
+
 
 @app.route('/products')
 def products_page():
@@ -213,13 +274,13 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
         user = db.session.execute(db.select(User).where(User.email == email)).scalar()
-        
+
         if user and password and check_password_hash(user.password_hash, password):
             login_user(user)
             return redirect(url_for('home'))
         else:
             flash('Invalid email or password')
-    
+
     return render_template("login.html", current_user=current_user)
 
 
@@ -238,18 +299,18 @@ def register():
         password = request.form.get('password')
         phone = request.form.get('phone')
         location = request.form.get('location')
-        
+
         # Check if user already exists
         existing_user = db.session.execute(db.select(User).where(User.email == email)).scalar()
         if existing_user:
             flash('Email already registered')
             return render_template("register.html", current_user=current_user)
-        
+
         # Create new user
         if not password:
             flash('Password is required')
             return render_template("register.html", current_user=current_user)
-            
+
         # type: ignore[call-arg]
         new_user = User(
             name=name,
@@ -261,10 +322,10 @@ def register():
         )
         db.session.add(new_user)
         db.session.commit()
-        
+
         login_user(new_user)
         return redirect(url_for('home'))
-    
+
     return render_template("register.html", current_user=current_user)
 
 
@@ -274,7 +335,7 @@ def add_posts():
     if request.method == 'POST':
         # Handle image upload
         media_url = request.form.get('post_image', '')
-        
+
         # Check if file was uploaded
         if 'post_image_file' in request.files:
             file = request.files['post_image_file']
@@ -286,7 +347,7 @@ def add_posts():
         if not media_url:
             flash('Please provide an image URL or upload an image for the post.')
             return render_template("add_posts.html", current_user=current_user)
-        
+
         # type: ignore[call-arg]
         new_post = Posts(
             artist_id=current_user.id,
@@ -307,7 +368,7 @@ def add_products():
     if request.method == 'POST':
         # Handle image upload
         img_url = request.form.get('product_image', '')
-        
+
         # Check if file was uploaded
         if 'product_image_file' in request.files:
             file = request.files['product_image_file']
@@ -319,7 +380,7 @@ def add_products():
         if not img_url:
             flash('Please provide an image URL or upload an image for the product.')
             return render_template("add_products.html", current_user=current_user)
-        
+
         # type: ignore[call-arg]
         new_product = Product(
             artist_id=current_user.id,
@@ -429,10 +490,10 @@ def profile():
     # Get current user's posts and products
     user_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == current_user.id)).scalars().all()
     user_products = db.session.execute(db.select(Product).where(Product.artist_id == current_user.id)).scalars().all()
-    
+
     # Generate portfolio narrative
     from ai import generate_enhanced_portfolio_narrative
-    
+
     # Convert posts to dictionaries for AI analysis
     posts_data = []
     for post in user_posts:
@@ -442,7 +503,7 @@ def profile():
             'media_url': post.media_url,
             'created_at': post.created_at
         })
-    
+
     # Convert products to dictionaries for AI analysis
     products_data = []
     for product in user_products:
@@ -453,7 +514,7 @@ def profile():
             'img_url': product.img_url,
             'created_at': product.created_at
         })
-    
+
     # Generate the portfolio narrative
     portfolio_narrative = generate_enhanced_portfolio_narrative(
         artist_name=current_user.name,
@@ -461,13 +522,13 @@ def profile():
         products=products_data,
         user_location=current_user.location
     )
-    
-    return render_template("profile.html", 
-                         current_user=current_user,
-                         profile_user=current_user, 
-                         posts=user_posts, 
-                         products=user_products,
-                         portfolio_narrative=portfolio_narrative)
+
+    return render_template("profile.html",
+                           current_user=current_user,
+                           profile_user=current_user,
+                           posts=user_posts,
+                           products=user_products,
+                           portfolio_narrative=portfolio_narrative)
 
 
 @app.route("/profile/<int:user_id>")
@@ -476,10 +537,10 @@ def view_profile(user_id):
     user = db.get_or_404(User, user_id)
     user_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == user_id)).scalars().all()
     user_products = db.session.execute(db.select(Product).where(Product.artist_id == user_id)).scalars().all()
-    
+
     # Generate portfolio narrative
     from ai import generate_enhanced_portfolio_narrative
-    
+
     # Convert posts to dictionaries for AI analysis
     posts_data = []
     for post in user_posts:
@@ -489,7 +550,7 @@ def view_profile(user_id):
             'media_url': post.media_url,
             'created_at': post.created_at
         })
-    
+
     # Convert products to dictionaries for AI analysis
     products_data = []
     for product in user_products:
@@ -500,7 +561,7 @@ def view_profile(user_id):
             'img_url': product.img_url,
             'created_at': product.created_at
         })
-    
+
     # Generate the portfolio narrative
     portfolio_narrative = generate_enhanced_portfolio_narrative(
         artist_name=user.name,
@@ -508,21 +569,140 @@ def view_profile(user_id):
         products=products_data,
         user_location=user.location
     )
-    
-    return render_template("profile.html", 
-                         current_user=current_user, 
-                         profile_user=user,
-                         posts=user_posts, 
-                         products=user_products,
-                         portfolio_narrative=portfolio_narrative)
+
+    return render_template("profile.html",
+                           current_user=current_user,
+                           profile_user=user,
+                           posts=user_posts,
+                           products=user_products,
+                           portfolio_narrative=portfolio_narrative)
 
 
 @app.route("/product/<int:product_id>")
 def product_buy(product_id):
     product = db.get_or_404(Product, product_id)
-    return render_template("product_buy.html", 
-                         current_user=current_user, 
-                         product=product)
+    # Load comments for this product
+    comments_rows = db.session.execute(db.select(ProductComments).where(ProductComments.product_id == product.product_id)).scalars().all()
+    comments_data = []
+    for c in comments_rows:
+        author = db.session.get(User, c.user_id)
+        comments_data.append({
+            'id': c.comment_id,
+            'content': c.content,
+            'created_at': c.created_at,
+            'artist': {
+                'name': getattr(author, 'name', 'Unknown') if author else 'Unknown',
+                'email': getattr(author, 'email', '') if author else '',
+                'id': getattr(author, 'id', None) if author else None,
+            }
+        })
+    setattr(product, 'comments', comments_data)
+    return render_template("product_buy.html",
+                           current_user=current_user,
+                           product=product)
+
+
+@app.route('/product/<int:product_id>/comment', methods=["POST"])
+@login_required
+def add_product_comment(product_id):
+    content = (request.form.get('comment') or '').strip()
+    if not content:
+        flash('Comment cannot be empty')
+        return redirect(url_for('product_buy', product_id=product_id))
+
+    new_comment = ProductComments(
+        product_id=product_id,
+        user_id=current_user.id,
+        content=content,
+        created_at=date.today().strftime("%B %d, %Y")
+    )
+    db.session.add(new_comment)
+    db.session.commit()
+    anchor = request.form.get('anchor')
+    if anchor:
+        return redirect(url_for('product_buy', product_id=product_id) + '#' + anchor)
+    return redirect(url_for('product_buy', product_id=product_id))
+
+
+@app.route('/product/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_product_comment(comment_id):
+    comment = db.get_or_404(ProductComments, comment_id)
+    if comment.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+    product_id = comment.product_id
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(url_for('product_buy', product_id=product_id) + '#product-' + str(product_id) + '-comments')
+
+
+@app.route('/comment/<int:post_id>', methods=["POST"])
+@login_required
+def add_comments(post_id):
+    """Create a comment for a given post_id. Expects form field 'comment'."""
+    content = (request.form.get('comment') or '').strip()
+    if not content:
+        flash('Comment cannot be empty')
+        return redirect(url_for('home'))
+
+    new_comment = Comments(
+        post_id=post_id,
+        user_id=current_user.id,
+        content=content,
+        created_at=date.today().strftime("%B %d, %Y")
+    )
+    db.session.add(new_comment)
+    db.session.commit()
+    # Redirect back to the post anchor so the page doesn't jump to the top
+    anchor = request.form.get('anchor')
+    if anchor:
+        return redirect(url_for('home') + '#' + anchor)
+    return redirect(url_for('home'))
+
+
+@app.route('/api/post/<int:post_id>/likes', methods=['GET'])
+def get_post_likes(post_id):
+    # Return total like count and whether current user liked (if authenticated)
+    total = db.session.execute(db.select(PostLike).where(PostLike.post_id == post_id)).scalars().all()
+    count = len(total)
+    liked = False
+    if current_user and getattr(current_user, 'is_authenticated', False):
+        exists = db.session.execute(db.select(PostLike).where(PostLike.post_id == post_id, PostLike.user_id == current_user.id)).scalar()
+        liked = bool(exists)
+    return jsonify({'count': count, 'liked': liked})
+
+
+@app.route('/api/post/<int:post_id>/like', methods=['POST'])
+@login_required
+def toggle_post_like(post_id):
+    # Toggle like: if exists, remove; otherwise add
+    existing = db.session.execute(db.select(PostLike).where(PostLike.post_id == post_id, PostLike.user_id == current_user.id)).scalar()
+    if existing:
+        db.session.delete(existing)
+        db.session.commit()
+        liked = False
+    else:
+        nl = PostLike(post_id=post_id, user_id=current_user.id)
+        db.session.add(nl)
+        db.session.commit()
+        liked = True
+
+    total = db.session.execute(db.select(PostLike).where(PostLike.post_id == post_id)).scalars().all()
+    return jsonify({'count': len(total), 'liked': liked})
+
+
+@app.route('/comment/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = db.get_or_404(Comments, comment_id)
+    # Allow delete if the current user created it or is admin (id == 1)
+    if comment.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+    post_id = comment.post_id
+    db.session.delete(comment)
+    db.session.commit()
+    # Redirect back to the post anchor
+    return redirect(url_for('home') + '#post-' + str(post_id))
 
 
 if __name__ == "__main__":
@@ -531,7 +711,7 @@ if __name__ == "__main__":
         with app.app_context():
             db.create_all()
             print("✅ Database tables created successfully")
-        
+
         # Run the app
         port = int(os.getenv('PORT', 5000))
         debug_mode = os.getenv('FLASK_ENV') != 'production'
