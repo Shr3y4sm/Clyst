@@ -705,6 +705,13 @@ def delete_comment(comment_id):
     return redirect(url_for('home') + '#post-' + str(post_id))
 
 
+@app.route("/camera")
+@login_required
+def camera():
+    """Camera page for verification purposes"""
+    return render_template("camera.html", current_user=current_user)
+
+
 if __name__ == "__main__":
     try:
         # Create database tables

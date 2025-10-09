@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clyst | Camera & Location</title>
+  <script src="https://cdn.jsdelivr.net/npm/piexifjs"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/styles.css"></link>
+  <link rel="stylesheet" href="../static/css/camera.css"></link>
+</head>
+<body>
+  <header>
+    <h1><a href="{{ url_for('home') }}" style="text-decoration:none; color:inherit;">Clyst</a></h1>
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}" class="profile-btn" title="Profile">
+          <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28.8662 27.5C28.7784 27.652 28.6521 27.7783 28.5001 27.8661C28.348 27.9538 28.1755 28 28 28H3.99995C3.8245 27.9998 3.65219 27.9535 3.50031 27.8656C3.34843 27.7778 3.22234 27.6515 3.13469 27.4995C3.04705 27.3475 3.00093 27.1752 3.00098 26.9997C3.00102 26.8243 3.04723 26.6519 3.13495 26.5C5.0387 23.2087 7.97245 20.8487 11.3962 19.73C9.70266 18.7218 8.38688 17.1856 7.65094 15.3572C6.91499 13.5289 6.79956 11.5095 7.32238 9.60918C7.8452 7.70887 8.97735 6.03272 10.545 4.83814C12.1126 3.64355 14.029 2.99658 16 2.99658C17.9709 2.99658 19.8873 3.64355 21.4549 4.83814C23.0226 6.03272 24.1547 7.70887 24.6775 9.60918C25.2003 11.5095 25.0849 13.5289 24.349 15.3572C23.613 17.1856 22.2972 18.7218 20.6037 19.73C24.0275 20.8487 26.9612 23.2087 28.865 26.5C28.9529 26.6519 28.9993 26.8243 28.9996 26.9998C28.9998 27.1754 28.9538 27.3479 28.8662 27.5Z" fill="inherit"/></svg>
+        </a>
+    {% endif %}
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Capture Photo & Location</h2>
+      <video id="camera" playsinline muted></video>
+      <button id="capture" class="btn btn-primary">Capture Photo</button>
+      <canvas id="canvas" style="display:none;"></canvas>
+      <img id="photo" style="display:none;">
+      <div class="info" id="location-info"></div>
+      <button id="submit" class="btn btn-primary" style="display:none;">Submit</button>
+      <button id="retake" class="btn btn-secondary" style="display:none;">Retake Photo</button>
+    </div>
+  </main>
+
+  <footer>© 2025 Clyst — Empowering Local Artisans</footer>
+
+  <script>
+    const video=document.getElementById('camera');
+    const canvas=document.getElementById('canvas');
+    const photo=document.getElementById('photo');
+    const info=document.getElementById('location-info');
+    const captureBtn=document.getElementById('capture');
+    const submitBtn=document.getElementById('submit');
+    const retakeBtn=document.getElementById('retake');
+    
+    let currentStream = null;
+
+    async function initCamera(){
+      try{
+        const stream=await navigator.mediaDevices.getUserMedia({
+          video:{facingMode:'environment'}
+        });
+        currentStream = stream;
+        video.srcObject=stream;
+        await video.play();
+      }catch(err){
+        alert("Camera access error: "+err.message);
+      }
+    }
+    
+    function stopCamera() {
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+        currentStream = null;
+      }
+    }
+    
+    function showCaptureView() {
+      video.style.display = 'block';
+      captureBtn.style.display = 'block';
+      photo.style.display = 'none';
+      submitBtn.style.display = 'none';
+      retakeBtn.style.display = 'none';
+      info.innerHTML = '';
+    }
+    
+    function showResultView() {
+      video.style.display = 'none';
+      captureBtn.style.display = 'none';
+      photo.style.display = 'block';
+      submitBtn.style.display = 'block';
+      retakeBtn.style.display = 'block';
+    }
+    
+    initCamera();
+
+    captureBtn.addEventListener('click',async()=>{
+      if(!video.videoWidth){
+        alert("Camera not ready. Try again.");
+        return;
+      }
+      canvas.width=video.videoWidth;
+      canvas.height=video.videoHeight;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      const imageData=canvas.toDataURL('image/jpeg');
+
+      // Stop the camera immediately after capture
+      stopCamera();
+
+      info.innerHTML="<em>Fetching location...</em>";
+      navigator.geolocation.getCurrentPosition(async pos=>{
+        const {latitude,longitude}=pos.coords;
+        const address=await getAddress(latitude,longitude);
+        info.innerHTML=`
+          <b>Latitude:</b> ${latitude.toFixed(5)}<br>
+          <b>Longitude:</b> ${longitude.toFixed(5)}<br>
+          <b>Address:</b> ${address}
+        `;
+        try{
+          const newImg=addExifData(imageData,latitude,longitude);
+          photo.src=newImg;
+        }catch(e){
+          photo.src=imageData; // fallback if piexif fails
+        }
+        showResultView();
+      },err=>{
+        alert("Location denied: "+err.message);
+        photo.src=imageData;
+        showResultView();
+      });
+    });
+    
+    submitBtn.addEventListener('click', () => {
+      alert("Photo submitted successfully!");
+      // Add your submit logic here
+    });
+    
+    retakeBtn.addEventListener('click', () => {
+      showCaptureView();
+      initCamera();
+    });
+
+    function toDMS(deg){
+      const d=Math.floor(deg);
+      const minfloat=(deg-d)*60;
+      const m=Math.floor(minfloat);
+      const secfloat=(minfloat-m)*60;
+      const s=Math.round(secfloat*100);
+      return [[d,1],[m,1],[s,100]];
+    }
+
+    function addExifData(imageData,lat,lon){
+      const gps={
+        [piexif.GPSIFD.GPSLatitudeRef]:lat>=0?"N":"S",
+        [piexif.GPSIFD.GPSLatitude]:toDMS(Math.abs(lat)),
+        [piexif.GPSIFD.GPSLongitudeRef]:lon>=0?"E":"W",
+        [piexif.GPSIFD.GPSLongitude]:toDMS(Math.abs(lon))
+      };
+      const exifObj={GPS:gps};
+      const exifBytes=piexif.dump(exifObj);
+      return piexif.insert(exifBytes,imageData);
+    }
+
+    async function getAddress(lat,lon){
+      try{
+        const url=`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+        const res=await fetch(url,{headers:{'User-Agent':'ClystCamera/1.0'}});
+        const data=await res.json();
+        return data.display_name||"Address not found";
+      }catch{return"Error fetching address";}
+    }
+  </script>
+</body>
+</html>
