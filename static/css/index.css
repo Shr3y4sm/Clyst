@@ -46,6 +46,9 @@
 	font-size: 24px;
 	font-weight: 800;
 }
+.post-avatar-link:hover .post-avatar {
+	filter: brightness(0.95);
+}
 .post-user-info {
 	display: flex;
 	flex-direction: column;
@@ -96,6 +99,14 @@
 	font-weight: 600;
 	color: var(--text);
 	text-transform: uppercase;
+}
+.promoted-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  display: block;
 }
 .post-description {
 	color: var(--text);

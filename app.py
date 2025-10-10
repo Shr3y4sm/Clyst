@@ -15,6 +15,7 @@ import json
 from typing import Optional, Dict, Any, List
 from flask_bootstrap5 import Bootstrap
 from flask_ckeditor import CKEditor
+from flask_migrate import Migrate
 # from flask_gravatar import Gravatar
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
@@ -64,10 +65,12 @@ if os.getenv('FLASK_ENV') == 'production':
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clyst.db'
 else:
-    # Use SQLite for development
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clyst.db'
+    # Use SQLite for development (store DB in Flask instance folder)
+    os.makedirs(app.instance_path, exist_ok=True)
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'clyst.db')
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
+migrate = Migrate(app, db)
 
 
 # Database creation will be done at the end
@@ -137,6 +140,7 @@ class Posts(db.Model):
     description: Mapped[Optional[str]] = mapped_column(db.Text)
     media_url: Mapped[Optional[str]] = mapped_column(db.String(255))
     created_at: Mapped[Optional[str]] = mapped_column(db.String(255))
+    is_promoted: Mapped[bool] = mapped_column(db.Boolean, default=False)
 
 
 class Product(db.Model):
@@ -149,8 +153,8 @@ class Product(db.Model):
     description: Mapped[Optional[str]] = mapped_column(db.Text)
     price: Mapped[Optional[float]] = mapped_column(db.Numeric(10, 2))
     img_url: Mapped[Optional[str]] = mapped_column(db.String(255))
-    # category_id = db.Column(db.Integer, db.ForeignKey('categories.category_id', ondelete='SET NULL'))
     created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    is_promoted: Mapped[bool] = mapped_column(db.Boolean, default=False)
 
 
 class Comments(db.Model):
@@ -354,12 +358,34 @@ def add_posts():
             post_title=request.form['post_title'],
             description=request.form['description'],
             media_url=media_url,
-            created_at=date.today().strftime("%B %d, %Y")
+            created_at=date.today().strftime("%B %d, %Y"),
+            is_promoted=request.form.get('is_promoted') == 'True'
         )
         db.session.add(new_post)
         db.session.commit()
         return redirect(url_for('home'))
-    return render_template("add_posts.html", current_user=current_user)
+    
+    # Pre-fill from query parameters for promotion
+    title = request.args.get('title', '')
+    description = request.args.get('description', '')
+    media_url = request.args.get('media_url', '')
+    is_promoted = request.args.get('is_promoted', 'False')
+    
+    return render_template("add_posts.html", current_user=current_user, title=title, description=description, media_url=media_url, is_promoted=is_promoted)
+
+
+@app.route("/promote_product/<int:product_id>", methods=["POST"])
+@login_required
+def promote_product(product_id):
+    product = db.get_or_404(Product, product_id)
+    if product.artist_id != current_user.id:
+        abort(403)
+    
+    return redirect(url_for('add_posts', 
+                            title=product.title, 
+                            description=product.description, 
+                            media_url=product.img_url,
+                            is_promoted='True'))
 
 
 @app.route("/add_products", methods=["GET", "POST"])

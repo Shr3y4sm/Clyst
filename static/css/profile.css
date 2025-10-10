@@ -77,6 +77,22 @@ svg {
 	text-transform: capitalize;
 }
 
+/* Verification prompt under profile name */
+.profile-verify {
+	margin-top: 6px;
+}
+.profile-verify a {
+	font-size: 14px;
+ 	color: var(--muted);
+ 	text-decoration: none;
+ 	opacity: 0.9;
+ 	border-bottom: 1px dotted rgba(0,0,0,0.08);
+}
+.profile-verify a:hover {
+ 	color: var(--text);
+ 	opacity: 1;
+}
+
 h1 {
 	margin: 0;
 	padding: 0;
@@ -360,6 +376,26 @@ h1 {
 	display: flex;
 	gap: 8px;
 	margin-top: 12px;
+}
+
+/* Promote button styling */
+.promote-form {
+	display: inline-block;
+}
+.promote-btn {
+ 	background: transparent;
+ 	border: 1px solid var(--muted);
+ 	color: var(--muted);
+ 	padding: 6px 10px;
+ 	font-size: 13px;
+ 	border-radius: 4px;
+ 	cursor: pointer;
+ 	transition: all 0.15s ease;
+}
+.promote-btn:hover {
+ 	background: var(--muted);
+ 	color: var(--card);
+ 	transform: translateY(-1px);
 }
 
 .form-actions {
