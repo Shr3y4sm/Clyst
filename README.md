@@ -11,6 +11,9 @@ Clyst is a comprehensive web application that serves as both a social platform f
 - **Image Management**: Support for both URL-based and file upload images with secure handling
 - **Search & Discovery**: Natural language search with price filtering capabilities
 - **Portfolio Management**: AI-generated portfolio narratives for artist profiles
+- **Promote Product to Post**: Turn a marketplace product into a community post with one click and a Promoted badge
+- **Verification (Get Verified)**: Dedicated camera page to complete simple verification from profile
+- **Likes & Comments**: Like posts and participate in discussions via comments (login required to like or comment; buttons visible to guests)
 
 ### AI-Powered Features
 - **Content Generation**: AI-powered title and description suggestions for posts and products using Google Gemini
@@ -60,7 +63,7 @@ Clyst is a comprehensive web application that serves as both a social platform f
 
 ### Database
 - **SQLite**: Lightweight database for development
-- **Database Migrations**: Automatic table creation and management
+- **Database Migrations**: Managed via Flask-Migrate/Alembic for safe schema changes
 - **File Storage**: Local file system with organized uploads
 
 ## 📁 Project Structure
@@ -91,7 +94,7 @@ ClystProto/
 │       ├── posts/       # Post images with UUID naming
 │       └── products/    # Product images with UUID naming
 └── instance/
-    └── clyst.db        # SQLite database
+   └── clyst.db        # SQLite database (dev DB lives here)
 ```
 
 ## 🚀 Installation & Setup
@@ -150,6 +153,10 @@ ClystProto/
 - The application uses SQLite by default
 - Database file is created automatically in the `instance/` directory
 - Tables are created on first run
+- Migrations are available for evolving schemas
+   - Initialize migrations (first time): `flask db init`
+   - Generate migration: `flask db migrate -m "your message"`
+   - Apply migration: `flask db upgrade`
 
 ## 📱 Usage Guide
 
@@ -164,12 +171,27 @@ ClystProto/
    - Upload images or provide image URLs
    - Use AI to generate engaging titles and descriptions
    - Translate content into multiple languages
+   - Promote a product to a post: From your profile, click "Promote Product" on a product; you'll be taken to Create Post with fields pre-filled. Submitting creates a post with a Promoted tag in the feed.
 
 3. **Selling Products**
    - Add products to the marketplace
    - Set prices and detailed descriptions
    - Use AI suggestions for better product listings
    - Manage your product inventory
+
+   4. **Get Verified**
+   - From your profile, click "Get verified now" to open the Camera page (`/camera`) and complete a simple verification step.
+
+### Interacting with Posts (All Users)
+- Like a post: Click the Like button on any post. If you’re not logged in, you’ll be prompted to log in first.
+- View comments: Click the Comment button to expand or collapse the discussion for a post.
+- Add a comment: When logged in, type your message in the reply box and submit. Guests see a "Login to comment" prompt.
+
+Developer endpoints
+- Get like count and state: `GET /api/post/<post_id>/likes`
+- Toggle like: `POST /api/post/<post_id>/like`
+- Add comment to post: `POST /comment/<post_id>` (form field: `comment`)
+- Delete a post comment: `POST /comment/<comment_id>/delete`
 
 ### For Buyers
 
@@ -309,7 +331,20 @@ The application features an advanced natural language search system that underst
 - `description`: Post description (Text)
 - `media_url`: Image URL or path (String, 255 chars)
 - `created_at`: Post creation date (String, 255 chars)
+- `is_promoted`: Whether this post is a promoted product (Boolean)
 - **Relationships**: Many-to-one with User
+
+### Comments Table
+- `comment_id`: Primary key (auto-increment)
+- `post_id`: Foreign key to posts.post_id (CASCADE on delete)
+- `user_id`: Foreign key to users.id
+- `content`: Comment text (Text)
+- `created_at`: Comment creation date (String, 250 chars)
+
+### Post Likes Table
+- `id`: Primary key (auto-increment)
+- `post_id`: Foreign key to posts.post_id (CASCADE on delete)
+- `user_id`: Foreign key to users.id
 
 ### Products Table
 - `product_id`: Primary key (auto-increment)
@@ -319,6 +354,7 @@ The application features an advanced natural language search system that underst
 - `price`: Product price (Numeric, 10 digits, 2 decimal places)
 - `img_url`: Product image URL or path (String, 255 chars)
 - `created_at`: Product creation date (String, 250 chars)
+- `is_promoted`: Promotion flag for product (Boolean) — currently used to track promotion state
 - **Relationships**: Many-to-one with User
 
 
@@ -346,7 +382,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - **Payment Integration**: Stripe/PayPal integration for transactions
 - **Advanced AI**: More sophisticated content generation, image analysis and smart price assist for artisans
-- **Social Features**: Comments, likes, and following system
+- **Social Features**: Following system
 - **Mobile App**: Native mobile application
 - **Advanced Search**: Recommendation system
 - **Order Management**: Complete e-commerce functionality
