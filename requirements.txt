@@ -5,8 +5,10 @@ Flask-Bootstrap5==0.1.dev1
 Flask-CKEditor==1.0.0
 Flask-Gravatar==0.5.0
 Flask-Login==0.6.3
+Flask-Migrate>=4.0.7
 Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.38
+alembic>=1.13.2
 Werkzeug==3.0.1
 
 # Load env vars from .env
