@@ -477,3 +477,110 @@ svg {
 		margin-left: 0;
 	}
 }
+
+/* Cart Button Styles */
+.cart-btn {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	color: var(--text);
+	text-decoration: none;
+	border-radius: 50%;
+}
+
+.cart-count {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	background: #25a18e;
+	color: white;
+	border-radius: 50%;
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 600;
+	min-width: 20px;
+}
+
+/* Add to Cart Button */
+.add-to-cart-btn {
+	background: #25a18e;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 600;
+	transition: all 0.2s;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.add-to-cart-btn:hover {
+	background: #1e8a7a;
+	transform: translateY(-1px);
+}
+
+.add-to-cart-btn:active {
+	transform: translateY(0);
+}
+
+.add-to-cart-btn:disabled {
+	background: var(--muted);
+	cursor: not-allowed;
+	transform: none;
+}
+
+.add-to-cart-btn .loading {
+	width: 16px;
+	height: 16px;
+	border: 2px solid transparent;
+	border-top: 2px solid currentColor;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+/* Success/Error Messages */
+.cart-message {
+	position: fixed;
+	top: 100px;
+	right: 20px;
+	padding: 12px 20px;
+	border-radius: 6px;
+	color: white;
+	font-weight: 500;
+	z-index: 1000;
+	transform: translateX(100%);
+	transition: transform 0.3s ease;
+}
+
+.cart-message.show {
+	transform: translateX(0);
+}
+
+.cart-message.success {
+	background: #25a18e;
+}
+
+.cart-message.error {
+	background: #dc3545;
+}
+
+/* Inline form styles */
+.inline-form {
+	display: inline;
+	margin-left: 8px;
+}

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clyst - Shopping Cart</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/cart.css" />
+  </head>
+  <body>
+    <!-- ===== NAVBAR ===== -->
+    <nav id="topNav">
+      <div class="nav">
+        <div class="nav-left">
+          <div class="hamburger" onclick="toggleMenu(event)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path>
+            </svg>
+          </div>
+          <a href="{{ url_for('home') }}">Clyst</a>
+        </div>
+
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
+        </div>
+
+        <div class="nav-actions">
+          <div
+            class="search-icon"
+            onclick="toggleSearch()"
+            aria-label="Open search"
+            title="Search"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M21 20l-5.8-5.8a7 7 0 10-1.2 1.2L20 21l1-1zM5 10a5 5 0 1110 0 5 5 0 01-10 0z"
+              />
+            </svg>
+          </div>
+          {% if current_user.is_authenticated %}
+          <a
+            href="{{ url_for('view_cart') }}"
+            class="cart-btn"
+            title="Shopping Cart"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M7 18c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm10 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zM7.16 14l.94-2h7.45c.75 0 1.41-.41 1.75-1.03l3.24-5.88A1 1 0 0 0 20 4H5.21l-.2-.61A1 1 0 0 0 4 3H2v2h2l3.6 7.59-1.35 2.44C5.16 15.37 5.76 16 6.5 16h12v-2H7.16z"
+              />
+            </svg>
+            <span class="cart-count" id="cartCount">0</span>
+          </a>
+          <a
+            href="{{ url_for('profile') }}"
+            class="profile-btn"
+            title="Profile"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+              />
+            </svg>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ url_for('home') }}">Community Feed</a>
+        <a href="{{ url_for('products_page') }}">Marketplace</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('view_cart') }}">Shopping Cart</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <!-- ===== SEARCH BELOW NAV ===== -->
+    <div id="searchBelow" class="search-below">
+      <div class="search-pill">
+        <input id="globalSearchInput" type="text" placeholder="Search..." />
+        <div class="search-close" onclick="toggleSearch()">✕</div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <h1>Shopping Cart</h1>
+      </div>
+
+      <div class="main-content">
+        {% if cart_items %}
+        <div class="cart-container">
+          <div class="cart-items">
+            {% for item in cart_items %}
+            <div class="cart-item" data-item-id="{{ item.item_id }}">
+              <div class="item-image">
+                {% if item.product.img_url %}
+                <img
+                  src="{{ item.product.img_url }}"
+                  alt="{{ item.product.title }}"
+                />
+                {% else %}
+                <div class="placeholder-image">
+                  <i class="fas fa-image"></i>
+                </div>
+                {% endif %}
+              </div>
+
+              <div class="item-details">
+                <h3 class="item-title">{{ item.product.title }}</h3>
+                <p class="item-artist">By {{ item.product.artist.name }}</p>
+                <p class="item-price">Rs.{{ item.product.price }}</p>
+              </div>
+
+              <div class="item-quantity">
+                <label for="quantity-{{ item.item_id }}">Quantity:</label>
+                <div class="quantity-controls">
+                  <button
+                    class="quantity-btn"
+                    onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int - 1 }})"
+                    type="button"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    id="quantity-{{ item.item_id }}"
+                    value="{{ item.quantity }}"
+                    min="1"
+                    onchange="updateQuantity('{{ item.item_id }}', this.value)"
+                  />
+                  <button
+                    class="quantity-btn"
+                    onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int + 1 }})"
+                    type="button"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <div class="item-total">
+                <span class="total-price"
+                  >Rs.{{ "%.2f"|format(item.quantity * item.product.price)
+                  }}</span
+                >
+              </div>
+
+              <div class="item-actions">
+                <button
+                  class="remove-btn"
+                  onclick="removeItem('{{ item.item_id }}')"
+                  title="Remove item"
+                  type="button"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="cart-summary">
+            <div class="summary-card">
+              <h3>Order Summary</h3>
+              <div class="summary-row">
+                <span>Subtotal ({{ cart_items|length }} items):</span>
+                <span>Rs.{{ "%.2f"|format(total_price) }}</span>
+              </div>
+              <div class="summary-row">
+                <span>Shipping:</span>
+                <span>Free</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total:</span>
+                <span>Rs.{{ "%.2f"|format(total_price) }}</span>
+              </div>
+
+              <div class="checkout-actions">
+                <button
+                  class="btn btn-primary checkout-btn"
+                  onclick="proceedToCheckout()"
+                >
+                  Proceed to Checkout
+                </button>
+                <button class="btn btn-secondary" onclick="continueShopping()">
+                  Continue Shopping
+                </button>
+                <button class="btn btn-danger" onclick="clearCart()">
+                  Clear Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-cart">
+          <div class="empty-cart-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              width="80"
+              height="80"
+              fill="currentColor"
+            >
+              <path
+                d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"
+              />
+            </svg>
+          </div>
+          <h3>Your cart is empty</h3>
+          <p>Looks like you haven't added any items to your cart yet.</p>
+          <a href="{{ url_for('products_page') }}" class="btn btn-primary">
+            Start Shopping
+          </a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div id="google_translate_element" class="translate-element"></div>
+    <button
+      id="translateButton"
+      onclick="googleTranslateElementInit()"
+      class="translate-btn"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path
+          d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"
+        />
+      </svg>
+    </button>
+
+    <script>
+      function toggleMenu(e) {
+        e?.stopPropagation?.();
+        const menu = document.getElementById("mobileMenu");
+        const now = menu.style.display === "flex" ? "none" : "flex";
+        menu.style.display = now;
+        if (now === "flex")
+          document.getElementById("searchBelow").classList.remove("open");
+      }
+
+      function toggleSearch() {
+        const bar = document.getElementById("searchBelow");
+        bar.classList.toggle("open");
+        const menu = document.getElementById("mobileMenu");
+        if (menu.style.display === "flex") menu.style.display = "none";
+        if (bar.classList.contains("open")) {
+          requestAnimationFrame(() =>
+            document.getElementById("globalSearchInput").focus()
+          );
+        }
+      }
+
+      // Update cart count on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        updateCartCount();
+      });
+
+      async function updateCartCount() {
+        try {
+          const response = await fetch("/api/cart/count");
+          const data = await response.json();
+          document.getElementById("cartCount").textContent = data.count;
+        } catch (error) {
+          console.error("Error updating cart count:", error);
+        }
+      }
+
+      async function updateQuantity(itemId, newQuantity) {
+        if (newQuantity < 1) {
+          removeItem(itemId);
+          return;
+        }
+
+        try {
+          const response = await fetch(`/cart/update/${itemId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ quantity: parseInt(newQuantity) }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            location.reload(); // Refresh to update totals
+          } else {
+            alert("Error updating quantity");
+          }
+        } catch (error) {
+          console.error("Error updating quantity:", error);
+          alert("Error updating quantity");
+        }
+      }
+
+      async function removeItem(itemId) {
+        if (!confirm("Remove this item from cart?")) return;
+
+        try {
+          const response = await fetch(`/cart/remove/${itemId}`, {
+            method: "POST",
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            location.reload();
+          } else {
+            alert("Error removing item");
+          }
+        } catch (error) {
+          console.error("Error removing item:", error);
+          alert("Error removing item");
+        }
+      }
+
+      async function clearCart() {
+        if (!confirm("Clear entire cart? This action cannot be undone."))
+          return;
+
+        try {
+          const response = await fetch("/cart/clear", {
+            method: "POST",
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            location.reload();
+          } else {
+            alert("Error clearing cart");
+          }
+        } catch (error) {
+          console.error("Error clearing cart:", error);
+          alert("Error clearing cart");
+        }
+      }
+
+      function proceedToCheckout() {
+        alert(
+          "Checkout functionality would be implemented here!\n\nThis would typically redirect to:\n- Payment gateway (Stripe, PayPal, Razorpay)\n- Order confirmation page\n- Email notifications"
+        );
+      }
+
+      function continueShopping() {
+        window.location.href = "{{ url_for('products_page') }}";
+      }
+
+      // Search functionality
+      document.addEventListener("DOMContentLoaded", function () {
+        const global = document.getElementById("globalSearchInput");
+        if (global) {
+          global.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              const q = global.value.trim();
+              const url = new URL(window.location.origin + "/products");
+              if (q) url.searchParams.set("q", q);
+              window.location.href = url.toString();
+            }
+          });
+        }
+      });
+    </script>
+
+    <script
+      type="text/javascript"
+      src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+    ></script>
+    <script type="text/javascript">
+      function googleTranslateElementInit() {
+        new google.translate.TranslateElement(
+          {
+            pageLanguage: "en",
+            includedLanguages:
+              "en,hi,bi,ta,te,mr,gu,kn,ml,pa,ur,es,fr,de,zh,ja,ko",
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+          },
+          "google_translate_element"
+        );
+      }
+    </script>
+  </body>
+</html>

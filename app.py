@@ -42,6 +42,8 @@ Bootstrap(app)
 # Configure Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login'  # Specify what view to redirect to when login is required
+login_manager.login_message_category = 'info'  # Optional: use bootstrap info category for flash messages
 
 
 # Configure Gravatar (commented out due to compatibility issues)
@@ -56,7 +58,12 @@ class Base(DeclarativeBase):
     pass
 
 
-# Database configuration for production
+# Database configuration
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True  # Enable automatic reconnection
+}
+
 if os.getenv('FLASK_ENV') == 'production':
     # Use PostgreSQL for production (Railway, Render)
     DATABASE_URL = os.getenv('DATABASE_URL')
@@ -67,10 +74,26 @@ if os.getenv('FLASK_ENV') == 'production':
 else:
     # Use SQLite for development (store DB in Flask instance folder)
     os.makedirs(app.instance_path, exist_ok=True)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'clyst.db')
+    db_path = os.path.join(app.instance_path, 'clyst.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+
+# Initialize SQLAlchemy with the declarative base class
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
-migrate = Migrate(app, db)
+
+# Initialize Flask-Migrate
+migrate = Migrate(app, db, compare_type=True, render_as_batch=True)
+
+# Create database tables within app context if they don't exist
+with app.app_context():
+    try:
+        db.create_all()
+        print("✅ Database tables created successfully")
+    except Exception as e:
+        print(f"❌ Error creating database tables: {e}")
+        if os.path.exists(db_path):
+            os.remove(db_path)
+            print("🔄 Removed corrupted database file")
 
 
 # Database creation will be done at the end
@@ -193,6 +216,31 @@ class ProductComments(db.Model):
     created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
 
 
+class Cart(db.Model):
+    __tablename__ = 'carts'
+
+    cart_id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    updated_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    items = relationship("CartItem", back_populates="cart", cascade="all, delete-orphan")
+
+
+class CartItem(db.Model):
+    __tablename__ = 'cart_items'
+
+    item_id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    cart_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('carts.cart_id'), nullable=False)
+    product_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('products.product_id'), nullable=False)
+    quantity: Mapped[int] = mapped_column(db.Integer, default=1)
+    added_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    product = relationship("Product")
+    cart = relationship("Cart", back_populates="items")
+    added_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    cart = relationship("Cart", back_populates="items")
+    product = relationship("Product")
+
+
 
 @app.route('/', methods=["GET", "POST"])
 def home():
@@ -274,6 +322,9 @@ def products_page():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    # Get next page from query params
+    next_page = request.args.get('next')
+    
     if request.method == "POST":
         email = request.form.get('email')
         password = request.form.get('password')
@@ -281,6 +332,9 @@ def login():
 
         if user and password and check_password_hash(user.password_hash, password):
             login_user(user)
+            # Redirect to next_page if it exists and is a relative path, otherwise go home
+            if next_page and next_page.startswith('/'):
+                return redirect(next_page)
             return redirect(url_for('home'))
         else:
             flash('Invalid email or password')
@@ -738,18 +792,184 @@ def camera():
     return render_template("camera.html", current_user=current_user)
 
 
+# ===== CART ROUTES =====
+
+def get_or_create_cart(user_id):
+    """Get existing cart or create new one for user"""
+    try:
+        cart = db.session.execute(db.select(Cart).where(Cart.user_id == user_id)).scalar()
+        if not cart:
+            cart = Cart(
+                user_id=user_id,
+                created_at=date.today().strftime("%B %d, %Y"),
+                updated_at=date.today().strftime("%B %d, %Y")
+            )
+            db.session.add(cart)
+            db.session.commit()
+        return cart
+    except Exception as e:
+        db.session.rollback()
+        raise e
+        db.session.commit()
+    return cart
+
+
+@app.route("/cart")
+@login_required
+def view_cart():
+    """View shopping cart"""
+    try:
+        cart = get_or_create_cart(current_user.id)
+        cart_items = db.session.execute(
+            db.select(CartItem).where(CartItem.cart_id == cart.cart_id)
+        ).scalars().all()
+        
+        total_price = sum(item.quantity * float(item.product.price) for item in cart_items)
+        
+        return render_template("cart.html", 
+                          current_user=current_user, 
+                          cart_items=cart_items,
+                          total_price=total_price)
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error accessing cart: {str(e)}")
+        return f"Error accessing cart: {str(e)}", 500
+        return render_template("cart.html", 
+                            current_user=current_user, 
+                            cart_items=cart_items,
+                            total_price=total_price)
+
+
+@app.route("/cart/add/<int:product_id>", methods=["POST"])
+@login_required
+def add_to_cart(product_id):
+    """Add product to cart"""
+    product = db.get_or_404(Product, product_id)
+    cart = get_or_create_cart(current_user.id)
+    
+    # Check if product already in cart
+    existing_item = db.session.execute(
+        db.select(CartItem).where(
+            CartItem.cart_id == cart.cart_id,
+            CartItem.product_id == product_id
+        )
+    ).scalar()
+    
+    if existing_item:
+        existing_item.quantity += 1
+    else:
+        new_item = CartItem(
+            cart_id=cart.cart_id,
+            product_id=product_id,
+            quantity=1,
+            added_at=date.today().strftime("%B %d, %Y")
+        )
+        db.session.add(new_item)
+    
+    cart.updated_at = date.today().strftime("%B %d, %Y")
+    db.session.commit()
+    
+    return jsonify({"success": True, "message": "Product added to cart"})
+
+
+@app.route("/cart/update/<int:item_id>", methods=["POST"])
+@login_required
+def update_cart_item(item_id):
+    """Update cart item quantity"""
+    item = db.get_or_404(CartItem, item_id)
+    cart = db.get_or_404(Cart, item.cart_id)
+    
+    # Ensure user owns this cart
+    if cart.user_id != current_user.id:
+        abort(403)
+    
+    quantity = request.json.get('quantity', 1)
+    if quantity <= 0:
+        db.session.delete(item)
+    else:
+        item.quantity = quantity
+    
+    cart.updated_at = date.today().strftime("%B %d, %Y")
+    db.session.commit()
+    
+    return jsonify({"success": True, "message": "Cart updated"})
+
+
+@app.route("/cart/remove/<int:item_id>", methods=["POST"])
+@login_required
+def remove_from_cart(item_id):
+    """Remove item from cart"""
+    item = db.get_or_404(CartItem, item_id)
+    cart = db.get_or_404(Cart, item.cart_id)
+    
+    # Ensure user owns this cart
+    if cart.user_id != current_user.id:
+        abort(403)
+    
+    db.session.delete(item)
+    cart.updated_at = date.today().strftime("%B %d, %Y")
+    db.session.commit()
+    
+    return jsonify({"success": True, "message": "Item removed from cart"})
+
+
+@app.route("/cart/clear", methods=["POST"])
+@login_required
+def clear_cart():
+    """Clear entire cart"""
+    cart = get_or_create_cart(current_user.id)
+    
+    # Delete all cart items
+    db.session.execute(db.delete(CartItem).where(CartItem.cart_id == cart.cart_id))
+    cart.updated_at = date.today().strftime("%B %d, %Y")
+    db.session.commit()
+    
+    return jsonify({"success": True, "message": "Cart cleared"})
+
+
+@app.route("/api/cart/count")
+@login_required
+def get_cart_count():
+    """Get cart item count for navbar"""
+    cart = db.session.execute(db.select(Cart).where(Cart.user_id == current_user.id)).scalar()
+    if not cart:
+        return jsonify({"count": 0})
+    
+    count = db.session.execute(
+        db.select(db.func.sum(CartItem.quantity)).where(CartItem.cart_id == cart.cart_id)
+    ).scalar() or 0
+    
+    return jsonify({"count": count})
+
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()  # In case error occurred during database operations
+    return render_template('500.html'), 500
+
 if __name__ == "__main__":
     try:
+        # Enable debug mode by default for direct python execution
+        app.debug = True
+        
         # Create database tables
         with app.app_context():
             db.create_all()
             print("✅ Database tables created successfully")
+            
+            # Test database connection
+            db.session.execute(db.select(User).limit(1))
+            print("✅ Database connection test successful")
 
         # Run the app
         port = int(os.getenv('PORT', 5000))
-        debug_mode = os.getenv('FLASK_ENV') != 'production'
-        print(f"🚀 Starting app on port {port}, debug={debug_mode}")
-        app.run(host='0.0.0.0', port=port, debug=debug_mode)
+        print(f"🚀 Starting app on port {port}")
+        app.run(host='127.0.0.1', port=port)
     except Exception as e:
         print(f"❌ Error starting app: {e}")
+        db.session.rollback()  # Rollback any failed transactions
+        print("⚠️ If you're getting database errors, try these steps:")
+        print("1. Delete the instance/clyst.db file")
+        print("2. Run 'flask db upgrade' to recreate the database")
+        print("3. Start the app again")
         raise
