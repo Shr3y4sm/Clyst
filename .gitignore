@@ -54,3 +54,5 @@ Thumbs.db
 
 # API Keys and Configuration
 config.py
+
+.gitignore

@@ -7,88 +7,118 @@
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
-    /><link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/products.css">
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/products.css" />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
     <nav id="topNav">
       <div class="nav">
-      <div class="nav-left">
-        <div class="hamburger" onclick="toggleMenu(event)">
-         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path></svg>
+        <div class="nav-left">
+          <div class="hamburger" onclick="toggleMenu(event)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path>
+            </svg>
+          </div>
+          <a href="{{ url_for('home') }}">Clyst</a>
         </div>
-        <a href="{{ url_for('home') }}">Clyst</a>
+
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
+        </div>
+
+        <div class="nav-actions">
+          <div
+            class="search-icon"
+            onclick="toggleSearch()"
+            aria-label="Open search"
+            title="Search"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M21 20l-5.8-5.8a7 7 0 10-1.2 1.2L20 21l1-1zM5 10a5 5 0 1110 0 5 5 0 01-10 0z"
+              />
+            </svg>
+          </div>
+          {% if current_user.is_authenticated %}
+          <a
+            href="{{ url_for('view_cart') }}"
+            class="cart-btn"
+            title="Shopping Cart"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M7 18c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm10 0c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zM7.16 14l.94-2h7.45c.75 0 1.41-.41 1.75-1.03l3.24-5.88A1 1 0 0 0 20 4H5.21l-.2-.61A1 1 0 0 0 4 3H2v2h2l3.6 7.59-1.35 2.44C5.16 15.37 5.76 16 6.5 16h12v-2H7.16z"
+              />
+            </svg>
+            <span class="cart-count" id="cartCount">0</span>
+          </a>
+          <a
+            href="{{ url_for('profile') }}"
+            class="profile-btn"
+            title="Profile"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+              />
+            </svg>
+          </a>
+          {% endif %}
+        </div>
       </div>
 
-      <div class="nav-center" id="navLinks">
+      <div class="mobile-menu" id="mobileMenu">
         <a href="{{ url_for('home') }}">Community Feed</a>
         <a href="{{ url_for('products_page') }}">Marketplace</a>
         {% if current_user.is_authenticated %}
+        <a href="{{ url_for('view_cart') }}">Shopping Cart</a>
         <a href="{{ url_for('logout') }}">Logout</a>
         {% else %}
         <a href="{{ url_for('login') }}">Login</a>
         <a href="{{ url_for('register') }}">Register</a>
         {% endif %}
       </div>
-
-
-      <div class="nav-actions">
-        <div
-          class="search-icon"
-          onclick="toggleSearch()"
-          aria-label="Open search"
-          title="Search"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path
-              d="M21 20l-5.8-5.8a7 7 0 10-1.2 1.2L20 21l1-1zM5 10a5 5 0 1110 0 5 5 0 01-10 0z"
-            />
-          </svg>
-        </div>
-        {% if current_user.is_authenticated %}
-        <a href="{{ url_for('profile') }}" class="profile-btn" title="Profile">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-            <path
-              d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
-            />
-          </svg>
-        </a>
-        {% endif %}
-      </div>
-      </div>
-
-    <div class="mobile-menu" id="mobileMenu">
-      <a href="{{ url_for('home') }}">Community Feed</a>
-      <a href="{{ url_for('products_page') }}">Marketplace</a>
-      {% if current_user.is_authenticated %}
-      <a href="{{ url_for('logout') }}">Logout</a>
-      {% else %}
-      <a href="{{ url_for('login') }}">Login</a>
-      <a href="{{ url_for('register') }}">Register</a>
-      {% endif %}
-    </div>
     </nav>
 
     <div class="container">
       <div class="header">
         <h1>Marketplace</h1>
       </div>
-    <!-- ===== SEARCH BELOW NAV ===== -->
-    <div id="searchBelow" class="search-below">
-      <div class="search-pill">
-        <input
-          id="globalSearchInput"
-          type="text"
-          placeholder="Search..."
-          value="{{ q or '' }}"
-        />
-        <div class="search-close" onclick="toggleSearch()">✕</div>
+      <!-- ===== SEARCH BELOW NAV ===== -->
+      <div id="searchBelow" class="search-below">
+        <div class="search-pill">
+          <input
+            id="globalSearchInput"
+            type="text"
+            placeholder="Search..."
+            value="{{ q or '' }}"
+          />
+          <div class="search-close" onclick="toggleSearch()">✕</div>
+        </div>
       </div>
-    </div>
       <div class="main-content">
         {% if products %}
         <div class="products-grid">
@@ -98,15 +128,38 @@
               class="btn say-aloud-btn"
               onclick="sayAloud({title: '{{ product.title }}', artist: '{{ product.artist.name }}', price: '{{ product.price }}', description: '{{ product.description | default('No description available') }}' })"
               title="Say Aloud"
+              type="button"
             >
-               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="inherit" viewBox="0 0 256 256"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"></path></svg>
-              </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                fill="inherit"
+                viewBox="0 0 256 256"
+              >
+                <path
+                  d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                ></path>
+              </svg>
+            </button>
             <button
               class="share-btn"
               onclick="copyToClipboard(window.location.host + '{{ url_for('product_buy', product_id=product.product_id) }}')"
+              title="Share Product"
+              type="button"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"></path></svg>
-              </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="currentColor"
+              >
+                <path
+                  d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                ></path>
+              </svg>
+            </button>
             {% if product.img_url %}
             <img
               src="{{ product.img_url }}"
@@ -119,43 +172,96 @@
             </div>
             {% endif %}
 
-              <div class="product-header">
-                <div>
-                  <h3 class="product-title">{{ product.title }}</h3>
-                  <div class="product-artist">By {{ product.artist.name }}</div>
-                </div>
-                <div class="product-price">Rs.{{ product.price }}</div>
+            <div class="product-header">
+              <div>
+                <h3 class="product-title">{{ product.title }}</h3>
+                <div class="product-artist">By {{ product.artist.name }}</div>
               </div>
+              <div class="product-price">Rs.{{ product.price }}</div>
+            </div>
 
-              {% if product.description %}
-              <p class="product-description">{{ product.description }}</p>
+            {% if product.description %}
+            <p class="product-description">{{ product.description }}</p>
+            {% endif %}
+
+            <div class="product-actions">
+              {% if current_user.is_authenticated and current_user.id !=
+              product.artist_id %}
+              <button
+                class="add-to-cart-btn"
+                onclick="addToCart({{ product.product_id }})"
+                data-product-id="{{ product.product_id }}"
+                title="Add to Cart"
+                type="button"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"
+                  />
+                </svg>
+                Add to Cart
+              </button>
+              {% elif not current_user.is_authenticated %}
+              <button
+                class="add-to-cart-btn"
+                onclick="window.location.href='{{ url_for('login') }}?next={{ url_for('product_buy', product_id=product.product_id) }}'"
+                title="Login to add to cart"
+                type="button"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"
+                  />
+                </svg>
+                Add to Cart
+              </button>
               {% endif %}
-
-              <div class="product-actions">
-                <a
-                  href="{{ url_for('product_buy', product_id=product.product_id) }}"
-                  class="btn btn-primary">
-                  Buy Now
-                </a>
-                <a
-                  href="{{ url_for('view_profile', user_id=product.artist_id) }}"
-                  class="btn btn-secondary"
+              <a
+                href="{{ url_for('product_buy', product_id=product.product_id) }}"
+                class="btn btn-primary"
+              >
+                Buy Now
+              </a>
+              <a
+                href="{{ url_for('view_profile', user_id=product.artist_id) }}"
+                class="btn btn-secondary"
+              >
+                View Artist
+              </a>
+              {% if current_user.is_authenticated and current_user.id ==
+              product.artist_id %}
+              <button
+                class="delete-btn"
+                onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_products', product_id=product.product_id) }}'"
+                title="Delete Product"
+                type="button"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                  fill="currentColor"
                 >
-                  View Artist
-                </a>
-                {% if current_user.is_authenticated and current_user.id ==
-                product.artist_id %}
-                <button
-                  class="delete-btn"
-                  onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_products', product_id=product.product_id) }}'"
-                  title="Delete Product"
-                >
-                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path></svg>
-              
-                </button>
-                {% endif %}
-              </div>
-            
+                  <path
+                    d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
+                  ></path>
+                </svg>
+              </button>
+              {% endif %}
+            </div>
           </div>
           {% endfor %}
         </div>
@@ -164,10 +270,7 @@
           <h3>No products available</h3>
           <p>Be the first to add products to the marketplace!</p>
           {% if current_user.is_authenticated %}
-          <a
-            href="{{ url_for('add_products') }}"
-            class="btn btn-primary"
-          >
+          <a href="{{ url_for('add_products') }}" class="btn btn-primary">
             Add Your First Product
           </a>
           {% endif %}
@@ -177,7 +280,14 @@
     </div>
 
     {% if current_user.is_authenticated %}
-    <a href="{{ url_for('add_products') }}" class="fab"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path></svg></a>
+    <a href="{{ url_for('add_products') }}" class="fab"
+      ><svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path></svg
+    ></a>
     {% endif %}
 
     <div id="google_translate_element" class="translate-element"></div>
@@ -186,9 +296,17 @@
       onclick="googleTranslateElementInit()"
       class="translate-btn"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"></path></svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path
+          d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"
+        ></path>
+      </svg>
     </button>
-<script
+    <script
       type="text/javascript"
       src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
     ></script>
@@ -268,6 +386,89 @@
           alert("Failed to copy text: " + err);
         }
       }
+
+      // Cart functionality
+      async function addToCart(productId) {
+        const button = document.querySelector(
+          `[data-product-id="${productId}"]`
+        );
+        const originalText = button.innerHTML;
+
+        // Show loading state
+        button.disabled = true;
+        button.innerHTML = '<div class="loading"></div> Adding...';
+
+        try {
+          const response = await fetch(`/cart/add/${productId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Show success message
+            showCartMessage("Product added to cart!", "success");
+            // Update cart count
+            updateCartCount();
+            // Reset button
+            button.innerHTML = "✓ Added to Cart";
+            button.style.background = "#28a745";
+            setTimeout(() => {
+              button.innerHTML = originalText;
+              button.style.background = "";
+              button.disabled = false;
+            }, 2000);
+          } else {
+            throw new Error(data.message || "Failed to add to cart");
+          }
+        } catch (error) {
+          console.error("Error adding to cart:", error);
+          showCartMessage("Failed to add to cart", "error");
+          button.innerHTML = originalText;
+          button.disabled = false;
+        }
+      }
+
+      async function updateCartCount() {
+        try {
+          const response = await fetch("/api/cart/count");
+          const data = await response.json();
+          document.getElementById("cartCount").textContent = data.count;
+        } catch (error) {
+          console.error("Error updating cart count:", error);
+        }
+      }
+
+      function showCartMessage(message, type) {
+        // Remove existing message
+        const existingMessage = document.querySelector(".cart-message");
+        if (existingMessage) {
+          existingMessage.remove();
+        }
+
+        // Create new message
+        const messageEl = document.createElement("div");
+        messageEl.className = `cart-message ${type}`;
+        messageEl.textContent = message;
+        document.body.appendChild(messageEl);
+
+        // Show message
+        setTimeout(() => messageEl.classList.add("show"), 100);
+
+        // Hide message after 3 seconds
+        setTimeout(() => {
+          messageEl.classList.remove("show");
+          setTimeout(() => messageEl.remove(), 300);
+        }, 3000);
+      }
+
+      // Update cart count on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        updateCartCount();
+      });
     </script>
     <script type="text/javascript">
       function googleTranslateElementInit() {
