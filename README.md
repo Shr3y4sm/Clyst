@@ -274,35 +274,6 @@ The application features an advanced natural language search system that underst
 - **Modals**: Smooth overlay interactions
 - **Grid Layouts**: Responsive grid systems
 
-## 📸 Screenshots
-
-### Home Page - Community Feed
-![Home Page](screenshots/home_page.png)
-*The main community feed showcasing artists' posts with search functionality and responsive design.*
-
-### Marketplace
-![Marketplace](screenshots/marketplace.png)
-*The marketplace page displaying products with price filtering and natural language search capabilities.*
-
-### Add Post Page with AI Suggestions & Translation
-![Add Post Page with AI Suggestions](screenshots/add_posts.png)
-*Create post form featuring AI-powered title and description suggestions based on uploaded artwork and multilingual translation capabilities.*
-
-### Add Product Page with AI & Translation
-![Add Product Page with AI & Translation](screenshots/add_products.png)
-*Add product form showcasing AI content generation and multilingual translation capabilities.*
-
-### Login Page
-![Login Page](screenshots/login_page.png)
-*Clean and modern login interface with secure authentication.*
-
-### Registration Page
-![Registration Page](screenshots/register_page.png)
-*User registration form with comprehensive profile setup including location and contact information.*
-
-### Profile Page
-![Profile Page](screenshots/profile_page.png)
-*User profile page showcasing portfolio with AI-generated narrative and management options for posts and products.*
 
 ## 🔒 Security Features
 
