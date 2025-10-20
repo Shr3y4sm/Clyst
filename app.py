@@ -150,6 +150,9 @@ class User(UserMixin, db.Model):
     phone: Mapped[Optional[str]] = mapped_column(db.String(20))
     location: Mapped[Optional[str]] = mapped_column(db.String(150))
     created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    is_verified: Mapped[bool] = mapped_column(db.Boolean, nullable=False, default=False, server_default='0')
+    verification_photo: Mapped[Optional[str]] = mapped_column(db.String(255), nullable=True)
+    verification_date: Mapped[Optional[str]] = mapped_column(db.String(250), nullable=True)
     posts = relationship("Posts", back_populates="artist")
     products = relationship("Product", back_populates="artist")
 
@@ -820,6 +823,58 @@ def camera():
     if not session.get("phone_verified"):
         return redirect(url_for("verify_otp"))
     return render_template("camera.html", current_user=current_user)
+
+@app.route("/complete-verification", methods=["POST"])
+@login_required
+def complete_verification():
+    """Complete the verification process"""
+    if not session.get("phone_verified"):
+        return jsonify({"success": False, "message": "Phone verification required"}), 400
+    
+    try:
+        data = request.get_json()
+        if not data or "photo" not in data:
+            return jsonify({"success": False, "message": "Missing required data"}), 400
+
+        # Save the verification photo
+        photo_data = data["photo"]
+        if photo_data.startswith('data:image'):
+            # Extract the base64 part
+            photo_data = photo_data.split(',')[1]
+        
+        # Generate unique filename
+        filename = f"verification_{current_user.id}_{uuid.uuid4().hex[:8]}.jpg"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'verification', filename)
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        
+        # Save the image
+        import base64
+        with open(filepath, "wb") as f:
+            f.write(base64.b64decode(photo_data))
+        
+        # Update user verification status
+        current_user.is_verified = True
+        current_user.verification_photo = filename
+        current_user.verification_date = str(date.today())
+        db.session.commit()
+        
+        # Clear the session verification flag
+        session.pop("phone_verified", None)
+        
+        flash("Congratulations! Your account is now verified.", "success")
+        return jsonify({
+            "success": True,
+            "message": "Verification completed successfully",
+            "redirect": url_for("profile")
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 
 # ===== CART ROUTES =====

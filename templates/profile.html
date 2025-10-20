@@ -80,8 +80,13 @@
                 {% if profile_user %} {{ profile_user.name }} {% else %} {{
                 current_user.name }} {% endif %}
               </h1>
-              <!-- Subtle verification prompt that links to the verification flow -->
-              {% if current_user.is_authenticated and (not profile_user or
+              <!-- Verification status or prompt -->
+              {% if profile_user and profile_user.is_verified or (not
+              profile_user and current_user.is_verified) %}
+              <div class="profile-verify verified">
+                <span>✓ Verified User</span>
+              </div>
+              {% elif current_user.is_authenticated and (not profile_user or
               current_user.id == profile_user.id) %}
               <div class="profile-verify">
                 <a href="{{ url_for('verify_otp') }}">Get verified now</a>
