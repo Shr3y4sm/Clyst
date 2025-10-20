@@ -9,7 +9,7 @@ import uuid
 # Load environment variables from .env file
 load_dotenv()
 from werkzeug.utils import secure_filename
-from flask import Flask, abort, render_template, redirect, url_for, flash, request, jsonify
+from flask import Flask, abort, render_template, redirect, url_for, flash, request, jsonify, session
 import json
 # Type hints for better IDE support
 from typing import Optional, Dict, Any, List
@@ -34,6 +34,7 @@ except ImportError:
 app.config['SECRET_KEY'] = FLASK_SECRET_KEY
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['SESSION_PERMANENT'] = True
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 ckeditor = CKEditor(app)
@@ -785,10 +786,39 @@ def delete_comment(comment_id):
     return redirect(url_for('home') + '#post-' + str(post_id))
 
 
+@app.route("/verify-phone", methods=["GET", "POST"])
+@login_required
+def verify_otp():
+    """Phone verification page before camera access"""
+    show_otp = False
+    submitted_phone = request.form.get("phone", current_user.phone if current_user.phone else "")
+    
+    if request.method == "POST":
+        if "otp" in request.form:
+            # Verify OTP (dummy check for now)
+            if request.form["otp"] == "1234":
+                session["phone_verified"] = True
+                flash("Phone number verified successfully!", "success")
+                return redirect(url_for("camera"))
+            else:
+                flash("Invalid OTP. Please try again.", "error")
+                show_otp = True
+        else:
+            # Phone number submitted, show OTP field
+            show_otp = True
+            flash("OTP sent! (Demo: Use 1234)", "success")
+    
+    return render_template("verify_otp.html", 
+                         current_user=current_user, 
+                         show_otp=show_otp, 
+                         submitted_phone=submitted_phone)
+
 @app.route("/camera")
 @login_required
 def camera():
     """Camera page for verification purposes"""
+    if not session.get("phone_verified"):
+        return redirect(url_for("verify_otp"))
     return render_template("camera.html", current_user=current_user)
 
 

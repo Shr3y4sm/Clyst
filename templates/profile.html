@@ -7,28 +7,52 @@
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
-    /><link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/styles.css">
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
     <link rel="stylesheet" href="../static/css/profile.css" />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
     <nav id="topNav">
       <div class="nav">
-      <div class="nav-left">
-        <div class="hamburger" onclick="toggleMenu(event)">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path></svg>
+        <div class="nav-left">
+          <div class="hamburger" onclick="toggleMenu(event)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path>
+            </svg>
+          </div>
+          <a
+            href="{{ url_for('home') }}"
+            style="text-decoration: none; color: inherit"
+            >Clyst</a
+          >
         </div>
-        <a
-          href="{{ url_for('home') }}"
-          style="text-decoration: none; color: inherit"
-          >Clyst</a
-        >
+
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
+        </div>
+
+        <div></div>
       </div>
 
-      <div class="nav-center" id="navLinks">
+      <div class="mobile-menu" id="mobileMenu">
         <a href="{{ url_for('home') }}">Community Feed</a>
         <a href="{{ url_for('products_page') }}">Marketplace</a>
         {% if current_user.is_authenticated %}
@@ -38,20 +62,6 @@
         <a href="{{ url_for('register') }}">Register</a>
         {% endif %}
       </div>
-
-      <div></div>
-</div>
-
-    <div class="mobile-menu" id="mobileMenu">
-      <a href="{{ url_for('home') }}">Community Feed</a>
-      <a href="{{ url_for('products_page') }}">Marketplace</a>
-      {% if current_user.is_authenticated %}
-      <a href="{{ url_for('logout') }}">Logout</a>
-      {% else %}
-      <a href="{{ url_for('login') }}">Login</a>
-      <a href="{{ url_for('register') }}">Register</a>
-      {% endif %}
-    </div>
     </nav>
 
     <div class="container">
@@ -60,85 +70,153 @@
         <!-- Profile Header -->
         <div class="profile-header">
           <div class="profile">
-          <div class="profile-details">
-          <div class="profile-avatar">
-            {% if profile_user %} {{ profile_user.name[0].upper() }} {% else %}
-            {{ current_user.name[0].upper() }} {% endif %}
-          </div>
+            <div class="profile-details">
+              <div class="profile-avatar">
+                {% if profile_user %} {{ profile_user.name[0].upper() }} {% else
+                %} {{ current_user.name[0].upper() }} {% endif %}
+              </div>
 
-          <h1 class="profile-name">
-            {% if profile_user %} {{ profile_user.name }} {% else %} {{
-            current_user.name }} {% endif %}
-          </h1>
-          <!-- Subtle verification prompt that links to the camera/verification page -->
-          {% if current_user.is_authenticated and (not profile_user or current_user.id == profile_user.id) %}
-          <div class="profile-verify">
-            <a href="{{ url_for('camera') }}">Get verfied now</a>
-          </div>
-          {% endif %}
-          <div class="profile-bio">
-            {% if profile_user %} {% if profile_user.email %}
-            <p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z"></path></svg> {{ profile_user.email }}</p>
-            {% endif %} {% if profile_user.phone %}
-            <p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z"></path></svg> {{ profile_user.phone }}</p>
-            {% endif %} {% if profile_user.location %}
-            <p>
-              <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
-fill="currentColor" viewBox="0 0 24 24" >
-<!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
-<path d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"></path>
-</svg>{{ profile_user.location
-              }}
-            </p>
-            {% endif %} {% else %} {% if current_user.email %}
-            <p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z"></path></svg> {{ current_user.email }}</p>
-            {% endif %} {% if current_user.phone %}
-            <p><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z"></path></svg> {{ current_user.phone }}</p>
-            {% endif %} {% if current_user.location %}
-            <p>
-              <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
-fill="currentColor" viewBox="0 0 24 24" >
-<!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
-<path d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"></path>
-</svg> {{ current_user.location }}
-            </p>
-            {% endif %} {% endif %}
-          </div>
-          </div>
+              <h1 class="profile-name">
+                {% if profile_user %} {{ profile_user.name }} {% else %} {{
+                current_user.name }} {% endif %}
+              </h1>
+              <!-- Subtle verification prompt that links to the verification flow -->
+              {% if current_user.is_authenticated and (not profile_user or
+              current_user.id == profile_user.id) %}
+              <div class="profile-verify">
+                <a href="{{ url_for('verify_otp') }}">Get verified now</a>
+              </div>
+              {% endif %}
+              <div class="profile-bio">
+                {% if profile_user %} {% if profile_user.email %}
+                <p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z"
+                    ></path>
+                  </svg>
+                  {{ profile_user.email }}
+                </p>
+                {% endif %} {% if profile_user.phone %}
+                <p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z"
+                    ></path>
+                  </svg>
+                  {{ profile_user.phone }}
+                </p>
+                {% endif %} {% if profile_user.location %}
+                <p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
+                    <path
+                      d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
+                    ></path></svg
+                  >{{ profile_user.location }}
+                </p>
+                {% endif %} {% else %} {% if current_user.email %}
+                <p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z"
+                    ></path>
+                  </svg>
+                  {{ current_user.email }}
+                </p>
+                {% endif %} {% if current_user.phone %}
+                <p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z"
+                    ></path>
+                  </svg>
+                  {{ current_user.phone }}
+                </p>
+                {% endif %} {% if current_user.location %}
+                <p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
+                    <path
+                      d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
+                    ></path>
+                  </svg>
+                  {{ current_user.location }}
+                </p>
+                {% endif %} {% endif %}
+              </div>
+            </div>
 
-          <div class="profile-info">
-            <div class="info-item">
-              <div class="info-label">Posts</div>
-              <div class="info-value">{{ posts|length }}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Products</div>
-              <div class="info-value">{{ products|length }}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Joined on</div>
-              <div class="info-value">
-                {% if profile_user %} {{ profile_user.created_at }} {% else %}
-                {{ current_user.created_at }} {% endif %}
+            <div class="profile-info">
+              <div class="info-item">
+                <div class="info-label">Posts</div>
+                <div class="info-value">{{ posts|length }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Products</div>
+                <div class="info-value">{{ products|length }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Joined on</div>
+                <div class="info-value">
+                  {% if profile_user %} {{ profile_user.created_at }} {% else %}
+                  {{ current_user.created_at }} {% endif %}
+                </div>
               </div>
             </div>
           </div>
-</div>
           <!-- Portfolio Narrative Section -->
           {% if portfolio_narrative %}
           <div class="portfolio-narrative">
             <div class="narrative-header">
               <h3>
-                About {{ profile_user.name if profile_user else current_user.name
-                }}
+                About {{ profile_user.name if profile_user else
+                current_user.name }}
               </h3>
               <button
                 id="speakNarrative"
                 class="say-aloud-btn"
                 title="Listen to Artist Story"
               >
-                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"></path></svg>
-              
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="#000000"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                  ></path>
+                </svg>
               </button>
             </div>
             <p id="narrativeText">{{ portfolio_narrative }}</p>
@@ -146,22 +224,56 @@ fill="currentColor" viewBox="0 0 24 24" >
             <div class="narrative-meta">
               <div class="narrative-stats">
                 <div class="narrative-stat">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 11.1005L7 9.1005L12.5 14.6005L16 11.1005L19 14.1005V5H5V11.1005ZM4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM15.5 10C14.6716 10 14 9.32843 14 8.5C14 7.67157 14.6716 7 15.5 7C16.3284 7 17 7.67157 17 8.5C17 9.32843 16.3284 10 15.5 10Z"></path></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M5 11.1005L7 9.1005L12.5 14.6005L16 11.1005L19 14.1005V5H5V11.1005ZM4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM15.5 10C14.6716 10 14 9.32843 14 8.5C14 7.67157 14.6716 7 15.5 7C16.3284 7 17 7.67157 17 8.5C17 9.32843 16.3284 10 15.5 10Z"
+                    ></path>
+                  </svg>
                   <span>{{ posts|length }} Posts</span>
                 </div>
                 <div class="narrative-stat">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM4.5 7.65311V7.65788L12 12V20.689L19.5 16.3469V7.65311L12 3.311L4.5 7.65311Z"></path></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM4.5 7.65311V7.65788L12 12V20.689L19.5 16.3469V7.65311L12 3.311L4.5 7.65311Z"
+                    ></path>
+                  </svg>
                   <span>{{ products|length }} Products</span>
                 </div>
                 <div class="narrative-stat">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24"><path fill="currentColor" d="M5 2h2v3H5zm4 0h2v3H9zm4 0h2v3h-2zm6 7h-2V8a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3h2c1.103 0 2-.897 2-2v-5c0-1.103-.897-2-2-2zm-2 7v-5h2l.002 5H17z"></path></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="100%"
+                    height="100%"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M5 2h2v3H5zm4 0h2v3H9zm4 0h2v3h-2zm6 7h-2V8a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3h2c1.103 0 2-.897 2-2v-5c0-1.103-.897-2-2-2zm-2 7v-5h2l.002 5H17z"
+                    ></path>
+                  </svg>
                   <span
                     >{{ (posts|length + products|length) }} Total Works</span
                   >
                 </div>
               </div>
               <div class="narrative-stat">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.0007 1.20825 18.3195 3.68108 20.7923 4.99992 18.3195 6.31876 17.0007 8.79159 15.6818 6.31876 13.209 4.99992 15.6818 3.68108 17.0007 1.20825ZM8.00065 4.33325 10.6673 9.33325 15.6673 11.9999 10.6673 14.6666 8.00065 19.6666 5.33398 14.6666.333984 11.9999 5.33398 9.33325 8.00065 4.33325ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"></path></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M17.0007 1.20825 18.3195 3.68108 20.7923 4.99992 18.3195 6.31876 17.0007 8.79159 15.6818 6.31876 13.209 4.99992 15.6818 3.68108 17.0007 1.20825ZM8.00065 4.33325 10.6673 9.33325 15.6673 11.9999 10.6673 14.6666 8.00065 19.6666 5.33398 14.6666.333984 11.9999 5.33398 9.33325 8.00065 4.33325ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"
+                  ></path>
+                </svg>
                 <span>AI-Generated Narrative</span>
               </div>
             </div>
@@ -169,7 +281,8 @@ fill="currentColor" viewBox="0 0 24 24" >
           {% endif %}
 
           <div class="form-actions">
-            {% if current_user.is_authenticated and current_user.id == profile_user.id %}
+            {% if current_user.is_authenticated and current_user.id ==
+            profile_user.id %}
             <a href="{{ url_for('add_posts') }}" class="btn btn-secondary">
               Add New Post
             </a>
@@ -203,8 +316,18 @@ fill="currentColor" viewBox="0 0 24 24" >
                     onclick="sayAloud({title: '{{ post.post_title }}', artist: '{{ post.artist.name }}', price: '{{ post.price }}', description: '{{ post.description | default('No description available') }}' })"
                     title="Say Aloud"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"></path></svg>
-              </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      fill="#000000"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                      ></path>
+                    </svg>
+                  </button>
                   {% if current_user.is_authenticated and current_user.id ==
                   post.artist_id %}
                   <button
@@ -212,8 +335,18 @@ fill="currentColor" viewBox="0 0 24 24" >
                     onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'"
                     title="Delete Post"
                   >
-                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path></svg>
-              </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
+                      ></path>
+                    </svg>
+                  </button>
                   {% endif %} {% if post.media_url %}
                   <img
                     src="{{ post.media_url }}"
@@ -239,8 +372,18 @@ fill="currentColor" viewBox="0 0 24 24" >
                     class="share-btn"
                     onclick="copyToClipboard(window.location.host + '{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}')"
                   >
-                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"></path></svg>
-              </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                      ></path>
+                    </svg>
+                  </button>
                 </div>
                 {% endfor %}
               </div>
@@ -264,17 +407,47 @@ fill="currentColor" viewBox="0 0 24 24" >
                     onclick="sayAloud({title: '{{ product.title }}', artist: '{{ product.artist.name }}', price: '{{ product.price }}', description: '{{ product.description | default('No description available') }}' })"
                     title="Say Aloud"
                   >
-                   <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"></path></svg>
-              </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      fill="#000000"
+                      viewBox="0 0 256 256"
+                    >
+                      <path
+                        d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                      ></path>
+                    </svg>
+                  </button>
                   <button
                     class="share-btn"
                     onclick="copyToClipboard(window.location.host + '{{ url_for('product_buy', product_id=product.product_id) }}')"
                   >
-                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"></path></svg>
-              </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      height="24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                      ></path>
+                    </svg>
+                  </button>
                   <!-- Promote product button (new) -->
-                  <form method="post" action="{{ url_for('promote_product', product_id=product.product_id) }}" class="promote-form">
-                    <button type="submit" class="btn promote-btn" title="Promote Product">Promote Product</button>
+                  <form
+                    method="post"
+                    action="{{ url_for('promote_product', product_id=product.product_id) }}"
+                    class="promote-form"
+                  >
+                    <button
+                      type="submit"
+                      class="btn promote-btn"
+                      title="Promote Product"
+                    >
+                      Promote Product
+                    </button>
                   </form>
                   {% if product.img_url %}
                   <img
@@ -309,8 +482,18 @@ fill="currentColor" viewBox="0 0 24 24" >
                         onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_products', product_id=product.product_id) }}'"
                         title="Delete Product"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path></svg>
-              </button>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
+                          ></path>
+                        </svg>
+                      </button>
                       {% endif %}
                     </div>
                   </div>
@@ -336,7 +519,15 @@ fill="currentColor" viewBox="0 0 24 24" >
       onclick="googleTranslateElementInit()"
       class="translate-btn"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"></path></svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path
+          d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"
+        ></path>
+      </svg>
     </button>
 
     <script>
