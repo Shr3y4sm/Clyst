@@ -258,16 +258,21 @@ fill="currentColor" viewBox="0 0 24 24" >
 
         {% endfor %} {% else %}
         <div class="empty-state">
-          <h3>No posts yet</h3>
-          <p>Be the first to share your artwork with the community!</p>
-        </div>
-        {% if current_user.is_authenticated %}
+          {% if current_user.is_authenticated %}
+          <h3>POST TO START</h3>
+          <p>Be the first to share your artwork with the community</p>
         <a
           href="{{ url_for('add_posts') }}"
-          class="view-artisan-btn"
+          class="btn btn-primary"
         >
-          + Create Your First Post
+          + START POSTING
         </a>
+          {% else %}
+          <h3>NO POSTS AVAILABLE</h3>
+          <p>Login to post</p>
+          {% endif %}
+        </div>
+        {% if current_user.is_authenticated %}
         {% endif %} {% endif %}
       </div>
     </div>

@@ -82,29 +82,28 @@ svg {
 	margin-top: 6px;
 }
 .profile-verify a {
-	font-size: 14px;
- 	color: var(--muted);
- 	text-decoration: none;
- 	opacity: 0.9;
- 	border-bottom: 1px dotted rgba(0,0,0,0.08);
+	font-size: 12px;
+	color: var(--muted);
+	text-decoration: none;
+	opacity: 0.9;
+	border-bottom: 1px dotted rgba(0, 0, 0, 0.08);
 }
 .profile-verify a:hover {
- 	color: var(--text);
- 	opacity: 1;
+	color: light-dark(#0f766e, #14b8a6);
+	opacity: 1;
 }
 .profile-verify.verified span {
-    color: #2ecc71;
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+	text-transform: uppercase;
+	color: light-dark(#0f766e, #14b8a6);
+	font-size: 12px;
+	font-weight: 500;
+	display: flex;
+	align-items: center;
+	gap: 4px;
 }
-.profile-verify.verified span::before {
-    content: "✓";
-    display: inline-block;
-    margin-right: 4px;
-    font-weight: bold;
+.profile-verify.verified svg {
+	width: 16px;
+	height: 16px;
 }
 
 h1 {
@@ -362,22 +361,22 @@ h1 {
 }
 
 .item-content {
-	padding: 8px 16px 16px 16px;
+	padding: 0 16px 16px 16px;
 }
 
 .item-title {
 	font-size: 16px;
 	font-weight: 600;
 	color: var(--text);
-	margin-bottom: 8px;
+	margin-bottom: 4px;
 	text-transform: uppercase;
 }
 
 .item-description {
 	font-size: 14px;
 	color: var(--muted);
-	line-height: 1.4;
-	margin-bottom: 12px;
+	line-height: 1.1;
+	margin-bottom: 4px;
 }
 
 .item-price {
@@ -389,7 +388,7 @@ h1 {
 .item-actions {
 	display: flex;
 	gap: 8px;
-	margin-top: 12px;
+	margin-top: 4px;
 }
 
 /* Promote button styling */
@@ -397,19 +396,20 @@ h1 {
 	display: inline-block;
 }
 .promote-btn {
- 	background: transparent;
- 	border: 1px solid var(--muted);
- 	color: var(--muted);
- 	padding: 6px 10px;
- 	font-size: 13px;
- 	border-radius: 4px;
- 	cursor: pointer;
- 	transition: all 0.15s ease;
+	background: transparent;
+	border: 1px solid var(--muted);
+	color: var(--muted);
+	padding: 6px 10px;
+	margin: 8px 0 8px 16px;
+	font-size: 13px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.15s ease;
 }
 .promote-btn:hover {
- 	background: var(--muted);
- 	color: var(--card);
- 	transform: translateY(-1px);
+	background: var(--muted);
+	color: var(--card);
+	transform: translateY(-1px);
 }
 
 .form-actions {
@@ -518,4 +518,9 @@ button {
 .product-item .share-btn:hover {
 	transform: scale(1.1);
 	color: light-dark(#005c61, #00dbe2);
+}
+
+.empty-state svg {
+	width: 100px;
+	max-width: none;
 }

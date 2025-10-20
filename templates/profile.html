@@ -75,23 +75,25 @@
                 {% if profile_user %} {{ profile_user.name[0].upper() }} {% else
                 %} {{ current_user.name[0].upper() }} {% endif %}
               </div>
-
-              <h1 class="profile-name">
-                {% if profile_user %} {{ profile_user.name }} {% else %} {{
-                current_user.name }} {% endif %}
-              </h1>
               <!-- Verification status or prompt -->
               {% if profile_user and profile_user.is_verified or (not
               profile_user and current_user.is_verified) %}
               <div class="profile-verify verified">
-                <span>✓ Verified User</span>
+                <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 2H20C20.5523 2 21 2.44772 21 3V22.2763C21 22.5525 20.7761 22.7764 20.5 22.7764C20.4298 22.7764 20.3604 22.7615 20.2963 22.7329L12 19.0313L3.70373 22.7329C3.45155 22.8455 3.15591 22.7322 3.04339 22.4801C3.01478 22.4159 3 22.3465 3 22.2763V3C3 2.44772 3.44772 2 4 2ZM12 13.5L14.9389 15.0451L14.3776 11.7725L16.7553 9.45492L13.4695 8.97746L12 6L10.5305 8.97746L7.24472 9.45492L9.62236 11.7725L9.06107 15.0451L12 13.5Z"></path></svg>
+                  Validated
+                </span>
               </div>
               {% elif current_user.is_authenticated and (not profile_user or
               current_user.id == profile_user.id) %}
               <div class="profile-verify">
-                <a href="{{ url_for('verify_otp') }}">Get verified now</a>
+                <span><a href="{{ url_for('verify_otp') }}">VALIDATE ACCOUNT</a></span>
               </div>
               {% endif %}
+              <h1 class="profile-name">
+                {% if profile_user %} {{ profile_user.name }} {% else %} {{
+                current_user.name }} {% endif %}
+              </h1>
+              
               <div class="profile-bio">
                 {% if profile_user %} {% if profile_user.email %}
                 <p>
@@ -131,8 +133,7 @@
                     <!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
                     <path
                       d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
-                    ></path></svg
-                  >{{ profile_user.location }}
+                    ></path></svg>{{ profile_user.location }}
                 </p>
                 {% endif %} {% else %} {% if current_user.email %}
                 <p>
@@ -394,9 +395,25 @@
               </div>
               {% else %}
               <div class="empty-state">
-                <i class="fas fa-image"></i>
-                <h3>No posts yet</h3>
-                <p>Start sharing your artwork with the community!</p>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M5 11.1005L7 9.1005L12.5 14.6005L16 11.1005L19 14.1005V5H5V11.1005ZM4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM15.5 10C14.6716 10 14 9.32843 14 8.5C14 7.67157 14.6716 7 15.5 7C16.3284 7 17 7.67157 17 8.5C17 9.32843 16.3284 10 15.5 10Z"
+                    ></path>
+                  </svg>
+                  {% if current_user.is_authenticated and current_user.id == profile_user.id %}
+                <h3>ADD POSTS TO START</h3>
+                <p>Start sharing your artwork with the community</p>
+                <a href="{{ url_for('add_posts') }}" class="btn btn-secondary">
+                  Add New Post
+                </a>
+                {% else %}
+                <h3>NO POSTS AVAILABLE</h3>
+                <p>{{ profile_user.name }} has not shared any posts yet.</p>
+                {% endif %}
               </div>
               {% endif %}
             </div>
@@ -440,6 +457,17 @@
                       ></path>
                     </svg>
                   </button>
+                  {% if product.img_url %}
+                  <img
+                    src="{{ product.img_url }}"
+                    alt="{{ product.title }}"
+                    class="item-image"
+                  />
+                  {% else %}
+                  <div class="item-image placeholder">
+                    <i class="fas fa-image"></i>
+                  </div>
+                  {% endif %}
                   <!-- Promote product button (new) -->
                   <form
                     method="post"
@@ -454,17 +482,6 @@
                       Promote Product
                     </button>
                   </form>
-                  {% if product.img_url %}
-                  <img
-                    src="{{ product.img_url }}"
-                    alt="{{ product.title }}"
-                    class="item-image"
-                  />
-                  {% else %}
-                  <div class="item-image placeholder">
-                    <i class="fas fa-image"></i>
-                  </div>
-                  {% endif %}
                   <div class="item-content">
                     <h3 class="item-title">{{ product.title }}</h3>
                     <p class="item-description">
@@ -507,11 +524,28 @@
               </div>
               {% else %}
               <div class="empty-state">
-                <i class="fa-solid fa-box-open"></i>
-                <h3>No products yet</h3>
-                <p>Start selling your artwork in the marketplace!</p>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM4.5 7.65311V7.65788L12 12V20.689L19.5 16.3469V7.65311L12 3.311L4.5 7.65311Z"
+                    ></path>
+                  </svg>
+                  {% if current_user.is_authenticated and current_user.id ==
+            profile_user.id %}
+                <h3>ADD PRODUCTS TO START</h3>
+                <p>Start selling your artwork in the marketplace</p>
+            <a href="{{ url_for('add_products') }}" class="btn btn-secondary">
+              Add New Product
+            </a>
+                {% else %}
+                <h3>NO PRODUCTS AVAILABLE</h3>
+                <p>{{ profile_user.name }} has not added any products yet.</p>
+                {% endif %}
               </div>
-              {% endif %}
+              <!-- {% endif %} -->
             </div>
           </div>
         </div>

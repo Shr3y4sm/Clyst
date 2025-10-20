@@ -78,6 +78,7 @@ h1 {
 	font-weight: 600;
 	color: var(--text);
 	margin-bottom: 4px;
+	text-transform: uppercase;
 }
 
 .product-price {
