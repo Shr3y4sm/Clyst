@@ -139,7 +139,7 @@ h1 {
 }
 
 .item-actions .info-value {
-	font-size: 16px;
+	font-size: 12px;
 	font-weight: 300;
 	color: var(--muted);
 }
@@ -193,9 +193,9 @@ h1 {
 }
 
 .say-aloud-btn {
-	position: relative;
-	padding: 12px;
-	border-radius: 50%;
+	position: absolute;
+	padding: 0;
+	border-radius: 2px;
 	cursor: pointer;
 	transition: all 0.3s ease;
 	font-size: 16px;
@@ -204,6 +204,11 @@ h1 {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+
+.narrative-header .say-aloud-btn {
+	width: 24px;
+	position: relative;
 }
 
 .speak-btn:hover {
@@ -234,7 +239,7 @@ h1 {
 
 .portfolio-narrative p {
 	color: var(--text);
-	line-height: 1.7;
+	line-height: 1.1;
 	font-size: 16px;
 	margin: 0 0 15px 0;
 	text-align: justify;
@@ -361,14 +366,13 @@ h1 {
 }
 
 .item-content {
-	padding: 0 16px 16px 16px;
+	padding: 4px 12px 12px 12px;
 }
 
 .item-title {
 	font-size: 16px;
 	font-weight: 600;
 	color: var(--text);
-	margin-bottom: 4px;
 	text-transform: uppercase;
 }
 
@@ -400,7 +404,7 @@ h1 {
 	border: 1px solid var(--muted);
 	color: var(--muted);
 	padding: 6px 10px;
-	margin: 8px 0 8px 16px;
+	margin: 0 0 8px 0;
 	font-size: 13px;
 	border-radius: 4px;
 	cursor: pointer;
@@ -425,10 +429,96 @@ button {
 	font-family: inherit;
 }
 
+.translate-btn {
+	bottom: 30px;
+}
+
+.translate-btn svg {
+	width: 34px;
+}
+
+.share-btn {
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+	background: none;
+	border: none;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 2px;
+	cursor: pointer;
+	font-size: 16px;
+	color: var(--text);
+	transition: opacity 0.2s;
+}
+
+.share-btn svg {
+	width: 24px;
+	height: 24px;
+	fill: currentColor;
+}
+
+.product-item .share-btn {
+	width: 32px;
+	height: 32px;
+	background: light-dark(#f0f0f0b0, #151515cd);
+	right: 10px;
+	top: 10px;
+}
+
+.post-item .share-btn:hover,
+.product-item .share-btn:hover {
+	transform: scale(1.1);
+	color: light-dark(#005c61, #00dbe2);
+}
+
+.post-item .say-aloud-btn,
+.product-item .say-aloud-btn {
+	width: 32px;
+	height: 32px;
+	top: 10px;
+	left: 10px;
+	background: light-dark(#f0f0f0b0, #151515cd);
+}
+
+.post-delete-btn {
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: light-dark(#f0f0f0b0, #151515cd);
+}
+
+.empty-state svg {
+	width: 100px;
+	max-width: none;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
 	.main-content {
 		margin-left: 0;
+		padding: 0;
+		width: 100%;
+		border: none;
+	}
+
+	.profile-header {
+		width: 100%;
+		border: none;
+		margin-bottom: 0;
+	}
+
+	.content-tabs {
+		width: 100%;
+		border-left: none;
+		border-right: none;
+		border-bottom: none;
+		margin: 0;
 	}
 
 	.profile-info {
@@ -475,52 +565,4 @@ button {
 		padding: 0;
 		font-size: 14px;
 	}
-}
-
-.translate-btn {
-	bottom: 30px;
-}
-
-.translate-btn svg {
-	width: 34px;
-}
-
-.share-btn {
-	position: absolute;
-	right: 10px;
-	bottom: 10px;
-	background: none;
-	border: none;
-	width: 24px;
-	height: 24px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 0.2em;
-	cursor: pointer;
-	font-size: 16px;
-	color: var(--text);
-	transition: opacity 0.2s;
-}
-
-.share-btn svg {
-	width: 24px;
-	height: 24px;
-	fill: currentColor;
-}
-
-.product-item .share-btn {
-	right: 10px;
-	top: 10px;
-}
-
-.post-item .share-btn:hover,
-.product-item .share-btn:hover {
-	transform: scale(1.1);
-	color: light-dark(#005c61, #00dbe2);
-}
-
-.empty-state svg {
-	width: 100px;
-	max-width: none;
 }

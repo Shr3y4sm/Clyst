@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../static/css/styles.css"></link>
   <link rel="stylesheet" href="../static/css/camera.css"></link>
+  <link rel="stylesheet" href="../static/css/otp.css"></link>
 </head>
 <body>
   <!-- ===== NAVBAR ===== -->
@@ -74,16 +75,28 @@
         </div>
         {% if show_otp %}
         <div class="form-group">
-          <label for="otp">Enter OTP</label>
+          <label for="otp">OTP [One-Time-Password]</label>
           <input type="text" id="otp" name="otp" pattern="[0-9]{4}" maxlength="4" required>
-          <small>Enter the 4-digit OTP (For demo: use 1234)</small>
+          <small>Enter the 4-digit OTP</br>(For demo: use 1234)</small>
         </div>
         {% endif %}
-        <button type="submit" class="btn btn-primary">{{ 'Verify OTP' if show_otp else 'Send OTP' }}</button>
+        <button type="submit" class="btn btn-primary">{{ 'Verify' if show_otp else 'Send OTP' }}</button>
       </form>
     </div>
   </main>
 
   <footer>© 2025 Clyst — Empowering Local Artisans</footer>
+
+  <script>
+    function toggleMenu(e) {
+        e?.stopPropagation?.();
+        const menu = document.getElementById("mobileMenu");
+        const now = menu.style.display === "flex" ? "none" : "flex";
+        menu.style.display = now;
+            if (now === "flex")
+              document.getElementById("searchBelow").classList.remove("open");
+      }
+
+  </script>
 </body>
 </html>

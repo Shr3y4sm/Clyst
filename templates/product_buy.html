@@ -53,11 +53,7 @@
             class="cart-btn"
             title="Shopping Cart"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path
-                d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"
-              />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"></path></svg>
             <span class="cart-count" id="cartCount">0</span>
           </a>
           <a
@@ -78,7 +74,6 @@
         <a href="{{url_for('home')}}">Community Feed</a>
         <a href="{{url_for('products_page')}}">Marketplace</a>
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('view_cart') }}">Shopping Cart</a>
         <a href="{{ url_for('logout') }}">Logout</a>
         {% else %}
         <a href="{{ url_for('login') }}">Login</a>
@@ -90,33 +85,121 @@
     <div class="container">
       <!-- Main Content -->
       <div class="post">
+        {% if product.img_url %}
+        <div class="post-image">
+          <img
+            src="{{ product.img_url }}"
+            alt="{{ product.title }}"
+            class="product-image"
+          />
+        </div>
+        {% endif %}
         <div class="post-info">
-          {% if current_user.is_authenticated and current_user.id ==
-          product.artist_id %}
-          <button
-            class="delete-btn"
-            onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_posts', product_id=product.product_id) }}'"
-            title="Delete Post"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              fill="currentColor"
-            >
-              <path
-                d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
-              ></path>
-            </svg>
-          </button>
-          {% endif %}
 
           <div class="product-header">
             <h1 class="product-title">{{ product.title }}</h1>
             <div class="product-price">Rs.{{ product.price }}</div>
           </div>
           <div class="item-desc">{{product.description}}</div>
+
+          
+        {% if current_user.is_authenticated %}
+        <form
+          action="{{ url_for('add_product_comment', product_id=product.product_id) }}"
+          method="POST"
+          class="comment-section"
+        >
+          <input
+            type="hidden"
+            name="anchor"
+            value="product-{{ product.product_id }}-comments"
+          />
+          <div class="artist-avatar">{{ current_user.name[0].upper() }}</div>
+          <input
+            type="text"
+            name="comment"
+            placeholder="Write a comment..."
+            required
+          />
+          <button class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12.9999H9V10.9999H3V1.84558C3 1.56944 3.22386 1.34558 3.5 1.34558C3.58425 1.34558 3.66714 1.36687 3.74096 1.40747L22.2034 11.5618C22.4454 11.6949 22.5337 11.9989 22.4006 12.2409C22.3549 12.324 22.2865 12.3924 22.2034 12.4381L3.74096 22.5924C3.499 22.7255 3.19497 22.6372 3.06189 22.3953C3.02129 22.3214 3 22.2386 3 22.1543V12.9999Z"></path></svg>
+          </button>
+        </form>
+        {% else %}
+        <p class="comment-login"><a href="{{ url_for('login') }}">Login</a> to leave a comment.</p>
+        {% endif %}
+
+        
+        {% if product.comments %} 
+          <div class="comments-list">
+            {% for comment in product.comments %}
+          <div class="comments" id="product-comment-{{ comment.id }}">
+            <div class="user-id-info">
+              <div class="artist-avatar">
+                {{ comment.artist.name[0].upper() if comment.artist.name else
+                'U' }}
+              </div>
+              <div class="artist-name">
+                {% if comment.artist.id %}
+                <a
+                  href="{{ url_for('view_profile', user_id=comment.artist.id) }}"
+                  class="post-username"
+                  >{{ comment.artist.name }}</a
+                >
+                {% else %}
+                <span class="post-username">{{ comment.artist.name }}</span>
+                {% endif %}
+                <p class="post-user-email">
+                  {{ comment.artist.email }} - {{ comment.created_at }}
+                </p>
+              </div>
+              {% if current_user.is_authenticated and current_user.id ==
+              comment.artist.id %}
+              <form action="{{ url_for('delete_product_comment', comment_id=comment.id) }}" method="POST" style="display:inline;">
+                <input type="hidden" name="anchor" value="product-{{ product.product_id }}-comments" />
+                <button class="action-btn delete-btn" onclick="return confirm('Delete this comment?')" type="submit">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
+                    ></path>
+                  </svg>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+            <p class="comment-p">{{ comment.content }}</p>
+            <div class="icon-set">
+              <button
+                class="say-aloud-btn"
+                title="Say Aloud"
+                type="button"
+                data-comment="{{ comment.content|e }}"
+                data-author="{{ comment.artist.name|e if comment.artist.name else '' }}"
+                onclick="sayCommentFromEl(this)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="#000000"
+                  viewBox="0 0 256 256"
+                >
+                  <path
+                    d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          {% endfor %} 
+        </div>
+        {% endif %}
 
           <!-- Product Meta -->
           <div class="product-meta">
@@ -149,56 +232,48 @@
               >
             </div>
           </div>
+          <div class="buttons">
 
           {% if current_user.is_authenticated and current_user.id !=
           product.artist_id %}
           <button
-            class="add-to-cart-btn"
+            class="btn btn-secondary"
             onclick="addToCart({{ product.product_id }})"
             data-product-id="{{ product.product_id }}"
             title="Add to Cart"
             type="button"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="currentColor"
-            >
-              <path
-                d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"
-              />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6.00488 9H19.9433L20.4433 7H8.00488V5H21.7241C22.2764 5 22.7241 5.44772 22.7241 6C22.7241 6.08176 22.7141 6.16322 22.6942 6.24254L20.1942 16.2425C20.083 16.6877 19.683 17 19.2241 17H5.00488C4.4526 17 4.00488 16.5523 4.00488 16V4H2.00488V2H5.00488C5.55717 2 6.00488 2.44772 6.00488 3V9ZM6.00488 23C4.90031 23 4.00488 22.1046 4.00488 21C4.00488 19.8954 4.90031 19 6.00488 19C7.10945 19 8.00488 19.8954 8.00488 21C8.00488 22.1046 7.10945 23 6.00488 23ZM18.0049 23C16.9003 23 16.0049 22.1046 16.0049 21C16.0049 19.8954 16.9003 19 18.0049 19C19.1095 19 20.0049 19.8954 20.0049 21C20.0049 22.1046 19.1095 23 18.0049 23Z"></path></svg>
             Add to Cart
           </button>
           {% elif not current_user.is_authenticated %}
           <button
-            class="add-to-cart-btn"
+            class="btn btn-secondary"
             onclick="window.location.href='{{ url_for('login') }}?next={{ url_for('product_buy', product_id=product.product_id) }}'"
             title="Login to add to cart"
             type="button"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="currentColor"
-            >
-              <path
-                d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V19C19 20.1 18.1 21 17 21H7C5.9 21 5 20.1 5 19V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V19H17V6H7Z"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6.00488 9H19.9433L20.4433 7H8.00488V5H21.7241C22.2764 5 22.7241 5.44772 22.7241 6C22.7241 6.08176 22.7141 6.16322 22.6942 6.24254L20.1942 16.2425C20.083 16.6877 19.683 17 19.2241 17H5.00488C4.4526 17 4.00488 16.5523 4.00488 16V4H2.00488V2H5.00488C5.55717 2 6.00488 2.44772 6.00488 3V9ZM6.00488 23C4.90031 23 4.00488 22.1046 4.00488 21C4.00488 19.8954 4.90031 19 6.00488 19C7.10945 19 8.00488 19.8954 8.00488 21C8.00488 22.1046 7.10945 23 6.00488 23ZM18.0049 23C16.9003 23 16.0049 22.1046 16.0049 21C16.0049 19.8954 16.9003 19 18.0049 19C19.1095 19 20.0049 19.8954 20.0049 21C20.0049 22.1046 19.1095 23 18.0049 23Z"></path></svg>
             </svg>
             Add to Cart
           </button>
           {% endif %}
+          {% if current_user.id != product.artist_id %}
           <a
             href="javascript:void(0)"
             onclick="handlePurchase()"
             class="btn btn-primary"
             >Purchase</a
           >
+          {% else %}
+          <button
+            class="btn btn-secondary btn-danger"
+            onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_posts', product_id=product.product_id) }}'"
+            title="Delete Post"
+          >
+            Delete Product
+          </button>
+          {% endif %}
           <div class="product-options">
             <button
               class="share-btn"
@@ -216,7 +291,7 @@
                 <path
                   d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
                 ></path>
-              </svg>
+              </svg>&nbsp;Share
             </button>
             <button
               class="btn icon say-aloud-btn"
@@ -241,113 +316,8 @@
               </svg>
             </button>
           </div>
-        </div>
-        {% if product.img_url %}
-        <div class="post-image">
-          <img
-            src="{{ product.img_url }}"
-            alt="{{ product.title }}"
-            class="product-image"
-          />
-        </div>
-        {% endif %}
-      </div>
-      <div
-        class="card comments-card"
-        id="product-{{ product.product_id }}-comments"
-      >
-        <div class="card-header"><h3>Comments</h3></div>
-        {% if current_user.is_authenticated %}
-        <form
-          action="{{ url_for('add_product_comment', product_id=product.product_id) }}"
-          method="POST"
-          class="comment-section"
-        >
-          <input
-            type="hidden"
-            name="anchor"
-            value="product-{{ product.product_id }}-comments"
-          />
-          <div class="artist-avatar">{{ current_user.name[0].upper() }}</div>
-          <input
-            type="text"
-            name="comment"
-            placeholder="Write a comment..."
-            required
-          />
-          <button class="btn btn-primary">Comment</button>
-        </form>
-        {% else %}
-        <p><a href="{{ url_for('login') }}">Login</a> to leave a comment.</p>
-        {% endif %}
 
-        <div class="comments-list">
-          {% if product.comments %} {% for comment in product.comments %}
-          <div class="comments" id="product-comment-{{ comment.id }}">
-            <div class="user-id-info">
-              <div class="artist-avatar">
-                {{ comment.artist.name[0].upper() if comment.artist.name else
-                'U' }}
-              </div>
-              <div class="artist-name">
-                {% if comment.artist.id %}
-                <a
-                  href="{{ url_for('view_profile', user_id=comment.artist.id) }}"
-                  class="post-username"
-                  >{{ comment.artist.name }}</a
-                >
-                {% else %}
-                <span class="post-username">{{ comment.artist.name }}</span>
-                {% endif %}
-                <p class="post-user-email">
-                  {{ comment.artist.email }} - {{ comment.created_at }}
-                </p>
-              </div>
-              {% if current_user.is_authenticated and current_user.id ==
-              comment.artist.id %}
-              <form action="{{ url_for('delete_product_comment', comment_id=comment.id) }}" method="POST" style="display:inline;margin-left:8px;">
-                <input type="hidden" name="anchor" value="product-{{ product.product_id }}-comments" />
-                <button class="action-btn delete-btn" onclick="return confirm('Delete this comment?')" type="submit">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
-                    ></path>
-                  </svg>
-                </button>
-              </form>
-              {% endif %}
-            </div>
-            <p>{{ comment.content }}</p>
-            <div class="icon-set">
-              <button
-                class="say-aloud-btn"
-                title="Say Aloud"
-                type="button"
-                data-comment="{{ comment.content|e }}"
-                data-author="{{ comment.artist.name|e if comment.artist.name else '' }}"
-                onclick="sayCommentFromEl(this)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  fill="#000000"
-                  viewBox="0 0 256 256"
-                >
-                  <path
-                    d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          {% endfor %} {% endif %}
+        </div>
         </div>
       </div>
     </div>

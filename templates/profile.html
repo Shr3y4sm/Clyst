@@ -130,7 +130,6 @@
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
                     <path
                       d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
                     ></path></svg>{{ profile_user.location }}
@@ -170,7 +169,6 @@
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
-                    <!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
                     <path
                       d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
                     ></path>
@@ -365,14 +363,14 @@
                   </div>
                   {% endif %}
                   <div class="item-content">
+                    <div class="item-actions">
+                      <span class="info-value">{{ post.created_at }}</span>
+                    </div>
                     <h3 class="item-title">{{ post.post_title }}</h3>
                     <p class="item-description">
                       {{ post.description[:100] }}{% if post.description|length
                       > 100 %}...{% endif %}
                     </p>
-                    <div class="item-actions">
-                      <span class="info-value">{{ post.created_at }}</span>
-                    </div>
                   </div>
                   <button
                     class="share-btn"
@@ -468,7 +466,9 @@
                     <i class="fas fa-image"></i>
                   </div>
                   {% endif %}
+                  <div class="item-content">
                   <!-- Promote product button (new) -->
+                  {% if current_user.id == product.artist_id %}
                   <form
                     method="post"
                     action="{{ url_for('promote_product', product_id=product.product_id) }}"
@@ -482,7 +482,7 @@
                       Promote Product
                     </button>
                   </form>
-                  <div class="item-content">
+                  {% endif %}
                     <h3 class="item-title">{{ product.title }}</h3>
                     <p class="item-description">
                       {{ product.description[:100] if product.description else
