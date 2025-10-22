@@ -351,14 +351,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🔮 Future Enhancements
 
-- **Payment Integration**: Stripe/PayPal integration for transactions
 - **Advanced AI**: More sophisticated content generation, image analysis and smart price assist for artisans
-- **Social Features**: Following system
-- **Mobile App**: Native mobile application
+- **Social Features**: Like, comment, share features
 - **Advanced Search**: Recommendation system
-- **Order Management**: Complete e-commerce functionality
-- **Review System**: Product reviews and ratings
-- **Categories**: Art categorization and filtering
+- **Order Management**: E-commerce cart functionality
+- **Review System**: Product reviews and ratings and analysis dashboard for artisans.
+
 
 
 ## 📝 Development Notes
