@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../static/css/styles.css"></link>
-  <link rel="stylesheet" href="../static/css/camera.css"></link>
+  <link rel="stylesheet" href="../static/css/auth.css"></link>
   <link rel="stylesheet" href="../static/css/otp.css"></link>
 </head>
 <body>
@@ -68,6 +68,13 @@
   <main>
     <div class="card">
       <h2>Phone Number Verification</h2>
+
+        {% with messages = get_flashed_messages(with_categories=True) %} {% if messages %} {% for
+        category, message in messages %}
+        <div class="flash-message {{category}}" style="display: flex;">
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
       <form id="verifyForm" method="POST" action="{{ url_for('verify_otp') }}">
         <div class="form-group">
           <label for="phone">Phone Number</label>

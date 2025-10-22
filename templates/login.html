@@ -32,13 +32,6 @@
           <p>Welcome back to Clyst</p>
         </div>
 
-        {% with messages = get_flashed_messages() %} {% if messages %} {% for
-        message in messages %}
-        <div class="flash-message" style="display: block;">
-          {{ message }}
-        </div>
-        {% endfor %} {% endif %} {% endwith %}
-
         <form method="POST" action="{{ url_for('login') }}" class="auth-form">
           <div class="form-group">
             <label for="email" class="form-label">Email</label>

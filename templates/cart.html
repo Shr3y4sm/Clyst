@@ -46,18 +46,6 @@
         </div>
 
         <div class="nav-actions">
-          <div
-            class="search-icon"
-            onclick="toggleSearch()"
-            aria-label="Open search"
-            title="Search"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path
-                d="M21 20l-5.8-5.8a7 7 0 10-1.2 1.2L20 21l1-1zM5 10a5 5 0 1110 0 5 5 0 01-10 0z"
-              />
-            </svg>
-          </div>
           {% if current_user.is_authenticated %}
           <a
             href="{{ url_for('view_cart') }}"
@@ -94,14 +82,6 @@
         {% endif %}
       </div>
     </nav>
-
-    <!-- ===== SEARCH BELOW NAV ===== -->
-    <div id="searchBelow" class="search-below">
-      <div class="search-pill">
-        <input id="globalSearchInput" type="text" placeholder="Search..." />
-        <div class="search-close" onclick="toggleSearch()">✕</div>
-      </div>
-    </div>
 
     <div class="container">
       <div class="header">
@@ -250,18 +230,6 @@
         menu.style.display = now;
         if (now === "flex")
           document.getElementById("searchBelow").classList.remove("open");
-      }
-
-      function toggleSearch() {
-        const bar = document.getElementById("searchBelow");
-        bar.classList.toggle("open");
-        const menu = document.getElementById("mobileMenu");
-        if (menu.style.display === "flex") menu.style.display = "none";
-        if (bar.classList.contains("open")) {
-          requestAnimationFrame(() =>
-            document.getElementById("globalSearchInput").focus()
-          );
-        }
       }
 
       // Update cart count on page load

@@ -292,6 +292,10 @@ input:focus-visible {
 	color: var(--text);
 }
 
+.empty-state .btn-primary svg {
+	width: 24px;
+}
+
 /* Responsive Styles */
 @media (max-width: 768px) {
 	.post {
@@ -316,6 +320,6 @@ input:focus-visible {
 
 @media (max-width: 400px) {
 	input {
-		width: 60%;
+		width: 80%;
 	}
 }

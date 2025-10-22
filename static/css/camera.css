@@ -8,17 +8,17 @@ header {
 	top: 0;
 	z-index: 10;
 }
-header h1 {
+h2 {
 	font-size: 1.3rem;
 	margin: 0;
 	color: var(--text);
-	font-weight: 700;
+	text-transform: uppercase;
 }
 nav a {
 	text-decoration: none;
 	color: var(--text);
-	font-weight: 500;
-	font-size: 1rem;
+	/* font-weight: 500;
+	font-size: 1rem; */
 }
 nav a:hover {
 	color: var(--accent);
@@ -28,39 +28,121 @@ main {
 	display: flex;
 	justify-content: center;
 	align-items: flex-start;
-	padding: 20px;
+	padding: 20px 0;
 }
 .card {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 10px;
-	background: var(--bg);
-	box-shadow: var(--shadow);
-	border-radius: var(--radius);
-	padding: 20px;
+	gap: 4px;
+	border-radius: 2px;
+	padding: 0;
 	width: 100%;
 	max-width: 480px;
 	text-align: center;
 }
+
+.camera-section,
+.camera-img {
+	width: 100%;
+	position: relative;
+}
+
+.capture {
+	width: 50px;
+	height: 50px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: absolute;
+	bottom: 20px;
+	left: 0;
+	right: 0;
+	margin-inline: auto;
+	border: none;
+	background: #181818bb;
+	border-radius: 50%;
+	backdrop-filter: blur(2px);
+	color: #fff;
+}
+
+.capture svg {
+	width: 40px;
+	height: 40px;
+	fill: #fff;
+}
+
+.capture:hover {
+	opacity: 0.6;
+}
+
+.actions-btn {
+	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	bottom: 20px;
+	left: 0;
+	right: 0;
+	margin-inline: auto;
+	border: none;
+	gap: 12px;
+}
+
+.btn {
+	width: 50px;
+	height: 50px;
+	align-items: center;
+	justify-content: center;
+	padding: 6px 12px;
+	background: #181818bb;
+	backdrop-filter: blur(2px);
+	color: #fff;
+	border-radius: 50%;
+}
+
+.btn svg {
+	width: 40px;
+	height: 40px;
+	fill: #fff;
+}
+
+.btn:hover {
+	opacity: 0.4;
+}
+
+video {
+	border-radius: 2px;
+}
+
 video,
 img {
 	width: 100%;
 	height: auto;
-	border-radius: var(--radius);
+	min-height: 300px;
 	margin-top: 10px;
 	object-fit: cover;
 }
 .info {
-	margin-top: 16px;
+	margin-top: 8px;
 	text-align: left;
-	font-size: 0.9rem;
 	background: var(--card);
-	border-radius: 10px;
+	border-radius: 2px;
 	padding: 14px;
 	word-wrap: break-word;
 }
+
+.info b {
+	font-size: 16px;
+	color: var(--accent);
+}
+
+.info p {
+	font-size: 20px;
+	color: var(--text);
+}
+
 footer {
 	text-align: center;
 	padding: 16px;

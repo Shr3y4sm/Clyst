@@ -66,10 +66,26 @@ fill="currentColor" viewBox="0 0 24 24" >
 </svg>
         </div>
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('profile') }}" class="profile-btn" title="Profile">
-          <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28.8662 27.5C28.7784 27.652 28.6521 27.7783 28.5001 27.8661C28.348 27.9538 28.1755 28 28 28H3.99995C3.8245 27.9998 3.65219 27.9535 3.50031 27.8656C3.34843 27.7778 3.22234 27.6515 3.13469 27.4995C3.04705 27.3475 3.00093 27.1752 3.00098 26.9997C3.00102 26.8243 3.04723 26.6519 3.13495 26.5C5.0387 23.2087 7.97245 20.8487 11.3962 19.73C9.70266 18.7218 8.38688 17.1856 7.65094 15.3572C6.91499 13.5289 6.79956 11.5095 7.32238 9.60918C7.8452 7.70887 8.97735 6.03272 10.545 4.83814C12.1126 3.64355 14.029 2.99658 16 2.99658C17.9709 2.99658 19.8873 3.64355 21.4549 4.83814C23.0226 6.03272 24.1547 7.70887 24.6775 9.60918C25.2003 11.5095 25.0849 13.5289 24.349 15.3572C23.613 17.1856 22.2972 18.7218 20.6037 19.73C24.0275 20.8487 26.9612 23.2087 28.865 26.5C28.9529 26.6519 28.9993 26.8243 28.9996 26.9998C28.9998 27.1754 28.9538 27.3479 28.8662 27.5Z" fill="inherit"/></svg>
-        </a>
-        {% endif %}
+          <a
+            href="{{ url_for('view_cart') }}"
+            class="cart-btn"
+            title="Shopping Cart"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"></path></svg>
+            <span class="cart-count" id="cartCount">0</span>
+          </a>
+          <a
+            href="{{ url_for('profile') }}"
+            class="profile-btn"
+            title="Profile"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+              />
+            </svg>
+          </a>
+          {% endif %}
       </div>
       </div>
     <div class="mobile-menu" id="mobileMenu">
@@ -96,10 +112,11 @@ fill="currentColor" viewBox="0 0 24 24" >
         <input
           id="globalSearchInput"
           type="text"
-          placeholder="Search for posts..."
+          placeholder="Find your trend"
           value="{{ q or '' }}"
         />
-        <div class="search-close" onclick="toggleSearch()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="inherit"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg></div>
+        <div class="search-close" onclick="toggleSearch()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="inherit"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg>
+        </div>
       </div>
     </div>
       <!-- Main Content -->
@@ -273,7 +290,7 @@ fill="currentColor" viewBox="0 0 24 24" >
           href="{{ url_for('add_posts') }}"
           class="btn btn-primary"
         >
-          + START POSTING
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path></svg> START POSTING
         </a>
           {% else %}
           <h3>NO POSTS AVAILABLE</h3>
@@ -499,6 +516,89 @@ fill="currentColor" viewBox="0 0 24 24" >
           commentsEl.scrollIntoView({behavior: 'smooth', block: 'center'});
         }
       }
+
+      // Cart functionality
+      async function addToCart(productId) {
+        const button = document.querySelector(
+          `[data-product-id="${productId}"]`
+        );
+        const originalText = button.innerHTML;
+
+        // Show loading state
+        button.disabled = true;
+        button.innerHTML = '<div class="loading"></div> Adding...';
+
+        try {
+          const response = await fetch(`/cart/add/${productId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Show success message
+            showCartMessage("Product added to cart!", "success");
+            // Update cart count
+            updateCartCount();
+            // Reset button
+            button.innerHTML = "✓ Added to Cart";
+            button.style.background = "#28a745";
+            setTimeout(() => {
+              button.innerHTML = originalText;
+              button.style.background = "";
+              button.disabled = false;
+            }, 2000);
+          } else {
+            throw new Error(data.message || "Failed to add to cart");
+          }
+        } catch (error) {
+          console.error("Error adding to cart:", error);
+          showCartMessage("Failed to add to cart", "error");
+          button.innerHTML = originalText;
+          button.disabled = false;
+        }
+      }
+
+      async function updateCartCount() {
+        try {
+          const response = await fetch("/api/cart/count");
+          const data = await response.json();
+          document.getElementById("cartCount").textContent = data.count;
+        } catch (error) {
+          console.error("Error updating cart count:", error);
+        }
+      }
+
+      function showCartMessage(message, type) {
+        // Remove existing message
+        const existingMessage = document.querySelector(".cart-message");
+        if (existingMessage) {
+          existingMessage.remove();
+        }
+
+        // Create new message
+        const messageEl = document.createElement("div");
+        messageEl.className = `cart-message ${type}`;
+        messageEl.textContent = message;
+        document.body.appendChild(messageEl);
+
+        // Show message
+        setTimeout(() => messageEl.classList.add("show"), 100);
+
+        // Hide message after 3 seconds
+        setTimeout(() => {
+          messageEl.classList.remove("show");
+          setTimeout(() => messageEl.remove(), 300);
+        }, 3000);
+      }
+
+      // Update cart count on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        updateCartCount();
+      });
     </script>
   </body>
 </html>

@@ -12,25 +12,74 @@
   <link rel="stylesheet" href="../static/css/camera.css"></link>
 </head>
 <body>
-  <header>
-    <h1><a href="{{ url_for('home') }}" style="text-decoration:none; color:inherit;">Clyst</a></h1>
-    {% if current_user.is_authenticated %}
+  <!-- ===== NAVBAR ===== -->
+    <nav id="topNav">
+      <div class="nav">
+              <div class="nav-left">
+        <div class="hamburger" onclick="toggleMenu(event)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path></svg>
+        </div>
+        <a href="{{ url_for('home') }}">Clyst</a>
+      </div>
+
+      <div class="nav-center" id="navLinks">
+        <a href="{{ url_for('home') }}">Community Feed</a>
+        <a href="{{ url_for('products_page') }}">Marketplace</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </div>
+
+      <div class="nav-actions">
+        {% if current_user.is_authenticated %}
         <a href="{{ url_for('profile') }}" class="profile-btn" title="Profile">
-          <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28.8662 27.5C28.7784 27.652 28.6521 27.7783 28.5001 27.8661C28.348 27.9538 28.1755 28 28 28H3.99995C3.8245 27.9998 3.65219 27.9535 3.50031 27.8656C3.34843 27.7778 3.22234 27.6515 3.13469 27.4995C3.04705 27.3475 3.00093 27.1752 3.00098 26.9997C3.00102 26.8243 3.04723 26.6519 3.13495 26.5C5.0387 23.2087 7.97245 20.8487 11.3962 19.73C9.70266 18.7218 8.38688 17.1856 7.65094 15.3572C6.91499 13.5289 6.79956 11.5095 7.32238 9.60918C7.8452 7.70887 8.97735 6.03272 10.545 4.83814C12.1126 3.64355 14.029 2.99658 16 2.99658C17.9709 2.99658 19.8873 3.64355 21.4549 4.83814C23.0226 6.03272 24.1547 7.70887 24.6775 9.60918C25.2003 11.5095 25.0849 13.5289 24.349 15.3572C23.613 17.1856 22.2972 18.7218 20.6037 19.73C24.0275 20.8487 26.9612 23.2087 28.865 26.5C28.9529 26.6519 28.9993 26.8243 28.9996 26.9998C28.9998 27.1754 28.9538 27.3479 28.8662 27.5Z" fill="inherit"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path
+              d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+            />
+          </svg>
         </a>
-    {% endif %}
-  </header>
+        {% endif %}
+      </div>
+      </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="{{ url_for('home') }}">Community Feed</a>
+      <a href="{{ url_for('products_page') }}">Marketplace</a>
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}">Register</a>
+      {% endif %}
+    </div>
+    </nav>
 
   <main>
     <div class="card">
       <h2>Capture Photo & Location</h2>
+      <div class="camera-section">
       <video id="camera" playsinline muted></video>
-      <button id="capture" class="btn btn-primary">Capture Photo</button>
+      <button id="capture" class="capture">
+        <svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="#e4b4c7" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm72-88a72,72,0,1,1-72-72A72.08,72.08,0,0,1,200,128Z"></path></svg>
+      </button>
+    </div>
       <canvas id="canvas" style="display:none;"></canvas>
+      <div class="camera-img">
       <img id="photo" style="display:none;">
+      <div class="actions-btn">
+      <button id="submit" class="btn" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 12.9999H9V10.9999H3V1.84558C3 1.56944 3.22386 1.34558 3.5 1.34558C3.58425 1.34558 3.66714 1.36687 3.74096 1.40747L22.2034 11.5618C22.4454 11.6949 22.5337 11.9989 22.4006 12.2409C22.3549 12.324 22.2865 12.3924 22.2034 12.4381L3.74096 22.5924C3.499 22.7255 3.19497 22.6372 3.06189 22.3953C3.02129 22.3214 3 22.2386 3 22.1543V12.9999Z"></path>
+        </svg></button>
+      <button id="retake" class="btn" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M6 4H21C21.5523 4 22 4.44772 22 5V12H20V6H6V9L1 5L6 1V4ZM18 20H3C2.44772 20 2 19.5523 2 19V12H4V18H18V15L23 19L18 23V20Z"></path>
+        </svg></button>
+      </div></div>
       <div class="info" id="location-info"></div>
-      <button id="submit" class="btn btn-primary" style="display:none;">Submit</button>
-      <button id="retake" class="btn btn-secondary" style="display:none;">Retake Photo</button>
     </div>
   </main>
 
@@ -69,7 +118,7 @@
     
     function showCaptureView() {
       video.style.display = 'block';
-      captureBtn.style.display = 'block';
+      captureBtn.style.display = 'flex';
       photo.style.display = 'none';
       submitBtn.style.display = 'none';
       retakeBtn.style.display = 'none';
@@ -80,8 +129,8 @@
       video.style.display = 'none';
       captureBtn.style.display = 'none';
       photo.style.display = 'block';
-      submitBtn.style.display = 'block';
-      retakeBtn.style.display = 'block';
+      submitBtn.style.display = 'flex';
+      retakeBtn.style.display = 'flex';
     }
     
     initCamera();
@@ -105,9 +154,9 @@
         const {latitude,longitude}=pos.coords;
         const address=await getAddress(latitude,longitude);
         info.innerHTML=`
-          <b>Latitude:</b> ${latitude.toFixed(5)}<br>
-          <b>Longitude:</b> ${longitude.toFixed(5)}<br>
-          <b>Address:</b> ${address}
+          <b>Latitude:</b></br><p>${latitude.toFixed(5)}</p></br>
+          <b>Longitude:</b></br><p>${longitude.toFixed(5)}</p></br>
+          <b>Address:</b></br><p>${address}</p>
         `;
         try{
           const newImg=addExifData(imageData,latitude,longitude);
