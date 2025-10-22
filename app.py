@@ -908,21 +908,30 @@ def view_cart():
         cart_items = db.session.execute(
             db.select(CartItem).where(CartItem.cart_id == cart.cart_id)
         ).scalars().all()
-        
-        total_price = sum(item.quantity * float(item.product.price) for item in cart_items)
-        
-        return render_template("cart.html", 
-                          current_user=current_user, 
-                          cart_items=cart_items,
-                          total_price=total_price)
+
+        # Filter out items with deleted/missing products
+        valid_items = [item for item in cart_items if item.product is not None]
+
+        # Optionally, remove invalid ones automatically
+        invalid_items = [item for item in cart_items if item.product is None]
+        for bad_item in invalid_items:
+            db.session.delete(bad_item)
+        if invalid_items:
+            db.session.commit()
+
+        total_price = sum(item.quantity * float(item.product.price) for item in valid_items)
+
+        return render_template(
+            "cart.html",
+            current_user=current_user,
+            cart_items=valid_items,
+            total_price=total_price
+        )
     except Exception as e:
         db.session.rollback()
         app.logger.error(f"Error accessing cart: {str(e)}")
         return f"Error accessing cart: {str(e)}", 500
-        return render_template("cart.html", 
-                            current_user=current_user, 
-                            cart_items=cart_items,
-                            total_price=total_price)
+
 
 
 @app.route("/cart/add/<int:product_id>", methods=["POST"])
