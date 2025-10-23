@@ -358,15 +358,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Review System**: Product reviews and ratings and analysis dashboard for artisans.
 
 
-
-## 📝 Development Notes
-
-- The application uses a single-file approach with models defined in `app.py`
-- AI features gracefully degrade when API keys are not configured
-- File uploads use UUID naming to prevent conflicts
-- Natural language search is implemented as a lightweight parser
-- Portfolio narratives are generated on-demand for better performance
-
 ---
 
 **Clyst** - Where Art Meets Community and Commerce
