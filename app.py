@@ -245,6 +245,42 @@ class CartItem(db.Model):
     product = relationship("Product")
 
 
+# ===== ORDER MODELS =====
+class Order(db.Model):
+    __tablename__ = 'orders'
+
+    order_id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status: Mapped[str] = mapped_column(db.String(50), default='pending')  # pending, paid, shipped, delivered, canceled
+    payment_status: Mapped[str] = mapped_column(db.String(50), default='unpaid')  # unpaid, paid, refunded
+    payment_reference: Mapped[Optional[str]] = mapped_column(db.String(120))
+    total_price: Mapped[Optional[float]] = mapped_column(db.Numeric(10, 2))
+    shipping_name: Mapped[Optional[str]] = mapped_column(db.String(120))
+    shipping_phone: Mapped[Optional[str]] = mapped_column(db.String(30))
+    shipping_address: Mapped[Optional[str]] = mapped_column(db.Text)
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    updated_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+    user = relationship("User")
+    items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+
+
+class OrderItem(db.Model):
+    __tablename__ = 'order_items'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    order_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('orders.order_id'), nullable=False)
+    product_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('products.product_id'), nullable=True)
+    product_title: Mapped[Optional[str]] = mapped_column(db.String(200))
+    product_img_url: Mapped[Optional[str]] = mapped_column(db.String(255))
+    unit_price: Mapped[Optional[float]] = mapped_column(db.Numeric(10, 2))
+    quantity: Mapped[int] = mapped_column(db.Integer, default=1)
+    total_price: Mapped[Optional[float]] = mapped_column(db.Numeric(10, 2))
+
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product")
+
+
 
 @app.route('/', methods=["GET", "POST"])
 def home():
@@ -1034,6 +1070,150 @@ def get_cart_count():
     ).scalar() or 0
     
     return jsonify({"count": count})
+
+
+# ===== CHECKOUT AND ORDERS =====
+@app.route("/checkout", methods=["GET", "POST"])
+@login_required
+def checkout():
+    """Checkout page to confirm shipping details and place order.
+    POST creates an order from the user's cart and clears the cart.
+    """
+    # Load cart and validate
+    cart = get_or_create_cart(current_user.id)
+    cart_items = db.session.execute(
+        db.select(CartItem).where(CartItem.cart_id == cart.cart_id)
+    ).scalars().all()
+
+    # Only include valid items (products that still exist)
+    valid_items = [item for item in cart_items if item.product is not None]
+    if request.method == 'POST':
+        if not valid_items:
+            flash('Your cart is empty.', 'error')
+            return redirect(url_for('view_cart'))
+
+        # Gather shipping info from form
+        shipping_name = (request.form.get('shipping_name') or current_user.name or '').strip()
+        shipping_phone = (request.form.get('shipping_phone') or current_user.phone or '').strip()
+        shipping_address = (request.form.get('shipping_address') or current_user.location or '').strip()
+
+        if not shipping_name or not shipping_phone or not shipping_address:
+            flash('Please provide name, phone, and address for shipping.', 'error')
+            return render_template(
+                'checkout.html',
+                current_user=current_user,
+                cart_items=valid_items,
+                subtotal=sum(i.quantity * float(i.product.price) for i in valid_items),
+                shipping_name=shipping_name,
+                shipping_phone=shipping_phone,
+                shipping_address=shipping_address
+            )
+
+        # Compute totals
+        subtotal = sum(i.quantity * float(i.product.price) for i in valid_items)
+        total = subtotal  # Free shipping placeholder
+
+        # Create Order
+        new_order = Order(
+            user_id=current_user.id,
+            status='pending',
+            payment_status='unpaid',
+            total_price=total,
+            shipping_name=shipping_name,
+            shipping_phone=shipping_phone,
+            shipping_address=shipping_address,
+            created_at=date.today().strftime("%B %d, %Y"),
+            updated_at=date.today().strftime("%B %d, %Y"),
+        )
+        db.session.add(new_order)
+        db.session.flush()  # get order_id
+
+        # Add OrderItems (snapshot of current product info)
+        for ci in valid_items:
+            db.session.add(OrderItem(
+                order_id=new_order.order_id,
+                product_id=ci.product_id,
+                product_title=ci.product.title,
+                product_img_url=ci.product.img_url,
+                unit_price=ci.product.price,
+                quantity=ci.quantity,
+                total_price=ci.quantity * float(ci.product.price)
+            ))
+
+        # Clear cart
+        db.session.execute(db.delete(CartItem).where(CartItem.cart_id == cart.cart_id))
+        cart.updated_at = date.today().strftime("%B %d, %Y")
+        db.session.commit()
+
+        # Redirect to order detail
+        return redirect(url_for('order_detail', order_id=new_order.order_id))
+
+    # GET: show checkout page populated from user/cart
+    return render_template(
+        'checkout.html',
+        current_user=current_user,
+        cart_items=valid_items,
+        subtotal=sum(i.quantity * float(i.product.price) for i in valid_items),
+        shipping_name=current_user.name or '',
+        shipping_phone=current_user.phone or '',
+        shipping_address=current_user.location or ''
+    )
+
+
+@app.route('/orders')
+@login_required
+def orders_list():
+    """List current user's orders."""
+    orders = db.session.execute(
+        db.select(Order).where(Order.user_id == current_user.id).order_by(db.desc(Order.order_id))
+    ).scalars().all()
+    return render_template('orders.html', current_user=current_user, orders=orders)
+
+
+@app.route('/orders/<int:order_id>')
+@login_required
+def order_detail(order_id: int):
+    """Order details with items and status."""
+    order = db.get_or_404(Order, order_id)
+    if order.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+    # Items are loaded via relationship
+    return render_template('order_detail.html', current_user=current_user, order=order)
+
+
+@app.route('/orders/<int:order_id>/cancel', methods=['POST'])
+@login_required
+def cancel_order(order_id: int):
+    order = db.get_or_404(Order, order_id)
+    if order.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+    if order.status in ('pending',) and order.payment_status in ('unpaid',):
+        order.status = 'canceled'
+        order.updated_at = date.today().strftime("%B %d, %Y")
+        db.session.commit()
+        flash('Order canceled.', 'info')
+    else:
+        flash('Order cannot be canceled at this stage.', 'error')
+    return redirect(url_for('order_detail', order_id=order_id))
+
+
+@app.route('/admin/orders/<int:order_id>/status', methods=['POST'])
+@admin_only
+def admin_update_order_status(order_id: int):
+    """Admin endpoint to update order and payment status. Expects form fields 'status' and optional 'payment_status'."""
+    order = db.get_or_404(Order, order_id)
+    status = (request.form.get('status') or '').strip().lower()
+    payment_status = (request.form.get('payment_status') or '').strip().lower()
+    allowed_status = {'pending', 'paid', 'shipped', 'delivered', 'canceled'}
+    allowed_pay = {'', 'unpaid', 'paid', 'refunded'}
+    if status and status in allowed_status:
+        order.status = status
+    if payment_status in allowed_pay and payment_status:
+        order.payment_status = payment_status
+    order.updated_at = date.today().strftime("%B %d, %Y")
+    db.session.commit()
+    flash('Order updated.', 'success')
+    return redirect(url_for('order_detail', order_id=order_id))
 
 
 @app.errorhandler(500)
