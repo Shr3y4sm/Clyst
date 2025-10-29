@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clyst - My Orders</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
+  </head>
+  <body>
+    <!-- ===== NAVBAR ===== -->
+    <nav id="topNav">
+      <div class="nav">
+        <div class="nav-left">
+          <div class="hamburger" onclick="toggleMenu(event)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path>
+            </svg>
+          </div>
+          <a href="{{ url_for('home') }}">Clyst</a>
+        </div>
+
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ url_for('home') }}">Community Feed</a>
+        <a href="{{ url_for('products_page') }}">Marketplace</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="header">
+        <h1>My Orders</h1>
+      </div>
+
+      <div class="main-content">
+        {% if orders %}
+        <div class="products-grid">
+          {% for o in orders %}
+          <div class="product-card">
+            <div
+              class="product-image"
+              style="
+                height: auto;
+                padding: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #fafafa;
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M21 16V21H3V16H1V21C1 22.1046 1.89543 23 3 23H21C22.1046 23 23 22.1046 23 21V16H21ZM7.58579 9.41421L11 6V16H13V6L16.4142 9.41421L17.8284 8L12 2.17157L6.17157 8L7.58579 9.41421Z"
+                ></path>
+              </svg>
+            </div>
+            <div class="product-info">
+              <h3 class="product-title">Order #{{ o.order_id }}</h3>
+              <p class="product-price">
+                Rs. {{ '%.2f'|format(o.total_price or 0) }}
+              </p>
+              <p class="product-meta">
+                {{ o.created_at }} • <strong>{{ o.status|upper }}</strong>{% if
+                o.payment_status %} • {{ o.payment_status|upper }}{% endif %}
+              </p>
+              <div class="product-actions">
+                <a
+                  class="btn btn-primary"
+                  href="{{ url_for('order_detail', order_id=o.order_id) }}"
+                  >View Details</a
+                >
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-cart">
+          <h3>No orders yet</h3>
+          <p>Start by exploring unique artworks in the marketplace.</p>
+          <a href="{{ url_for('products_page') }}" class="btn btn-primary"
+            >Browse Marketplace</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      function toggleMenu(e) {
+        e?.stopPropagation?.();
+        const menu = document.getElementById("mobileMenu");
+        const now = menu.style.display === "flex" ? "none" : "flex";
+        menu.style.display = now;
+      }
+    </script>
+  </body>
+</html>

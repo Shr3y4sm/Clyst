@@ -52,6 +52,8 @@ Thumbs.db
 # Logs
 *.log
 
+#tests
+tests
 # API Keys and Configuration
 config.py
 

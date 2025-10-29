@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clyst - Checkout</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/cart.css" />
+  </head>
+  <body>
+    <!-- ===== NAVBAR ===== -->
+    <nav id="topNav">
+      <div class="nav">
+        <div class="nav-left">
+          <div class="hamburger" onclick="toggleMenu(event)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path>
+            </svg>
+          </div>
+          <a href="{{ url_for('home') }}">Clyst</a>
+        </div>
+
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
+        </div>
+
+        <div class="nav-actions">
+          {% if current_user.is_authenticated %}
+          <a
+            href="{{ url_for('view_cart') }}"
+            class="cart-btn"
+            title="Shopping Cart"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"
+              ></path>
+            </svg>
+            <span class="cart-count" id="cartCount">0</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ url_for('home') }}">Community Feed</a>
+        <a href="{{ url_for('products_page') }}">Marketplace</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('view_cart') }}">Shopping Cart</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="header">
+        <h1>Checkout</h1>
+      </div>
+
+      <div class="main-content">
+        {% if cart_items %}
+        <form method="POST" class="cart-summary" style="gap: 16px">
+          <div class="summary-card">
+            <h3>Shipping Details</h3>
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input
+                class="form-input"
+                type="text"
+                name="shipping_name"
+                value="{{ shipping_name }}"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input
+                class="form-input"
+                type="text"
+                name="shipping_phone"
+                value="{{ shipping_phone }}"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <textarea
+                class="form-input"
+                name="shipping_address"
+                rows="3"
+                required
+              >
+{{ shipping_address }}</textarea
+              >
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <h3>Order Summary</h3>
+            {% for item in cart_items %}
+            <div
+              class="cart-item"
+              style="padding: 8px 0; border-bottom: 1px solid #eee"
+            >
+              <div class="item-info">
+                <div class="item-details">
+                  <div class="item-title" style="font-weight: 600">
+                    {{ item.product.title }}
+                  </div>
+                  <div class="item-artist">
+                    By {{ item.product.artist.name }}
+                  </div>
+                </div>
+                <div class="item-quantity" style="text-align: right">
+                  <div>x {{ item.quantity }}</div>
+                  <div style="font-weight: 600">
+                    Rs. {{ '%.2f'|format(item.quantity * item.product.price) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <div class="summary-row">
+              <span class="summary-label">Subtotal</span>
+              <span>Rs. {{ '%.2f'|format(subtotal) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Shipping</span>
+              <span>Free</span>
+            </div>
+            <div class="summary-row total">
+              <span class="summary-label">TOTAL</span>
+              <span>Rs. {{ '%.2f'|format(subtotal) }}</span>
+            </div>
+
+            <div class="checkout-actions">
+              <a class="btn btn-secondary" href="{{ url_for('view_cart') }}"
+                >Back to Cart</a
+              >
+              <button class="btn btn-primary" type="submit">Place Order</button>
+            </div>
+            <p style="color: #8e8e8e; font-size: 12px; margin-top: 8px">
+              Payment will be collected after order placement in the next step.
+              This is a demo flow without a payment gateway.
+            </p>
+          </div>
+        </form>
+        {% else %}
+        <div class="empty-cart">
+          <h3>Your cart is empty</h3>
+          <a href="{{ url_for('products_page') }}" class="btn btn-primary"
+            >Start Shopping</a
+          >
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script>
+      function toggleMenu(e) {
+        e?.stopPropagation?.();
+        const menu = document.getElementById("mobileMenu");
+        const now = menu.style.display === "flex" ? "none" : "flex";
+        menu.style.display = now;
+      }
+    </script>
+  </body>
+</html>

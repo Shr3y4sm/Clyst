@@ -52,7 +52,15 @@
             class="cart-btn"
             title="Shopping Cart"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"></path></svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"
+              ></path>
+            </svg>
             <span class="cart-count" id="cartCount">0</span>
           </a>
           <a
@@ -91,79 +99,104 @@
       <div class="main-content">
         {% if cart_items %}
 
-          <div class="cart-summary">
-            <div class="summary-card">
-              <h3>Your Order Summary</h3>
-        <div class="cart-container">
-          <div class="cart-items">
-            {% for item in cart_items %}
-            <div class="cart-item" data-item-id="{{ item.item_id }}">
-              <div class="item-image">
-                {% if item.product.img_url %}
-                <img
-                  src="{{ item.product.img_url }}"
-                  alt="{{ item.product.title }}"
-                />
-                {% else %}
-                <div class="placeholder-image">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 5H4V19L13.2923 9.70649C13.6828 9.31595 14.3159 9.31591 14.7065 9.70641L20 15.0104V5ZM2 3.9934C2 3.44476 2.45531 3 2.9918 3H21.0082C21.556 3 22 3.44495 22 3.9934V20.0066C22 20.5552 21.5447 21 21.0082 21H2.9918C2.44405 21 2 20.5551 2 20.0066V3.9934ZM8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7C9.10457 7 10 7.89543 10 9C10 10.1046 9.10457 11 8 11Z"></path></svg>
-                </div>
-                {% endif %}
-              </div>
+        <div class="cart-summary">
+          <div class="summary-card">
+            <h3>Your Order Summary</h3>
+            <div class="cart-container">
+              <div class="cart-items">
+                {% for item in cart_items %}
+                <div class="cart-item" data-item-id="{{ item.item_id }}">
+                  <div class="item-image">
+                    {% if item.product.img_url %}
+                    <img
+                      src="{{ item.product.img_url }}"
+                      alt="{{ item.product.title }}"
+                    />
+                    {% else %}
+                    <div class="placeholder-image">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M20 5H4V19L13.2923 9.70649C13.6828 9.31595 14.3159 9.31591 14.7065 9.70641L20 15.0104V5ZM2 3.9934C2 3.44476 2.45531 3 2.9918 3H21.0082C21.556 3 22 3.44495 22 3.9934V20.0066C22 20.5552 21.5447 21 21.0082 21H2.9918C2.44405 21 2 20.5551 2 20.0066V3.9934ZM8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7C9.10457 7 10 7.89543 10 9C10 10.1046 9.10457 11 8 11Z"
+                        ></path>
+                      </svg>
+                    </div>
+                    {% endif %}
+                  </div>
 
-              <div class="item-info">
-              <div class="item-details">
-                <h3 class="item-title">{{ item.product.title }}
-                </h3>
-                <p class="item-artist">By {{ item.product.artist.name }}</p>
-                <p class="item-price">Rs.{{ item.product.price }}</p>
-                <button
-                  class="btn btn-danger btn-secondary"
-                  onclick="removeItem('{{ item.item_id }}')"
-                  title="Remove item"
-                  type="button"
-                >
-                 REMOVE ITEM
-                </button>
-              </div>
+                  <div class="item-info">
+                    <div class="item-details">
+                      <h3 class="item-title">{{ item.product.title }}</h3>
+                      <p class="item-artist">
+                        By {{ item.product.artist.name }}
+                      </p>
+                      <p class="item-price">Rs.{{ item.product.price }}</p>
+                      <button
+                        class="btn btn-danger btn-secondary"
+                        onclick="removeItem('{{ item.item_id }}')"
+                        title="Remove item"
+                        type="button"
+                      >
+                        REMOVE ITEM
+                      </button>
+                    </div>
 
-              <div class="item-quantity">
-                <label for="quantity-{{ item.item_id }}">Quantity</label>
-                <div class="quantity-controls">
-                  <button
-                    class="quantity-btn"
-                    onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int - 1 }})"
-                    type="button"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 11H5V13H19V11Z"></path></svg>
-                  </button>
-                  <input
-                    type="number"
-                    id="quantity-{{ item.item_id }}"
-                    value="{{ item.quantity }}"
-                    min="1"
-                    onchange="updateQuantity('{{ item.item_id }}', this.value)"
-                  />
-                  <button
-                    class="quantity-btn"
-                    onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int + 1 }})"
-                    type="button"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path></svg>
-                  </button>
+                    <div class="item-quantity">
+                      <label for="quantity-{{ item.item_id }}">Quantity</label>
+                      <div class="quantity-controls">
+                        <button
+                          class="quantity-btn"
+                          onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int - 1 }})"
+                          type="button"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path d="M19 11H5V13H19V11Z"></path>
+                          </svg>
+                        </button>
+                        <input
+                          type="number"
+                          id="quantity-{{ item.item_id }}"
+                          value="{{ item.quantity }}"
+                          min="1"
+                          onchange="updateQuantity('{{ item.item_id }}', this.value)"
+                        />
+                        <button
+                          class="quantity-btn"
+                          onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int + 1 }})"
+                          type="button"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                          >
+                            <path
+                              d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"
+                            ></path>
+                          </svg>
+                        </button>
+                      </div>
+                      <label for="total-price">Item total</label>
+                      <span class="total-price"
+                        >Rs. {{ "%.2f"|format(item.quantity *
+                        item.product.price) }}</span
+                      >
+                    </div>
+                  </div>
                 </div>
-                <label for="total-price">Item total</label>
-                <span class="total-price"
-                  >Rs. {{ "%.2f"|format(item.quantity * item.product.price)
-                  }}</span
-                >
-              </div></div>
-              
-            </div>
-            {% endfor %}
-          </div>
+                {% endfor %}
+              </div>
               <div class="summary-row">
-                <span class="summary-label">Subtotal ({{ cart_items|length }} items)</span>
+                <span class="summary-label"
+                  >Subtotal ({{ cart_items|length }} items)</span
+                >
                 <span>Rs. {{ "%.2f"|format(total_price) }}</span>
               </div>
               <div class="summary-row">
@@ -176,7 +209,10 @@
               </div>
 
               <div class="checkout-actions">
-                <button class="btn btn-secondary btn-danger" onclick="clearCart()">
+                <button
+                  class="btn btn-secondary btn-danger"
+                  onclick="clearCart()"
+                >
                   Clear Cart
                 </button>
                 <button class="btn btn-secondary" onclick="continueShopping()">
@@ -194,7 +230,15 @@
         </div>
         {% else %}
         <div class="empty-cart">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM6.00436 7.00265V13.0027H17.5163L19.3163 7.00265H6.00436ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"></path></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
+            <path
+              d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM6.00436 7.00265V13.0027H17.5163L19.3163 7.00265H6.00436ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"
+            ></path>
+          </svg>
           <h3>Your cart is empty</h3>
           <p>Looks like you haven't added any items to your cart yet.</p>
           <a href="{{ url_for('products_page') }}" class="btn btn-primary">
@@ -316,9 +360,7 @@
       }
 
       function proceedToCheckout() {
-        alert(
-          "Checkout functionality would be implemented here!\n\nThis would typically redirect to:\n- Payment gateway (Stripe, PayPal, Razorpay)\n- Order confirmation page\n- Email notifications"
-        );
+        window.location.href = "{{ url_for('checkout') }}";
       }
 
       function continueShopping() {
