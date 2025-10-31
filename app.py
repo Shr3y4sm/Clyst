@@ -430,7 +430,22 @@ def register():
 @app.route("/add", methods=["GET", "POST"])
 @login_required
 def add_posts():
+    post_id = request.args.get('post_id')
+    post = None
+    if post_id:
+        post = db.get_or_404(Posts, post_id)
+        # Check if user owns this post
+        if post.artist_id != current_user.id:
+            abort(403)
+
     if request.method == 'POST':
+        post_id = request.form.get('post_id')
+        if post_id:
+            post = db.get_or_404(Posts, post_id)
+            # Check if user owns this post
+            if post.artist_id != current_user.id:
+                abort(403)
+
         # Handle image upload
         media_url = request.form.get('post_image', '')
 
@@ -441,31 +456,70 @@ def add_posts():
                 uploaded_path = save_uploaded_file(file, 'posts')
                 if uploaded_path:
                     media_url = uploaded_path
-        # Enforce that at least one image source is provided
-        if not media_url:
-            flash('Please provide an image URL or upload an image for the post.')
-            return render_template("add_posts.html", current_user=current_user)
+                    
+        # For editing, keep existing image if no new one provided
+        if not media_url and post:
+            media_url = post.media_url
+        # For new posts, enforce image requirement
+        elif not media_url and not post:
+            message = 'Please provide an image URL or upload an image for the post.'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'message': message})
+            flash(message)
+            return render_template("add_posts.html", current_user=current_user, post=post)
 
-        # type: ignore[call-arg]
-        new_post = Posts(
-            artist_id=current_user.id,
-            post_title=request.form['post_title'],
-            description=request.form['description'],
-            media_url=media_url,
-            created_at=date.today().strftime("%B %d, %Y"),
-            is_promoted=request.form.get('is_promoted') == 'True'
-        )
-        db.session.add(new_post)
-        db.session.commit()
-        return redirect(url_for('home'))
+        if post:
+            # Update existing post
+            post.post_title = request.form['post_title']
+            post.description = request.form['description']
+            if media_url:  # Only update image if new one provided
+                post.media_url = media_url
+            post.is_promoted = request.form.get('is_promoted') == 'True'
+        else:
+            # Create new post
+            post = Posts(
+                artist_id=current_user.id,
+                post_title=request.form['post_title'],
+                description=request.form['description'],
+                media_url=media_url,
+                created_at=date.today().strftime("%B %d, %Y"),
+                is_promoted=request.form.get('is_promoted') == 'True'
+            )
+            db.session.add(post)
+
+        try:
+            db.session.commit()
+            # If it's an AJAX request, return JSON response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': True,
+                    'message': 'Post updated successfully',
+                    'post': {
+                        'post_title': post.post_title,
+                        'description': post.description or '',
+                        'media_url': media_url if media_url != post.media_url else None
+                    }
+                })
+            
+            # For regular form submissions, redirect to home
+            return redirect(url_for('home'))
+        except Exception as e:
+            db.session.rollback()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': False,
+                    'message': str(e)
+                }), 400
+            flash('Error updating post: ' + str(e))
+            return redirect(url_for('home'))
     
-    # Pre-fill from query parameters for promotion
+    # Pre-fill from query parameters for promotion or editing
     title = request.args.get('title', '')
     description = request.args.get('description', '')
     media_url = request.args.get('media_url', '')
     is_promoted = request.args.get('is_promoted', 'False')
     
-    return render_template("add_posts.html", current_user=current_user, title=title, description=description, media_url=media_url, is_promoted=is_promoted)
+    return render_template("add_posts.html", current_user=current_user, post=post, title=title, description=description, media_url=media_url, is_promoted=is_promoted)
 
 
 @app.route("/promote_product/<int:product_id>", methods=["POST"])

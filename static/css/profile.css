@@ -551,6 +551,11 @@ button {
 	fill: #fff;
 }
 
+.post-actions {
+	display: flex;
+	flex-direction: row-reverse;
+}
+
 .empty-state svg {
 	width: 100px;
 	max-width: none;

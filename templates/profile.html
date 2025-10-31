@@ -155,8 +155,7 @@
                   >
                     <path
                       d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
-                    ></path></svg
-                  >{{ profile_user.location }}
+                    ></path></svg>{{ profile_user.location }}
                 </p>
                 {% endif %} {% else %} {% if current_user.email %}
                 <p>
@@ -356,25 +355,25 @@
                       ></path>
                     </svg>
                   </button>
-                  {% if current_user.is_authenticated and current_user.id ==
-                  post.artist_id %}
-                  <button
-                    class="delete-btn post-delete-btn"
-                    onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'"
-                    title="Delete Post"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      height="24"
-                      fill="currentColor"
+                  {% if current_user.is_authenticated and current_user.id == post.artist_id %}
+                  <div class="post-actions">
+                    <button
+                      class="action-btn edit-btn"
+                      onclick="openEditPostModal('{{ post.post_id }}', '{{ post.post_title|replace('\'', '\\\'') }}', '{{ post.description|replace('\'', '\\\'') }}', '{{ post.media_url }}', {{ post.is_promoted|tojson }})"
+                      title="Edit Post"
                     >
-                      <path
-                        d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
-                      ></path>
-                    </svg>
-                  </button>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"></path></svg>
+                    </button>
+                    <button
+                      class="action-btn delete-btn"
+                      onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'"
+                      title="Delete Post"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path>
+                      </svg>
+                    </button>
+                  </div>
                   {% endif %} {% if post.media_url %}
                   <img
                     src="{{ post.media_url }}"
@@ -974,5 +973,216 @@
         );
       }
     </script>
+
+    <script>
+      // Edit post modal functionality
+      function openEditPostModal(postId, title, description, mediaUrl, isPromoted) {
+        // Create modal HTML
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'editPostModal';
+        modal.innerHTML = `
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Edit Post</h2>
+              <button type="button" class="close-btn" onclick="closeEditPostModal()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg>
+              </button>
+            </div>
+            <form id="editPostForm" action="/add_posts" method="POST" enctype="multipart/form-data">
+              <input type="hidden" name="post_id" value="${postId}">
+              <div class="form-group">
+                <label for="post_title">Post Title</label>
+                <input type="text" id="post_title" name="post_title" value="${title}" required>
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" required>${description}</textarea>
+              </div>
+              <div class="form-group">
+                <label for="media">Image (leave empty to keep current)</label>
+                <input type="file" id="media" name="media" accept="image/*">
+                ${mediaUrl ? `<img src="${mediaUrl}" alt="Current image" class="preview-image">` : ''}
+              </div>
+              <div class="modal-footer">
+                <button type="button" onclick="closeEditPostModal()" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        `;
+
+        // Add modal to page
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+
+        // Show modal with animation
+        setTimeout(() => modal.classList.add('open'), 10);
+
+        // Setup form submission
+        const form = document.getElementById('editPostForm');
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          const formData = new FormData(form);
+          
+          try {
+            const response = await fetch("{{ url_for('add_posts') }}", {
+              method: 'POST',
+              body: formData
+            });
+            
+            if (response.ok) {
+              window.location.reload();
+            } else {
+              throw new Error('Failed to update post');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to update post. Please try again.');
+          }
+        };
+      }
+
+      function closeEditPostModal() {
+        const modal = document.getElementById('editPostModal');
+        modal.classList.remove('open');
+        setTimeout(() => {
+          modal.remove();
+          document.body.style.overflow = '';
+        }, 300);
+      }
+    </script>
+
+    <style>
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .modal.open {
+        opacity: 1;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+        transform: translateY(20px);
+        transition: transform 0.3s ease;
+      }
+
+      .modal.open .modal-content {
+        transform: translateY(0);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+      }
+
+      .close-btn svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      .form-group input[type="text"],
+      .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .form-group textarea {
+        min-height: 100px;
+      }
+
+      .preview-image {
+        max-width: 100%;
+        height: auto;
+        margin-top: 10px;
+        border-radius: 4px;
+      }
+
+      .modal-footer {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      .btn-primary {
+        background: #007bff;
+        color: white;
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+      }
+
+      .post-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      }
+
+      .action-btn:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+
+      .action-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      .edit-btn svg {
+        color: #0066cc;
+      }
+
+      .delete-btn svg {
+        color: #dc3545;
+      }
+    </style>
   </body>
 </html>
