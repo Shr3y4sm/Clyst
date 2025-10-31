@@ -100,7 +100,7 @@
                     >BECOME VERIFIED ARTISAN</a
                   ></span
                 >
-              </div>
+              </div>{% endif %} 
               {% if current_user.is_authenticated and (not profile_user or
               current_user.id == profile_user.id) %}
               <div
@@ -111,7 +111,7 @@
                   ><a href="{{ url_for('orders_list') }}">MY ORDERS</a></span
                 >
               </div>
-              {% endif %} {% endif %}
+              {% endif %}
               <h1 class="profile-name">
                 {% if profile_user %} {{ profile_user.name }} {% else %} {{
                 current_user.name }} {% endif %}
