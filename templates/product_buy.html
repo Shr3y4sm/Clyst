@@ -98,12 +98,24 @@
 
           <div class="product-header">
             <h1 class="product-title">{{ product.title }}</h1>
+            <div class="product-rating" title="Average rating">
+              {% set avg = (product.avg_rating or 0) %}
+              {% for i in range(1,6) %}
+                {% if i <= avg|round(0, 'floor') %}
+                <svg class="star-icon icon-20 star--filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+                {% else %}
+                <svg class="star-icon icon-20 star--empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+                {% endif %}
+              {% endfor %}
+              <span class="avg-rating-text">{{ '%.1f'|format(product.avg_rating or 0) }} ({{ product.reviews_count or 0 }})</span>
+            </div>
             <div class="product-price">Rs.{{ product.price }}</div>
           </div>
           <div class="item-desc">{{product.description}}</div>
 
           
         {% if current_user.is_authenticated %}
+        <h3 class="reviews-heading">Reviews & Rating</h3>
         <form
           action="{{ url_for('add_product_comment', product_id=product.product_id) }}"
           method="POST"
@@ -115,19 +127,32 @@
             value="product-{{ product.product_id }}-comments"
           />
           <div class="artist-avatar">{{ current_user.name[0].upper() }}</div>
+          <div class="rating-input" id="comment-rating" data-current-rating="{{ product.current_user_rating or 0 }}" aria-label="Rate this product">
+            <span class="rating-label">Rating</span>
+            <div class="rating-stars" role="radiogroup" aria-label="Stars">
+              {% for i in range(1,6) %}
+              <button type="button" class="star-btn" data-value="{{ i }}" aria-label="{{ i }} star{% if i>1 %}s{% endif %}">
+                <svg class="star-icon icon-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+              </button>
+              {% endfor %}
+            </div>
+            <input type="hidden" name="rating" id="rating-hidden" value="0" />
+          </div>
           <input
             type="text"
             name="comment"
             placeholder="Write a comment..."
             required
           />
-          <button class="btn btn-primary">
+          <button class="btn btn-primary" type="submit" title="Submit comment">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12.9999H9V10.9999H3V1.84558C3 1.56944 3.22386 1.34558 3.5 1.34558C3.58425 1.34558 3.66714 1.36687 3.74096 1.40747L22.2034 11.5618C22.4454 11.6949 22.5337 11.9989 22.4006 12.2409C22.3549 12.324 22.2865 12.3924 22.2034 12.4381L3.74096 22.5924C3.499 22.7255 3.19497 22.6372 3.06189 22.3953C3.02129 22.3214 3 22.2386 3 22.1543V12.9999Z"></path></svg>
+            <span class="sr-only">Submit comment</span>
           </button>
         </form>
         {% else %}
-        <p class="comment-login"><a href="{{ url_for('login') }}">Login</a> to leave a comment.</p>
+        <p class="comment-login"><a href="{{ url_for('login') }}">Login</a> to leave a review.</p>
         {% endif %}
+        
 
         
         {% if product.comments %} 
@@ -155,9 +180,9 @@
               </div>
               {% if current_user.is_authenticated and current_user.id ==
               comment.artist.id %}
-              <form action="{{ url_for('delete_product_comment', comment_id=comment.id) }}" method="POST" style="display:inline;">
+              <form action="{{ url_for('delete_product_comment', comment_id=comment.id) }}" method="POST" class="form-inline">
                 <input type="hidden" name="anchor" value="product-{{ product.product_id }}-comments" />
-                <button class="action-btn delete-btn" onclick="return confirm('Delete this comment?')" type="submit">
+                <button class="action-btn delete-btn" onclick="return confirm('Delete this comment?')" type="submit" title="Delete comment">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -169,10 +194,23 @@
                       d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
                     ></path>
                   </svg>
+                  <span class="sr-only">Delete comment</span>
                 </button>
               </form>
               {% endif %}
             </div>
+            {% set ur = product.ratings_map.get(comment.artist.id) if product.ratings_map else 0 %}
+            {% if ur %}
+            <div class="rating-display">
+              {% for i in range(1,6) %}
+                {% if i <= ur %}
+                <svg class="star-icon icon-16 star--filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+                {% else %}
+                <svg class="star-icon icon-16 star--empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% endif %}
             <p class="comment-p">{{ comment.content }}</p>
             <div class="icon-set">
               <button
@@ -340,6 +378,7 @@
       id="translateButton"
       onclick="googleTranslateElementInit()"
       class="translate-btn"
+      title="Translate page"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -350,6 +389,7 @@
           d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"
         ></path>
       </svg>
+      <span class="sr-only">Translate this page</span>
     </button>
 
     <script>
@@ -498,11 +538,12 @@
       // Update cart count on page load
       document.addEventListener("DOMContentLoaded", function () {
         updateCartCount();
+        initCommentRatingWidget();
       });
     </script>
     <script
       type="text/javascript"
-      src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+      src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
     ></script>
     <script type="text/javascript">
       function googleTranslateElementInit() {
@@ -515,6 +556,35 @@
           },
           "google_translate_element"
         );
+      }
+    </script>
+    <script>
+      function initCommentRatingWidget() {
+        const wrap = document.getElementById('comment-rating');
+        if (!wrap) return;
+        const hidden = document.getElementById('rating-hidden');
+        const stars = wrap.querySelectorAll('.star-btn');
+        const current = parseInt(wrap.getAttribute('data-current-rating') || '0', 10) || 0;
+        function paint(n) {
+          stars.forEach(btn => {
+            const v = parseInt(btn.getAttribute('data-value'), 10) || 0;
+            btn.classList.toggle('active', v <= n);
+          });
+        }
+        if (current) {
+          hidden.value = String(current);
+          paint(current);
+        }
+        stars.forEach(btn => {
+          btn.addEventListener('mouseover', () => paint(parseInt(btn.getAttribute('data-value'), 10) || 0));
+          btn.addEventListener('focus', () => paint(parseInt(btn.getAttribute('data-value'), 10) || 0));
+          btn.addEventListener('click', () => {
+            const val = parseInt(btn.getAttribute('data-value'), 10) || 0;
+            hidden.value = String(val);
+            paint(val);
+          });
+        });
+        wrap.addEventListener('mouseleave', () => paint(parseInt(hidden.value || '0', 10) || 0));
       }
     </script>
 
@@ -574,7 +644,7 @@
               />
               {% if product.img_url %}
               <div class="current-image">
-                <img src="{{ product.img_url }}" alt="Current product image" style="max-width: 200px; margin-top: 10px;">
+                <img src="{{ product.img_url }}" alt="Current product image" class="current-image-preview">
                 <small class="form-help">Current image</small>
               </div>
               {% endif %}

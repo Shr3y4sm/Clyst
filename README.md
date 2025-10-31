@@ -7,9 +7,12 @@ Clyst is a comprehensive web application that serves as both a social platform f
 ### Core Functionality
 - **Community Feed**: Artists can share their artwork with the community through posts
 - **Marketplace**: Buy and sell artwork with integrated pricing and product management
+- **Shopping Cart**: Full-featured shopping cart with add, update quantity, and remove functionality
+- **Order Management**: Complete e-commerce workflow from checkout to order tracking
+- **Reviews & Ratings**: Interactive 1-5 star rating system integrated with product reviews
 - **User Authentication**: Secure registration, login, and profile management with Flask-Login
 - **Image Management**: Support for both URL-based and file upload images with secure handling
-- **Search & Discovery**: Natural language search with price filtering capabilities
+- **Search & Discovery**: Natural language search with price filtering and rating display
 - **Portfolio Management**: AI-generated portfolio narratives for artist profiles
 - **Promote Product to Post**: Turn a marketplace product into a community post with one click and a Promoted badge
 - **Verification (Get Verified)**: Dedicated camera page to complete simple verification from profile
@@ -197,18 +200,33 @@ Developer endpoints
 
 1. **Browsing & Discovery**
    - Explore the community feed for inspiration
-   - Browse the marketplace for products
+   - Browse the marketplace with star ratings displayed on each product
    - Use natural language search (e.g., "abstract paintings under 5000")
+   - View average ratings and review counts to make informed decisions
 
 2. **Search Features**
    - Search by keywords, artist names, or descriptions
    - Filter by price ranges
    - Use phrases like "landscape oil painting below 7500"
 
-3. **Product Interaction**
-   - View detailed product information
+3. **Shopping Cart**
+   - Add products to cart with custom quantities
+   - Update quantities or remove items from cart
+   - View total price before checkout
+   - Proceed to checkout for order placement
+
+4. **Product Interaction**
+   - View detailed product information with ratings
+   - Leave reviews with 1-5 star ratings
+   - Read other buyers' reviews and ratings
+   - Rate and review products in one unified interface
    - Contact artists through their profiles
    - Use text-to-speech for accessibility
+
+5. **Order Management**
+   - Complete checkout process for cart items
+   - Track order status (pending, completed, cancelled)
+   - View order history with details and pricing
 
 ## 🔍 Search Capabilities
 
@@ -237,6 +255,27 @@ The application features an advanced natural language search system that underst
 - Supports ₹, Rs, INR notations
 - Handles k/M suffixes (5k = 5000, 2M = 2,000,000)
 - Removes thousand separators (1,200 → 1200)
+
+## ⭐ Reviews & Rating System
+
+### Interactive Star Ratings
+- **Modern Interface**: Clickable 1-5 star rating widget with hover effects
+- **Unified Experience**: Rating integrated seamlessly with product reviews
+- **Visual Feedback**: Active, hover, and selected states for better user experience
+- **Rating Prefill**: Users can see and update their previous ratings
+
+### Rating Features
+- **One Rating Per User**: Each user can rate a product once (can be updated)
+- **Average Calculation**: Automatic computation of average ratings from all reviews
+- **Marketplace Display**: Star ratings shown on product cards with average and review count
+- **Product Detail**: Full rating breakdown on product pages with individual reviews
+- **Cascade Deletion**: Removing a review automatically updates product rating
+
+### Developer Details
+- **Endpoints**: Rating submission integrated with `/add_product_comment/<product_id>`
+- **Rating Parameter**: Optional 'rating' field (integer 1-5) in comment form
+- **Database**: ProductReview table with unique constraint per user-product pair
+- **Frontend**: Pure JavaScript/CSS implementation with SVG star icons
 
 ## 🤖 AI Features
 
@@ -328,6 +367,40 @@ The application features an advanced natural language search system that underst
 - `is_promoted`: Promotion flag for product (Boolean) — currently used to track promotion state
 - **Relationships**: Many-to-one with User
 
+### ProductComments Table
+- `comment_id`: Primary key (auto-increment)
+- `product_id`: Foreign key to products.product_id (CASCADE on delete)
+- `user_id`: Foreign key to users.id
+- `content`: Comment/review text (Text)
+- `created_at`: Comment creation date (String, 250 chars)
+
+### ProductReview Table
+- `review_id`: Primary key (auto-increment)
+- `product_id`: Foreign key to products.product_id (CASCADE on delete)
+- `user_id`: Foreign key to users.id
+- `rating`: Star rating (Integer, 1-5)
+- `title`: Optional review title (String, 255 chars)
+- `content`: Optional review content (Text)
+- `created_at`: Review creation date (String, 250 chars)
+- `updated_at`: Review updated date (String, 250 chars)
+- **Constraints**: One review per user per product (unique constraint on product_id + user_id)
+
+### Cart Table
+- `cart_id`: Primary key (auto-increment)
+- `user_id`: Foreign key to users.id
+- `product_id`: Foreign key to products.product_id
+- `quantity`: Number of items (Integer, default 1)
+- `added_at`: Date item added to cart (String, 250 chars)
+
+### Orders Table
+- `order_id`: Primary key (auto-increment)
+- `user_id`: Foreign key to users.id (buyer)
+- `product_id`: Foreign key to products.product_id
+- `quantity`: Number of items ordered (Integer)
+- `total_price`: Total order price (Numeric, 10 digits, 2 decimal places)
+- `status`: Order status (String, 50 chars) - e.g., "pending", "completed", "cancelled"
+- `created_at`: Order creation date (String, 250 chars)
+
 
 ### Environment Setup
 ```bash
@@ -352,10 +425,12 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🔮 Future Enhancements
 
 - **Advanced AI**: More sophisticated content generation, image analysis and smart price assist for artisans
-- **Social Features**: Like, comment, share features
-- **Advanced Search**: Recommendation system
-- **Order Management**: E-commerce cart functionality
-- **Review System**: Product reviews and ratings and analysis dashboard for artisans.
+- **Social Features**: Enhanced sharing features and social media integration
+- **Advanced Search**: Recommendation system based on browsing history and preferences
+- **Payment Integration**: Secure payment gateway integration for online transactions
+- **Analytics Dashboard**: Comprehensive analytics for artists to track sales, reviews, and performance
+- **Half-Star Ratings**: Support for fractional ratings (e.g., 4.5 stars) for more precise averages
+- **Review Moderation**: Tools for artists to respond to reviews and flag inappropriate content
 
 
 ---

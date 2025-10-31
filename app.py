@@ -220,6 +220,19 @@ class ProductComments(db.Model):
     created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
 
 
+class ProductReview(db.Model):
+    __tablename__ = 'product_reviews'
+
+    review_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.product_id', ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # 1..5
+    title = db.Column(db.String(150))
+    content = db.Column(db.Text)
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    updated_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+
 class Cart(db.Model):
     __tablename__ = 'carts'
 
@@ -357,6 +370,17 @@ def products_page():
                 pass
     result = db.session.execute(prod_query)
     products = result.scalars().all()
+    
+    # Attach avg rating and review count to each product
+    for product in products:
+        reviews_rows = db.session.execute(
+            db.select(ProductReview).where(ProductReview.product_id == product.product_id)
+        ).scalars().all()
+        total_rating = sum(int(r.rating or 0) for r in reviews_rows)
+        avg_rating = (total_rating / len(reviews_rows)) if reviews_rows else 0
+        setattr(product, 'avg_rating', avg_rating)
+        setattr(product, 'reviews_count', len(reviews_rows))
+    
     return render_template('products.html', products=products, current_user=current_user, q=q)
 
 
@@ -822,6 +846,39 @@ def product_buy(product_id):
             }
         })
     setattr(product, 'comments', comments_data)
+    # Load reviews and compute average rating
+    reviews_rows = db.session.execute(db.select(ProductReview).where(ProductReview.product_id == product.product_id)).scalars().all()
+    reviews_data = []
+    total_rating = 0
+    ratings_map = {}
+    for r in reviews_rows:
+        author = db.session.get(User, r.user_id)
+        reviews_data.append({
+            'id': r.review_id,
+            'rating': r.rating,
+            'title': r.title,
+            'content': r.content,
+            'created_at': r.created_at,
+            'artist': {
+                'name': getattr(author, 'name', 'Unknown') if author else 'Unknown',
+                'email': getattr(author, 'email', '') if author else '',
+                'id': getattr(author, 'id', None) if author else None,
+            }
+        })
+        try:
+            total_rating += int(r.rating or 0)
+        except Exception:
+            pass
+        ratings_map[r.user_id] = int(r.rating or 0)
+    avg_rating = (total_rating / len(reviews_rows)) if reviews_rows else 0
+    setattr(product, 'reviews', reviews_data)
+    setattr(product, 'avg_rating', avg_rating)
+    setattr(product, 'reviews_count', len(reviews_rows))
+    setattr(product, 'ratings_map', ratings_map)
+    try:
+        setattr(product, 'current_user_rating', ratings_map.get(current_user.id) if current_user.is_authenticated else 0)
+    except Exception:
+        setattr(product, 'current_user_rating', 0)
     return render_template("product_buy.html",
                            current_user=current_user,
                            product=product)
@@ -832,9 +889,10 @@ def product_buy(product_id):
 def add_product_comment(product_id):
     content = (request.form.get('comment') or '').strip()
     if not content:
-        flash('Comment cannot be empty')
+        flash('Review text cannot be empty')
         return redirect(url_for('product_buy', product_id=product_id))
 
+    # Always create the visible comment (for backward-compatible UI)
     new_comment = ProductComments(
         product_id=product_id,
         user_id=current_user.id,
@@ -842,10 +900,98 @@ def add_product_comment(product_id):
         created_at=date.today().strftime("%B %d, %Y")
     )
     db.session.add(new_comment)
+
+    # Optionally create or update a star review when provided
+    rating_raw = (request.form.get('rating') or '').strip()
+    try:
+        rating_val = int(rating_raw) if rating_raw else 0
+    except Exception:
+        rating_val = 0
+    if 1 <= rating_val <= 5:
+        existing = db.session.execute(
+            db.select(ProductReview).where(
+                ProductReview.product_id == product_id,
+                ProductReview.user_id == current_user.id
+            )
+        ).scalar()
+        if existing:
+            existing.rating = rating_val
+            existing.content = content or existing.content
+            existing.updated_at = date.today().strftime("%B %d, %Y")
+        else:
+            db.session.add(ProductReview(
+                product_id=product_id,
+                user_id=current_user.id,
+                rating=rating_val,
+                title='',
+                content=content,
+                created_at=date.today().strftime("%B %d, %Y"),
+                updated_at=date.today().strftime("%B %d, %Y"),
+            ))
+
     db.session.commit()
     anchor = request.form.get('anchor')
     if anchor:
         return redirect(url_for('product_buy', product_id=product_id) + '#' + anchor)
+    return redirect(url_for('product_buy', product_id=product_id))
+
+
+@app.route('/product/<int:product_id>/review', methods=["POST"])
+@login_required
+def add_or_update_product_review(product_id):
+    """Create or update a star review for a product. One review per user per product."""
+    rating_raw = (request.form.get('rating') or '').strip()
+    title = (request.form.get('title') or '').strip()
+    content = (request.form.get('content') or '').strip()
+
+    try:
+        rating_val = int(rating_raw)
+    except Exception:
+        rating_val = 0
+    if rating_val < 1 or rating_val > 5:
+        flash('Please choose a rating between 1 and 5 stars.', 'error')
+        return redirect(url_for('product_buy', product_id=product_id))
+
+    # Check for existing review
+    existing = db.session.execute(
+        db.select(ProductReview).where(
+            ProductReview.product_id == product_id,
+            ProductReview.user_id == current_user.id
+        )
+    ).scalar()
+
+    if existing:
+        existing.rating = rating_val
+        existing.title = title
+        existing.content = content
+        existing.updated_at = date.today().strftime("%B %d, %Y")
+    else:
+        new_r = ProductReview(
+            product_id=product_id,
+            user_id=current_user.id,
+            rating=rating_val,
+            title=title,
+            content=content,
+            created_at=date.today().strftime("%B %d, %Y"),
+            updated_at=date.today().strftime("%B %d, %Y"),
+        )
+        db.session.add(new_r)
+
+    db.session.commit()
+    flash('Your review has been saved.', 'success')
+    return redirect(url_for('product_buy', product_id=product_id))
+
+
+@app.route('/product/review/<int:review_id>/delete', methods=['POST'])
+@login_required
+def delete_product_review(review_id):
+    r = db.get_or_404(ProductReview, review_id)
+    if r.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+    product_id = r.product_id
+    db.session.delete(r)
+    db.session.commit()
+    flash('Review deleted.', 'info')
     return redirect(url_for('product_buy', product_id=product_id))
 
 
@@ -856,7 +1002,19 @@ def delete_product_comment(comment_id):
     if comment.user_id != current_user.id and current_user.id != 1:
         abort(403)
     product_id = comment.product_id
+    user_id = comment.user_id
     db.session.delete(comment)
+    
+    # Also delete associated review if exists
+    review = db.session.execute(
+        db.select(ProductReview).where(
+            ProductReview.product_id == product_id,
+            ProductReview.user_id == user_id
+        )
+    ).scalar()
+    if review:
+        db.session.delete(review)
+    
     db.session.commit()
     return redirect(url_for('product_buy', product_id=product_id) + '#product-' + str(product_id) + '-comments')
 

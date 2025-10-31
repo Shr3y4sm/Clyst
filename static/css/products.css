@@ -94,6 +94,37 @@
 	text-transform: capitalize;
 }
 
+.product-rating-small {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+	margin-bottom: 4px;
+}
+
+.product-rating-small .icon-14 {
+	width: 14px;
+	height: 14px;
+	vertical-align: middle;
+}
+
+.rating-text-small {
+	margin-left: 4px;
+	color: #6b7280;
+	font-size: 12px;
+}
+
+.star-icon {
+	vertical-align: middle;
+}
+
+.star--filled {
+	fill: #f4b400;
+}
+
+.star--empty {
+	fill: #ddd;
+}
+
 .product-description {
 	color: var(--text);
 	line-height: 1.5;
