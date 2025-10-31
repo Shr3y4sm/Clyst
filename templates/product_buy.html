@@ -234,7 +234,20 @@
           </div>
           <div class="buttons">
 
-          {% if current_user.is_authenticated and current_user.id !=
+          {% if current_user.is_authenticated and current_user.id ==
+          product.artist_id %}
+          <button
+            class="btn btn-primary"
+            onclick="openEditModal()"
+            title="Edit Product"
+            type="button"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M15.7279 9.57629L14.3137 8.16207L5 17.4758V18.89H6.41421L15.7279 9.57629ZM17.1421 8.16207L18.5563 6.74786L17.1421 5.33365L15.7279 6.74786L17.1421 8.16207ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.8218 17.4587 2.8218 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"></path>
+            </svg>
+            Edit Product
+          </button>
+          {% elif current_user.is_authenticated and current_user.id !=
           product.artist_id %}
           <button
             class="btn btn-secondary"
@@ -503,6 +516,273 @@
           "google_translate_element"
         );
       }
+    </script>
+
+    <!-- Edit Product Modal -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Edit Product</h2>
+          <span class="close-modal" onclick="closeEditModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="editProductForm" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="edit_product_name" class="form-label">Product Name</label>
+              <input
+                type="text"
+                id="edit_product_name"
+                name="product_name"
+                class="form-input"
+                value="{{ product.title }}"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="edit_price" class="form-label">Price (Rs.)</label>
+              <input
+                type="number"
+                id="edit_price"
+                name="price"
+                class="form-input"
+                step="0.01"
+                min="0"
+                value="{{ product.price }}"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="edit_description" class="form-label">Description</label>
+              <textarea
+                id="edit_description"
+                name="description"
+                class="form-textarea"
+                rows="4"
+              >{{ product.description }}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="edit_product_image" class="form-label">New Image (Optional)</label>
+              <input
+                type="file"
+                id="edit_product_image"
+                name="product_image_file"
+                class="form-input"
+                accept="image/*"
+              />
+              {% if product.img_url %}
+              <div class="current-image">
+                <img src="{{ product.img_url }}" alt="Current product image" style="max-width: 200px; margin-top: 10px;">
+                <small class="form-help">Current image</small>
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary">Save Changes</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      /* Modal styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
+
+      .modal-content {
+        position: relative;
+        background-color: #fff;
+        margin: 50px auto;
+        padding: 0;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        padding: 20px;
+        border-bottom: 1px solid #e5e5e5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .modal-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .close-modal {
+        font-size: 24px;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+      }
+
+      .close-modal:hover {
+        color: #000;
+      }
+
+      /* Form styles */
+      .modal .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .modal .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .modal .form-input,
+      .modal .form-textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .modal .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      .modal .form-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+      }
+
+      .modal .current-image {
+        margin: 1rem 0;
+      }
+
+      /* Loading indicator */
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+
+    <script>
+      // Modal functions
+      function openEditModal() {
+        document.getElementById('editModal').style.display = 'block';
+      }
+
+      function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target == modal) {
+          closeEditModal();
+        }
+      }
+
+      // Handle form submission
+      document.getElementById('editProductForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const form = e.target;
+        const formData = new FormData(form);
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="loading-spinner"></div> Saving...';
+
+        try {
+          const response = await fetch('{{ url_for("add_products", product_id=product.product_id) }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Update product details in the page
+            const productData = data.product;
+            document.querySelector('.product-title').textContent = productData.title;
+            document.querySelector('.product-price').textContent = 'Rs.' + productData.price;
+            document.querySelector('.item-desc').textContent = productData.description;
+            
+            // Show success message
+            showCartMessage('Product updated successfully!', 'success');
+            
+            // If a new image was uploaded and returned
+            if (productData.img_url) {
+              const imgElements = document.querySelectorAll('.product-image');
+              imgElements.forEach(img => {
+                img.src = productData.img_url;
+              });
+            }
+            
+            // Close modal
+            closeEditModal();
+          } else {
+            throw new Error(data.message || 'Failed to update product');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showCartMessage(error.message || 'Failed to update product', 'error');
+          
+          // Reset button state
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnText;
+        }
+      });
     </script>
   </body>
 </html>

@@ -485,6 +485,14 @@ def promote_product(product_id):
 @app.route("/add_products", methods=["GET", "POST"])
 @login_required
 def add_products():
+    product_id = request.args.get('product_id')
+    product = None
+    if product_id:
+        product = db.get_or_404(Product, product_id)
+        # Check if user owns this product
+        if product.artist_id != current_user.id:
+            abort(403)
+
     if request.method == 'POST':
         # Handle image upload
         img_url = request.form.get('product_image', '')
@@ -496,24 +504,67 @@ def add_products():
                 uploaded_path = save_uploaded_file(file, 'products')
                 if uploaded_path:
                     img_url = uploaded_path
-        # Enforce that at least one image source is provided
-        if not img_url:
-            flash('Please provide an image URL or upload an image for the product.')
-            return render_template("add_products.html", current_user=current_user)
 
-        # type: ignore[call-arg]
-        new_product = Product(
-            artist_id=current_user.id,
-            title=request.form['product_name'],
-            description=request.form.get('description', ''),
-            price=request.form['price'],
-            img_url=img_url,
-            created_at=date.today().strftime("%B %d, %Y")
-        )
-        db.session.add(new_product)
+        # For editing, keep existing image if no new one provided
+        if not img_url and product:
+            img_url = product.img_url
+        # For new products, enforce image requirement
+        elif not img_url and not product:
+            message = 'Please provide an image URL or upload an image for the product.'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({'success': False, 'message': message})
+            flash(message)
+            return render_template("add_products.html", current_user=current_user, product=product)
+
+        if product:
+            # Update existing product
+            product.title = request.form['product_name']
+            product.description = request.form.get('description', '')
+            product.price = request.form['price']
+            if img_url:  # Only update image if new one provided
+                product.img_url = img_url
+        else:
+            # Create new product
+            product = Product(
+                artist_id=current_user.id,
+                title=request.form['product_name'],
+                description=request.form.get('description', ''),
+                price=request.form['price'],
+                img_url=img_url,
+                created_at=date.today().strftime("%B %d, %Y")
+            )
+            db.session.add(product)
+
         db.session.commit()
-        return redirect(url_for('products_page'))
-    return render_template("add_products.html", current_user=current_user)
+
+        try:
+            db.session.commit()
+            # If it's an AJAX request, return JSON response
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': True,
+                    'message': 'Product updated successfully',
+                    'product': {
+                        'title': product.title,
+                        'price': str(product.price),
+                        'description': product.description or '',
+                        'img_url': img_url if img_url != product.img_url else None
+                    }
+                })
+            
+            # For regular form submissions, redirect to product page
+            return redirect(url_for('product_buy', product_id=product.product_id))
+        except Exception as e:
+            db.session.rollback()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({
+                    'success': False,
+                    'message': str(e)
+                }), 400
+            flash('Error updating product: ' + str(e))
+            return redirect(url_for('product_buy', product_id=product.product_id))
+    
+    return render_template("add_products.html", current_user=current_user, product=product)
 
 
 @app.route('/api/generate_copy', methods=['POST'])
