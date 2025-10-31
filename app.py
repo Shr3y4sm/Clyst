@@ -294,6 +294,140 @@ class OrderItem(db.Model):
     product = relationship("Product")
 
 
+# ===== FOLLOW/FOLLOWER SYSTEM =====
+class Follow(db.Model):
+    __tablename__ = 'follows'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    follower_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # User who follows
+    followed_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)  # User being followed
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+    # Ensure unique follower-followed pairs
+    __table_args__ = (db.UniqueConstraint('follower_id', 'followed_id', name='unique_follow'),)
+
+
+# ===== HASHTAG SYSTEM =====
+class Hashtag(db.Model):
+    __tablename__ = 'hashtags'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(db.String(100), unique=True, nullable=False)  # Without the # symbol
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+
+class PostHashtag(db.Model):
+    __tablename__ = 'post_hashtags'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    post_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('posts.post_id', ondelete='CASCADE'), nullable=False)
+    hashtag_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('hashtags.id', ondelete='CASCADE'), nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('post_id', 'hashtag_id', name='unique_post_hashtag'),)
+
+
+class ProductHashtag(db.Model):
+    __tablename__ = 'product_hashtags'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('products.product_id', ondelete='CASCADE'), nullable=False)
+    hashtag_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('hashtags.id', ondelete='CASCADE'), nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('product_id', 'hashtag_id', name='unique_product_hashtag'),)
+
+
+# ===== HELPER FUNCTIONS =====
+
+def extract_hashtags(text):
+    """Extract hashtags from text. Returns list of hashtag names (without #)"""
+    import re
+    if not text:
+        return []
+    # Match hashtags: # followed by word characters (letters, numbers, underscores)
+    hashtags = re.findall(r'#(\w+)', text)
+    # Convert to lowercase and remove duplicates while preserving order
+    seen = set()
+    unique_tags = []
+    for tag in hashtags:
+        tag_lower = tag.lower()
+        if tag_lower not in seen:
+            seen.add(tag_lower)
+            unique_tags.append(tag_lower)
+    return unique_tags
+
+
+def save_hashtags_for_post(post_id, text):
+    """Extract and save hashtags for a post"""
+    hashtag_names = extract_hashtags(text)
+    
+    for tag_name in hashtag_names:
+        # Get or create hashtag
+        hashtag = db.session.execute(
+            db.select(Hashtag).where(Hashtag.name == tag_name)
+        ).scalar_one_or_none()
+        
+        if not hashtag:
+            hashtag = Hashtag(name=tag_name, created_at=date.today().strftime('%B %d, %Y'))
+            db.session.add(hashtag)
+            db.session.flush()
+        
+        # Create post-hashtag association if it doesn't exist
+        existing = db.session.execute(
+            db.select(PostHashtag).where(
+                PostHashtag.post_id == post_id,
+                PostHashtag.hashtag_id == hashtag.id
+            )
+        ).scalar_one_or_none()
+        
+        if not existing:
+            post_hashtag = PostHashtag(post_id=post_id, hashtag_id=hashtag.id)
+            db.session.add(post_hashtag)
+
+
+def save_hashtags_for_product(product_id, text):
+    """Extract and save hashtags for a product"""
+    hashtag_names = extract_hashtags(text)
+    
+    for tag_name in hashtag_names:
+        # Get or create hashtag
+        hashtag = db.session.execute(
+            db.select(Hashtag).where(Hashtag.name == tag_name)
+        ).scalar_one_or_none()
+        
+        if not hashtag:
+            hashtag = Hashtag(name=tag_name, created_at=date.today().strftime('%B %d, %Y'))
+            db.session.add(hashtag)
+            db.session.flush()
+        
+        # Create product-hashtag association if it doesn't exist
+        existing = db.session.execute(
+            db.select(ProductHashtag).where(
+                ProductHashtag.product_id == product_id,
+                ProductHashtag.hashtag_id == hashtag.id
+            )
+        ).scalar_one_or_none()
+        
+        if not existing:
+            product_hashtag = ProductHashtag(product_id=product_id, hashtag_id=hashtag.id)
+            db.session.add(product_hashtag)
+
+
+def linkify_hashtags(text):
+    """Convert hashtags in text to clickable links, safely escaping other HTML."""
+    import re
+    from markupsafe import escape, Markup
+    if not text:
+        return ''
+    # First escape any existing HTML to prevent injection
+    escaped = escape(text)
+    # Replace #hashtag with <a href="/hashtag/hashtag">#hashtag</a>
+    pattern = re.compile(r'#(\w+)\b')
+    def _repl(match: re.Match) -> str:
+        tag = match.group(1)
+        return f'<a href="/hashtag/{tag}" class="hashtag-link">#{tag}</a>'
+    linked = pattern.sub(_repl, str(escaped))
+    return Markup(linked)
+
 
 @app.route('/', methods=["GET", "POST"])
 def home():
@@ -318,22 +452,26 @@ def home():
 
     # Load comments per post and attach a simple comments list (with author info)
     for post in posts:
-        comments_rows = db.session.execute(db.select(Comments).where(Comments.post_id == post.post_id)).scalars().all()
-        comments_data = []
-        for c in comments_rows:
-            author = db.session.get(User, c.user_id)
-            comments_data.append({
-                'id': c.comment_id,
-                'content': c.content,
-                'created_at': c.created_at,
-                'artist': {
-                    'name': getattr(author, 'name', 'Unknown') if author else 'Unknown',
-                    'email': getattr(author, 'email', '') if author else '',
-                    'id': getattr(author, 'id', None) if author else None,
-                }
-            })
-        # Attach to post object so template can use post.comments
-        setattr(post, 'comments', comments_data)
+            # Linkify hashtags in post description
+            if post.description:
+                post.description = linkify_hashtags(post.description)
+        
+            comments_rows = db.session.execute(db.select(Comments).where(Comments.post_id == post.post_id)).scalars().all()
+            comments_data = []
+            for c in comments_rows:
+                author = db.session.get(User, c.user_id)
+                comments_data.append({
+                    'id': c.comment_id,
+                    'content': c.content,
+                    'created_at': c.created_at,
+                    'artist': {
+                        'name': getattr(author, 'name', 'Unknown') if author else 'Unknown',
+                        'email': getattr(author, 'email', '') if author else '',
+                        'id': getattr(author, 'id', None) if author else None,
+                    }
+                })
+            # Attach to post object so template can use post.comments
+            setattr(post, 'comments', comments_data)
 
     return render_template("index.html", posts=posts, current_user=current_user, q=q)
 
@@ -373,13 +511,17 @@ def products_page():
     
     # Attach avg rating and review count to each product
     for product in products:
-        reviews_rows = db.session.execute(
-            db.select(ProductReview).where(ProductReview.product_id == product.product_id)
-        ).scalars().all()
-        total_rating = sum(int(r.rating or 0) for r in reviews_rows)
-        avg_rating = (total_rating / len(reviews_rows)) if reviews_rows else 0
-        setattr(product, 'avg_rating', avg_rating)
-        setattr(product, 'reviews_count', len(reviews_rows))
+            # Linkify hashtags in product description
+            if product.description:
+                product.description = linkify_hashtags(product.description)
+        
+            reviews_rows = db.session.execute(
+                db.select(ProductReview).where(ProductReview.product_id == product.product_id)
+            ).scalars().all()
+            total_rating = sum(int(r.rating or 0) for r in reviews_rows)
+            avg_rating = (total_rating / len(reviews_rows)) if reviews_rows else 0
+            setattr(product, 'avg_rating', avg_rating)
+            setattr(product, 'reviews_count', len(reviews_rows))
     
     return render_template('products.html', products=products, current_user=current_user, q=q)
 
@@ -513,6 +655,12 @@ def add_posts():
 
         try:
             db.session.commit()
+            
+            # Extract and save hashtags from title and description
+            combined_text = f"{request.form['post_title']} {request.form['description']}"
+            save_hashtags_for_post(post.post_id, combined_text)
+            db.session.commit()
+            
             # If it's an AJAX request, return JSON response
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify({
@@ -613,10 +761,14 @@ def add_products():
             )
             db.session.add(product)
 
-        db.session.commit()
-
         try:
             db.session.commit()
+            
+            # Extract and save hashtags from title and description
+            combined_text = f"{request.form['product_name']} {request.form.get('description', '')}"
+            save_hashtags_for_product(product.product_id, combined_text)
+            db.session.commit()
+            
             # If it's an AJAX request, return JSON response
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return jsonify({
@@ -733,6 +885,36 @@ def delete_products():
     return redirect(url_for('products_page'))
 
 
+def calculate_artisan_rating(artist_id):
+    """Calculate overall artisan rating based on all their products' ratings"""
+    # Get all products by this artisan
+    products = db.session.execute(db.select(Product).where(Product.artist_id == artist_id)).scalars().all()
+    
+    if not products:
+        return {'avg_rating': 0, 'total_reviews': 0, 'total_products': 0}
+    
+    total_rating = 0
+    total_reviews = 0
+    
+    # Aggregate ratings from all products
+    for product in products:
+        reviews = db.session.execute(
+            db.select(ProductReview).where(ProductReview.product_id == product.product_id)
+        ).scalars().all()
+        
+        for review in reviews:
+            total_rating += int(review.rating or 0)
+            total_reviews += 1
+    
+    avg_rating = round(total_rating / total_reviews, 1) if total_reviews > 0 else 0
+    
+    return {
+        'avg_rating': avg_rating,
+        'total_reviews': total_reviews,
+        'total_products': len(products)
+    }
+
+
 @app.route("/profile")
 @login_required
 def profile():
@@ -772,12 +954,27 @@ def profile():
         user_location=current_user.location
     )
 
+    # Calculate artisan rating
+    artisan_rating = calculate_artisan_rating(current_user.id)
+
+    # Get follower/following counts
+    followers_count = db.session.execute(
+        db.select(db.func.count(Follow.id)).where(Follow.followed_id == current_user.id)
+    ).scalar()
+    following_count = db.session.execute(
+        db.select(db.func.count(Follow.id)).where(Follow.follower_id == current_user.id)
+    ).scalar()
+
     return render_template("profile.html",
                            current_user=current_user,
                            profile_user=current_user,
                            posts=user_posts,
                            products=user_products,
-                           portfolio_narrative=portfolio_narrative)
+                           followers_count=followers_count,
+                           following_count=following_count,
+                           is_following=False,
+                           portfolio_narrative=portfolio_narrative,
+                           artisan_rating=artisan_rating)
 
 
 @app.route("/profile/<int:user_id>")
@@ -819,12 +1016,37 @@ def view_profile(user_id):
         user_location=user.location
     )
 
+    # Calculate artisan rating
+    artisan_rating = calculate_artisan_rating(user_id)
+
+    # Get follower/following counts
+    followers_count = db.session.execute(
+        db.select(db.func.count(Follow.id)).where(Follow.followed_id == user_id)
+    ).scalar()
+    following_count = db.session.execute(
+        db.select(db.func.count(Follow.id)).where(Follow.follower_id == user_id)
+    ).scalar()
+    
+    # Check if current user is following this user
+    is_following = False
+    if current_user.is_authenticated and current_user.id != user_id:
+        is_following = db.session.execute(
+            db.select(Follow).where(
+                Follow.follower_id == current_user.id,
+                Follow.followed_id == user_id
+            )
+        ).scalar_one_or_none() is not None
+
     return render_template("profile.html",
                            current_user=current_user,
                            profile_user=user,
                            posts=user_posts,
                            products=user_products,
-                           portfolio_narrative=portfolio_narrative)
+                           followers_count=followers_count,
+                           following_count=following_count,
+                           is_following=is_following,
+                           portfolio_narrative=portfolio_narrative,
+                           artisan_rating=artisan_rating)
 
 
 @app.route("/product/<int:product_id>")
@@ -1477,6 +1699,124 @@ def admin_update_order_status(order_id: int):
     db.session.commit()
     flash('Order updated.', 'success')
     return redirect(url_for('order_detail', order_id=order_id))
+
+
+@app.route("/follow/<int:user_id>", methods=["POST"])
+@login_required
+def follow_user(user_id):
+    """Follow a user"""
+    if user_id == current_user.id:
+        return jsonify({'success': False, 'message': 'Cannot follow yourself'}), 400
+    
+    user_to_follow = db.get_or_404(User, user_id)
+    
+    # Check if already following
+    existing_follow = db.session.execute(
+        db.select(Follow).where(
+            Follow.follower_id == current_user.id,
+            Follow.followed_id == user_id
+        )
+    ).scalar_one_or_none()
+    
+    if existing_follow:
+        return jsonify({'success': False, 'message': 'Already following this user'}), 400
+    
+    # Create follow relationship
+    follow = Follow(
+        follower_id=current_user.id,
+        followed_id=user_id,
+        created_at=date.today().strftime('%B %d, %Y')
+    )
+    db.session.add(follow)
+    db.session.commit()
+    
+    # Get updated counts
+    followers_count = db.session.execute(
+        db.select(db.func.count(Follow.id)).where(Follow.followed_id == user_id)
+    ).scalar()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Now following {user_to_follow.name}',
+        'followers_count': followers_count
+    })
+
+
+@app.route("/unfollow/<int:user_id>", methods=["POST"])
+@login_required
+def unfollow_user(user_id):
+    """Unfollow a user"""
+    follow = db.session.execute(
+        db.select(Follow).where(
+            Follow.follower_id == current_user.id,
+            Follow.followed_id == user_id
+        )
+    ).scalar_one_or_none()
+    
+    if not follow:
+        return jsonify({'success': False, 'message': 'Not following this user'}), 400
+    
+    db.session.delete(follow)
+    db.session.commit()
+    
+    # Get updated counts
+    followers_count = db.session.execute(
+        db.select(db.func.count(Follow.id)).where(Follow.followed_id == user_id)
+    ).scalar()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Unfollowed successfully',
+        'followers_count': followers_count
+    })
+
+
+@app.route("/hashtag/<tag_name>")
+def view_hashtag(tag_name):
+    """View all posts and products with a specific hashtag"""
+    # Get the hashtag
+    hashtag = db.session.execute(
+        db.select(Hashtag).where(Hashtag.name == tag_name.lower())
+    ).scalar_one_or_none()
+    
+    if not hashtag:
+        flash(f'No content found for #{tag_name}', 'info')
+        return redirect(url_for('home'))
+    
+    # Get all posts with this hashtag
+    post_hashtags = db.session.execute(
+        db.select(PostHashtag).where(PostHashtag.hashtag_id == hashtag.id)
+    ).scalars().all()
+    
+    posts = []
+    for ph in post_hashtags:
+        post = db.session.get(Posts, ph.post_id)
+        if post:
+            posts.append(post)
+    
+    # Get all products with this hashtag
+    product_hashtags = db.session.execute(
+        db.select(ProductHashtag).where(ProductHashtag.hashtag_id == hashtag.id)
+    ).scalars().all()
+    
+    products = []
+    for prh in product_hashtags:
+        product = db.session.get(Product, prh.product_id)
+        if product:
+            # Add rating info
+            reviews = db.session.execute(
+                db.select(ProductReview).where(ProductReview.product_id == product.product_id)
+            ).scalars().all()
+            avg_rating = sum(int(r.rating or 0) for r in reviews) / len(reviews) if reviews else 0
+            setattr(product, 'avg_rating', round(avg_rating, 1))
+            setattr(product, 'reviews_count', len(reviews))
+            products.append(product)
+    
+    return render_template("hashtag.html", 
+                          hashtag=tag_name, 
+                          posts=posts, 
+                          products=products,
+                          current_user=current_user)
 
 
 @app.errorhandler(500)

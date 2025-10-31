@@ -100,9 +100,9 @@
                     >BECOME VERIFIED ARTISAN</a
                   ></span
                 >
-              </div>{% endif %} 
-              {% if current_user.is_authenticated and (not profile_user or
-              current_user.id == profile_user.id) %}
+              </div>
+              {% endif %} {% if current_user.is_authenticated and (not
+              profile_user or current_user.id == profile_user.id) %}
               <div
                 class="btn promote-btn profile-verify"
                 style="margin-left: 8px"
@@ -112,10 +112,65 @@
                 >
               </div>
               {% endif %}
+
+              <!-- Follow/Unfollow Button (only on other users' profiles) -->
+              {% if current_user.is_authenticated and profile_user and
+              current_user.id != profile_user.id %}
+              <div
+                class="btn promote-btn profile-verify"
+                style="margin-left: 8px"
+              >
+                <span>
+                  <a
+                    href="#"
+                    id="follow-btn"
+                    onclick="toggleFollow(event, {{ profile_user.id }})"
+                  >
+                    {% if is_following %}UNFOLLOW{% else %}FOLLOW{% endif %}
+                  </a>
+                </span>
+              </div>
+              {% endif %}
+
               <h1 class="profile-name">
                 {% if profile_user %} {{ profile_user.name }} {% else %} {{
                 current_user.name }} {% endif %}
               </h1>
+
+              <!-- Artisan Rating -->
+              {% if artisan_rating and artisan_rating.total_reviews > 0 %}
+              <div class="artisan-rating">
+                <div class="rating-stars">
+                  {% for i in range(1, 6) %} {% if i <=
+                  artisan_rating.avg_rating|round(0, 'floor') %}
+                  <svg
+                    class="star-icon icon-20 star--filled"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                    />
+                  </svg>
+                  {% else %}
+                  <svg
+                    class="star-icon icon-20 star--empty"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                    />
+                  </svg>
+                  {% endif %} {% endfor %}
+                </div>
+                <span class="rating-text"
+                  >{{ artisan_rating.avg_rating }} / 5.0 ({{
+                  artisan_rating.total_reviews }} reviews across {{
+                  artisan_rating.total_products }} products)</span
+                >
+              </div>
+              {% endif %}
 
               <div class="profile-bio">
                 {% if profile_user %} {% if profile_user.email %}
@@ -155,7 +210,8 @@
                   >
                     <path
                       d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
-                    ></path></svg>{{ profile_user.location }}
+                    ></path></svg
+                  >{{ profile_user.location }}
                 </p>
                 {% endif %} {% else %} {% if current_user.email %}
                 <p>
@@ -210,6 +266,16 @@
               <div class="info-item">
                 <div class="info-label">Products</div>
                 <div class="info-value">{{ products|length }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Followers</div>
+                <div class="info-value" id="followers-count">
+                  {{ followers_count }}
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Following</div>
+                <div class="info-value">{{ following_count }}</div>
               </div>
               <div class="info-item">
                 <div class="info-label">Joined on</div>
@@ -355,22 +421,41 @@
                       ></path>
                     </svg>
                   </button>
-                  {% if current_user.is_authenticated and current_user.id == post.artist_id %}
+                  {% if current_user.is_authenticated and current_user.id ==
+                  post.artist_id %}
                   <div class="post-actions">
                     <button
                       class="action-btn edit-btn"
                       onclick="openEditPostModal('{{ post.post_id }}', '{{ post.post_title|replace('\'', '\\\'') }}', '{{ post.description|replace('\'', '\\\'') }}', '{{ post.media_url }}', {{ post.is_promoted|tojson }})"
                       title="Edit Post"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"></path></svg>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"
+                        ></path>
+                      </svg>
                     </button>
                     <button
                       class="action-btn delete-btn"
                       onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'"
                       title="Delete Post"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                        <path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
+                        ></path>
                       </svg>
                     </button>
                   </div>
@@ -976,11 +1061,17 @@
 
     <script>
       // Edit post modal functionality
-      function openEditPostModal(postId, title, description, mediaUrl, isPromoted) {
+      function openEditPostModal(
+        postId,
+        title,
+        description,
+        mediaUrl,
+        isPromoted
+      ) {
         // Create modal HTML
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.id = 'editPostModal';
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.id = "editPostModal";
         modal.innerHTML = `
           <div class="modal-content">
             <div class="modal-header">
@@ -1002,7 +1093,11 @@
               <div class="form-group">
                 <label for="media">Image (leave empty to keep current)</label>
                 <input type="file" id="media" name="media" accept="image/*">
-                ${mediaUrl ? `<img src="${mediaUrl}" alt="Current image" class="preview-image">` : ''}
+                ${
+                  mediaUrl
+                    ? `<img src="${mediaUrl}" alt="Current image" class="preview-image">`
+                    : ""
+                }
               </div>
               <div class="modal-footer">
                 <button type="button" onclick="closeEditPostModal()" class="btn btn-secondary">Cancel</button>
@@ -1014,41 +1109,41 @@
 
         // Add modal to page
         document.body.appendChild(modal);
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = "hidden";
 
         // Show modal with animation
-        setTimeout(() => modal.classList.add('open'), 10);
+        setTimeout(() => modal.classList.add("open"), 10);
 
         // Setup form submission
-        const form = document.getElementById('editPostForm');
+        const form = document.getElementById("editPostForm");
         form.onsubmit = async (e) => {
           e.preventDefault();
           const formData = new FormData(form);
-          
+
           try {
             const response = await fetch("{{ url_for('add_posts') }}", {
-              method: 'POST',
-              body: formData
+              method: "POST",
+              body: formData,
             });
-            
+
             if (response.ok) {
               window.location.reload();
             } else {
-              throw new Error('Failed to update post');
+              throw new Error("Failed to update post");
             }
           } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to update post. Please try again.');
+            console.error("Error:", error);
+            alert("Failed to update post. Please try again.");
           }
         };
       }
 
       function closeEditPostModal() {
-        const modal = document.getElementById('editPostModal');
-        modal.classList.remove('open');
+        const modal = document.getElementById("editPostModal");
+        modal.classList.remove("open");
         setTimeout(() => {
           modal.remove();
-          document.body.style.overflow = '';
+          document.body.style.overflow = "";
         }, 300);
       }
     </script>
@@ -1184,5 +1279,45 @@
         color: #dc3545;
       }
     </style>
+
+    <script>
+      // Follow/Unfollow functionality
+      function toggleFollow(event, userId) {
+        event.preventDefault();
+
+        const followBtn = document.getElementById("follow-btn");
+        const isFollowing = followBtn.textContent.trim() === "UNFOLLOW";
+        const endpoint = isFollowing
+          ? `/unfollow/${userId}`
+          : `/follow/${userId}`;
+
+        fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Toggle button text
+              followBtn.textContent = isFollowing ? "FOLLOW" : "UNFOLLOW";
+
+              // Update followers count
+              const followersCountEl =
+                document.getElementById("followers-count");
+              if (followersCountEl) {
+                followersCountEl.textContent = data.followers_count;
+              }
+            } else {
+              alert(data.message || "An error occurred");
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+          });
+      }
+    </script>
   </body>
 </html>
