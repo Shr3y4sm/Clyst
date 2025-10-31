@@ -77,6 +77,46 @@ svg {
 	text-transform: capitalize;
 }
 
+/* Artisan Rating */
+.artisan-rating {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin-top: 12px;
+	margin-bottom: 8px;
+}
+
+.artisan-rating .rating-stars {
+	display: inline-flex;
+	gap: 2px;
+}
+
+.artisan-rating .star-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.artisan-rating .icon-20 {
+	width: 20px;
+	height: 20px;
+}
+
+.artisan-rating .star--filled {
+	fill: #f4b400;
+}
+
+.artisan-rating .star--empty {
+	fill: #ddd;
+}
+
+.artisan-rating .rating-text {
+	font-size: 14px;
+	color: var(--text);
+	opacity: 0.8;
+	font-weight: 500;
+}
+
 /* Verification prompt under profile name */
 .profile-verify {
 	margin-top: 6px;

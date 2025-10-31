@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clyst - #{{ hashtag }}</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/index.css" />
+    <link rel="stylesheet" href="../static/css/products.css" />
+    <style>
+      .hashtag-header {
+        background: var(--card);
+        border: 1px solid light-dark(#d4d4d4, #222);
+        border-radius: 0.2em;
+        padding: 30px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+
+      .hashtag-title {
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 10px;
+      }
+
+      .hashtag-count {
+        font-size: 16px;
+        color: var(--text);
+        opacity: 0.7;
+      }
+
+      .section-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 30px 0 20px;
+        color: var(--text);
+      }
+
+      .no-content {
+        text-align: center;
+        padding: 40px;
+        color: var(--text);
+        opacity: 0.6;
+      }
+
+      .hashtag-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .hashtag-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav id="topNav">
+      <div class="nav">
+        <div class="nav-left">
+          <div class="hamburger" onclick="toggleMenu(event)">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path d="M3 4H21V6H3V4ZM3 11H21V13H3V11ZM3 18H21V20H3V18Z"></path>
+            </svg>
+          </div>
+          <a
+            href="{{ url_for('home') }}"
+            style="text-decoration: none; color: inherit"
+            >Clyst</a
+          >
+        </div>
+
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('profile') }}">Profile</a>
+          <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
+        </div>
+
+        <div></div>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ url_for('home') }}">Community Feed</a>
+        <a href="{{ url_for('products_page') }}">Marketplace</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="main-content">
+        <!-- Hashtag Header -->
+        <div class="hashtag-header">
+          <h1 class="hashtag-title">#{{ hashtag }}</h1>
+          <p class="hashtag-count">
+            {{ posts|length }} post{{ 's' if posts|length != 1 else '' }} · {{
+            products|length }} product{{ 's' if products|length != 1 else '' }}
+          </p>
+        </div>
+
+        <!-- Posts Section -->
+        {% if posts %}
+        <h2 class="section-title">Community Posts</h2>
+        <div class="feed">
+          {% for post in posts %}
+          <div class="post">
+            <a
+              href="{{ url_for('view_profile', user_id=post.artist.id) }}"
+              style="text-decoration: none; color: inherit"
+            >
+              <div class="post-author">
+                <div class="author-avatar">
+                  {{ post.artist.name[0].upper() }}
+                </div>
+                <div class="author-info">
+                  <span class="author-name">{{ post.artist.name }}</span>
+                  <span class="post-date">{{ post.created_at }}</span>
+                </div>
+              </div>
+            </a>
+
+            {% if post.media_url %}
+            <img
+              src="{{ post.media_url }}"
+              class="post-image"
+              alt="Post Image"
+            />
+            {% endif %}
+
+            <div class="post-content">
+              <h2 class="post-title">
+                {{ post.post_title }} {% if post.is_promoted %}
+                <span class="promoted-badge">Promoted</span>
+                {% endif %}
+              </h2>
+              <p class="post-description">{{ post.description|safe }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Products Section -->
+        {% if products %}
+        <h2 class="section-title">Marketplace Products</h2>
+        <div class="products-grid">
+          {% for product in products %}
+          <div class="product-card">
+            <a
+              href="{{ url_for('product_buy', product_id=product.product_id) }}"
+              style="text-decoration: none; color: inherit"
+            >
+              <div class="product-image-container">
+                <img
+                  src="{{ product.img_url }}"
+                  alt="{{ product.title }}"
+                  class="product-image"
+                />
+              </div>
+              <div class="product-info">
+                <div class="product-header">
+                  <h3 class="product-title">{{ product.title }}</h3>
+                  {% if product.reviews_count > 0 %}
+                  <div class="product-rating-small">
+                    <div class="rating-stars">
+                      {% for i in range(1, 6) %} {% if i <=
+                      product.avg_rating|round(0, 'floor') %}
+                      <svg
+                        class="star-icon icon-14 star--filled"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                        />
+                      </svg>
+                      {% else %}
+                      <svg
+                        class="star-icon icon-14 star--empty"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                        />
+                      </svg>
+                      {% endif %} {% endfor %}
+                    </div>
+                    <span class="rating-text-small"
+                      >{{ product.avg_rating }} ({{ product.reviews_count
+                      }})</span
+                    >
+                  </div>
+                  {% endif %}
+                </div>
+                <p class="product-price">₹{{ "%.2f"|format(product.price) }}</p>
+                <p class="product-artist">by {{ product.artist.name }}</p>
+              </div>
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- No Content Message -->
+        {% if not posts and not products %}
+        <div class="no-content">
+          <p>No posts or products found with this hashtag yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script src="../static/js/app.js"></script>
+  </body>
+</html>

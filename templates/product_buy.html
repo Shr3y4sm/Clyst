@@ -111,7 +111,7 @@
             </div>
             <div class="product-price">Rs.{{ product.price }}</div>
           </div>
-          <div class="item-desc">{{product.description}}</div>
+          <div class="item-desc">{{ product.description|safe }}</div>
 
           
         {% if current_user.is_authenticated %}
