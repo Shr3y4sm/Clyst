@@ -687,3 +687,171 @@ button {
 		font-size: 14px;
 	}
 }
+
+/* Inbox Icon Button */
+.inbox-icon-btn {
+	position: fixed;
+	bottom: 80px;
+	right: 30px;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--text);
+	color: var(--card);
+	border: none;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	transition: all 0.3s ease;
+	z-index: 999;
+}
+
+.inbox-icon-btn:hover {
+	transform: scale(1.1);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.inbox-icon-btn svg {
+	width: 28px;
+	height: 28px;
+	fill: currentColor;
+}
+
+.inbox-badge {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background: #ef4444;
+	color: white;
+	border-radius: 50%;
+	min-width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: bold;
+	padding: 0 6px;
+	border: 2px solid var(--card);
+}
+
+/* Inbox Modal */
+.inbox-modal {
+	display: none;
+	position: fixed;
+	bottom: 150px;
+	right: 30px;
+	width: 400px;
+	max-height: 500px;
+	background: var(--card);
+	border: 1px solid light-dark(#d4d4d4, #333);
+	border-radius: 12px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	z-index: 998;
+	overflow: hidden;
+}
+
+.inbox-modal.show {
+	display: flex;
+	flex-direction: column;
+}
+
+.inbox-modal-header {
+	padding: 16px 20px;
+	border-bottom: 1px solid light-dark(#e5e5e5, #333);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.inbox-modal-header h3 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+.inbox-modal-close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	opacity: 0.6;
+	transition: opacity 0.2s;
+}
+
+.inbox-modal-close:hover {
+	opacity: 1;
+}
+
+.inbox-modal-close svg {
+	width: 20px;
+	height: 20px;
+}
+
+.inbox-modal-body {
+	padding: 12px;
+	overflow-y: auto;
+	max-height: 400px;
+}
+
+.inbox-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.inbox-item {
+	padding: 12px;
+	border-radius: 8px;
+	margin-bottom: 8px;
+	transition: background 0.2s;
+	cursor: pointer;
+}
+
+.inbox-item:hover {
+	background: light-dark(#f5f5f5, #2a2a2a);
+}
+
+.inbox-item a {
+	text-decoration: none;
+	color: var(--text);
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.inbox-item strong {
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.inbox-item .inbox-date {
+	font-size: 12px;
+	color: var(--muted);
+}
+
+.inbox-item .badge {
+	display: inline-block;
+	background: #3b82f6;
+	color: white;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 600;
+	margin-left: 8px;
+}
+
+@media (max-width: 768px) {
+	.inbox-modal {
+		right: 10px;
+		width: calc(100vw - 20px);
+		max-width: 400px;
+	}
+	
+	.inbox-icon-btn {
+		bottom: 70px;
+		right: 15px;
+	}
+}

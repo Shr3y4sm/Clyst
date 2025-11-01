@@ -440,3 +440,168 @@ Focus on the artistic themes, creative evolution, and the story these works tell
         print(f"AI portfolio narrative generation failed: {e}")
         return generate_portfolio_narrative(artist_name, posts, products)
 
+
+def chat_with_product(question: str, product_data: Dict[str, Any], api_key: str = None) -> Dict[str, Any]:
+    """
+    Hybrid chatbot for product Q&A using 3-layer approach:
+    1. Pattern matching for common questions
+    2. Product-specific extraction from description
+    3. Gemini AI fallback with safety rules
+    
+    Returns: {'answer': str, 'source': 'pattern|extraction|ai', 'suggestions': list}
+    """
+    
+    question_lower = question.lower().strip()
+    
+    # Layer 1: Pattern Matching for Common Questions
+    common_patterns = {
+        'shipping': {
+            'keywords': ['ship', 'deliver', 'shipping', 'delivery', 'how long', 'when will'],
+            'answer': "Shipping times vary by location. Please contact the seller for specific delivery estimates to your area.",
+            'suggestions': ['What materials is this made from?', 'Can I customize this?', 'Is this available in other sizes?']
+        },
+        'materials': {
+            'keywords': ['material', 'made of', 'made from', 'fabric', 'wood', 'metal', 'what is it'],
+            'answer': None,  # Will extract from description
+            'suggestions': ['How much does shipping cost?', 'Can I customize this?', 'When will it arrive?']
+        },
+        'customize': {
+            'keywords': ['customize', 'customiz', 'custom', 'personalize', 'modify', 'change'],
+            'answer': "Customization options depend on the artisan. Please use the 'Contact Seller' button to discuss your specific requirements.",
+            'suggestions': ['What materials is this made from?', 'How long will delivery take?', 'Is this handmade?']
+        },
+        'price': {
+            'keywords': ['price', 'cost', 'how much', 'expensive', 'cheap', 'discount', 'payment'],
+            'answer': f"The current price is Rs.{product_data.get('price', 'N/A')}. For any special offers or bulk discounts, please contact the seller directly.",
+            'suggestions': ['What materials is this made from?', 'How long will shipping take?', 'Can I customize this?']
+        },
+        'size': {
+            'keywords': ['size', 'dimension', 'how big', 'how small', 'measurement', 'height', 'width'],
+            'answer': None,  # Will extract from description
+            'suggestions': ['What materials is this made from?', 'Can I customize the size?', 'How much does shipping cost?']
+        },
+        'handmade': {
+            'keywords': ['handmade', 'hand made', 'handcraft', 'artisan', 'craft'],
+            'answer': "This is a handcrafted artisan product. For details about the creation process, please check the description or contact the seller.",
+            'suggestions': ['What materials is this used?', 'Can I see more from this artist?', 'How long will delivery take?']
+        },
+    }
+    
+    # Check pattern match
+    matched_pattern = None
+    for pattern_name, pattern_data in common_patterns.items():
+        if any(keyword in question_lower for keyword in pattern_data['keywords']):
+            matched_pattern = pattern_data
+            break
+    
+    # Layer 2: Product-Specific Extraction
+    def extract_from_description(keywords, description):
+        """Extract relevant information from product description"""
+        if not description:
+            return None
+        
+        desc_lower = description.lower()
+        sentences = [s.strip() for s in description.split('.') if s.strip()]
+        
+        # Find sentences containing keywords
+        relevant_sentences = []
+        for sentence in sentences:
+            if any(keyword in sentence.lower() for keyword in keywords):
+                relevant_sentences.append(sentence)
+        
+        if relevant_sentences:
+            return ' '.join(relevant_sentences[:2])  # Return up to 2 relevant sentences
+        return None
+    
+    # If pattern matched and requires extraction
+    if matched_pattern and matched_pattern['answer'] is None:
+        description = product_data.get('description', '')
+        keywords = matched_pattern['keywords']
+        extracted = extract_from_description(keywords, description)
+        
+        if extracted:
+            return {
+                'answer': extracted + "\n\n💬 Need more details? Use the 'Contact Seller' button below.",
+                'source': 'extraction',
+                'suggestions': matched_pattern['suggestions']
+            }
+    
+    # If pattern matched with predefined answer
+    if matched_pattern and matched_pattern['answer']:
+        return {
+            'answer': matched_pattern['answer'],
+            'source': 'pattern',
+            'suggestions': matched_pattern['suggestions']
+        }
+    
+    # Layer 3: Gemini AI Fallback
+    if genai and api_key and api_key != "your_gemini_api_key_here":
+        try:
+            genai.configure(api_key=api_key)
+            model = genai.GenerativeModel(
+                model_name='gemini-2.5-flash-lite',
+                generation_config={
+                    'temperature': 0.7,
+                    'top_p': 0.95,
+                    'max_output_tokens': 300,
+                }
+            )
+            
+            # Build safe context
+            context = f"""
+You are a helpful product assistant for an artisan marketplace. Answer questions about this product accurately and helpfully.
+
+PRODUCT INFORMATION:
+- Title: {product_data.get('title', 'N/A')}
+- Price: Rs.{product_data.get('price', 'N/A')}
+- Artist: {product_data.get('artist_name', 'N/A')}
+- Description: {product_data.get('description', 'No description available')}
+
+STRICT RULES:
+1. NEVER make promises about payment, refunds, returns, or guarantees
+2. NEVER provide seller's contact information
+3. If you're not certain, say "Please contact the seller for accurate information"
+4. Keep answers concise (2-3 sentences max)
+5. Always be helpful and polite
+6. Focus only on the product information provided
+
+USER QUESTION: {question}
+
+Provide a helpful answer based on the product information. If the answer isn't clear from the description, politely suggest contacting the seller.
+"""
+            
+            response = model.generate_content(context)
+            ai_answer = response.text.strip()
+            
+            # Add contact seller nudge
+            if any(word in ai_answer.lower() for word in ['contact', 'ask', 'unclear', 'not sure', 'depends']):
+                ai_answer += "\n\n💬 For specific details, please use the 'Contact Seller' button below."
+            
+            return {
+                'answer': ai_answer,
+                'source': 'ai',
+                'suggestions': [
+                    'Tell me more about the materials',
+                    'How long will shipping take?',
+                    'Can this be customized?',
+                    'Is this handmade?'
+                ]
+            }
+            
+        except Exception as e:
+            print(f"AI chat failed: {e}")
+            # Fallback to generic response
+            pass
+    
+    # Final fallback if all layers fail
+    return {
+        'answer': f"I'd be happy to help! For detailed information about \"{product_data.get('title', 'this product')}\", please contact the seller directly using the 'Contact Seller' button below. They can provide specific details about materials, shipping, customization, and more.",
+        'source': 'fallback',
+        'suggestions': [
+            'What materials is this made from?',
+            'How long will delivery take?',
+            'Can I customize this?',
+            'Is this handmade?'
+        ]
+    }
+

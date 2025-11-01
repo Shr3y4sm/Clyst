@@ -1,5 +1,5 @@
 # type: ignore[import]
-from datetime import date
+from datetime import date, datetime
 import os
 from dotenv import load_dotenv
 import natural_search
@@ -336,6 +336,43 @@ class ProductHashtag(db.Model):
     __table_args__ = (db.UniqueConstraint('product_id', 'hashtag_id', name='unique_product_hashtag'),)
 
 
+# ===== MESSAGING MODELS =====
+class Conversation(db.Model):
+    __tablename__ = 'conversations'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    product_id: Mapped[Optional[int]] = mapped_column(db.Integer, db.ForeignKey('products.product_id'), nullable=True)
+    buyer_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    seller_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status: Mapped[str] = mapped_column(db.String(20), default='open')
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    last_message_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+    product = relationship('Product')
+    buyer = relationship('User', foreign_keys=[buyer_id])
+    seller = relationship('User', foreign_keys=[seller_id])
+    messages = relationship('Message', back_populates='conversation', cascade='all, delete-orphan')
+
+    __table_args__ = (
+        db.UniqueConstraint('product_id', 'buyer_id', 'seller_id', name='unique_conv_product_buyer_seller'),
+    )
+
+
+class Message(db.Model):
+    __tablename__ = 'messages'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    conversation_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('conversations.id'), nullable=False)
+    sender_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    body: Mapped[Optional[str]] = mapped_column(db.Text)
+    attachment_url: Mapped[Optional[str]] = mapped_column(db.String(255))
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    read_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+    conversation = relationship('Conversation', back_populates='messages')
+    sender = relationship('User')
+
+
 # ===== HELPER FUNCTIONS =====
 
 def extract_hashtags(text):
@@ -427,6 +464,158 @@ def linkify_hashtags(text):
         return f'<a href="/hashtag/{tag}" class="hashtag-link">#{tag}</a>'
     linked = pattern.sub(_repl, str(escaped))
     return Markup(linked)
+
+
+# ========= Messaging routes =========
+@app.route('/messages/start', methods=['POST'])
+@login_required
+def start_conversation():
+    """Create or open a conversation for a product between buyer and seller; add first message."""
+    try:
+        product_id_raw = request.form.get('product_id', '')
+        message_body = (request.form.get('message') or '').strip()
+        product_id = int(product_id_raw) if product_id_raw else None
+
+        if not product_id:
+            return jsonify({'success': False, 'message': 'Missing product id'}), 400
+
+        product = db.get_or_404(Product, product_id)
+        seller_id = product.artist_id
+        buyer_id = current_user.id
+
+        if buyer_id == seller_id:
+            return jsonify({'success': False, 'message': "You can't message yourself about your own product."}), 400
+
+        if not message_body and 'attachment' not in request.files:
+            return jsonify({'success': False, 'message': 'Please enter a message or attach a file.'}), 400
+
+        # Find or create conversation
+        existing = db.session.execute(
+            db.select(Conversation).where(
+                Conversation.product_id == product_id,
+                Conversation.buyer_id == buyer_id,
+                Conversation.seller_id == seller_id
+            )
+        ).scalar_one_or_none()
+
+        if existing:
+            conv = existing
+        else:
+            conv = Conversation(
+                product_id=product_id,
+                buyer_id=buyer_id,
+                seller_id=seller_id,
+                status='open',
+                created_at=date.today().strftime('%B %d, %Y'),
+                last_message_at=date.today().strftime('%B %d, %Y')
+            )
+            db.session.add(conv)
+            db.session.flush()  # get id
+
+        # Handle attachment (optional)
+        attachment_url = None
+        if 'attachment' in request.files:
+            file = request.files['attachment']
+            if file and file.filename:
+                uploaded = save_uploaded_file(file, 'messages')
+                if uploaded:
+                    attachment_url = uploaded
+
+        msg = Message(
+            conversation_id=conv.id,
+            sender_id=current_user.id,
+            body=message_body,
+            attachment_url=attachment_url,
+            created_at=date.today().strftime('%B %d, %Y')
+        )
+        conv.last_message_at = msg.created_at
+        db.session.add(msg)
+        db.session.commit()
+
+        # Response
+        url = url_for('view_conversation', conversation_id=conv.id)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'success': True, 'conversation_id': conv.id, 'url': url})
+        return redirect(url)
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@app.route('/messages/<int:conversation_id>')
+@login_required
+def view_conversation(conversation_id: int):
+    conv = db.get_or_404(Conversation, conversation_id)
+    # Authorization: must be a participant
+    if current_user.id not in (conv.buyer_id, conv.seller_id):
+        abort(403)
+
+    # Mark all unread messages from the other user as read
+    unread_messages = db.session.execute(
+        db.select(Message).where(
+            Message.conversation_id == conv.id,
+            Message.sender_id != current_user.id,
+            Message.read_at == None
+        )
+    ).scalars().all()
+    
+    if unread_messages:
+        current_time = datetime.now().strftime('%B %d, %Y %H:%M:%S')
+        for msg in unread_messages:
+            msg.read_at = current_time
+        db.session.commit()
+
+    # Load messages ordered by id asc
+    messages = db.session.execute(
+        db.select(Message).where(Message.conversation_id == conv.id).order_by(Message.id.asc())
+    ).scalars().all()
+
+    # Load the other user (counterparty)
+    other_user_id = conv.seller_id if current_user.id == conv.buyer_id else conv.buyer_id
+    other_user = db.session.get(User, other_user_id)
+
+    product = db.session.get(Product, conv.product_id) if conv.product_id else None
+
+    return render_template('conversation.html',
+                           current_user=current_user,
+                           conv=conv,
+                           product=product,
+                           messages=messages,
+                           other_user=other_user)
+
+
+@app.route('/messages/<int:conversation_id>/send', methods=['POST'])
+@login_required
+def send_message(conversation_id: int):
+    conv = db.get_or_404(Conversation, conversation_id)
+    if current_user.id not in (conv.buyer_id, conv.seller_id):
+        abort(403)
+
+    body = (request.form.get('message') or '').strip()
+    if not body and 'attachment' not in request.files:
+        flash('Please type a message or attach a file.')
+        return redirect(url_for('view_conversation', conversation_id=conversation_id))
+
+    attachment_url = None
+    if 'attachment' in request.files:
+        file = request.files['attachment']
+        if file and file.filename:
+            up = save_uploaded_file(file, 'messages')
+            if up:
+                attachment_url = up
+
+    msg = Message(
+        conversation_id=conv.id,
+        sender_id=current_user.id,
+        body=body,
+        attachment_url=attachment_url,
+        created_at=date.today().strftime('%B %d, %Y')
+    )
+    conv.last_message_at = msg.created_at
+    db.session.add(msg)
+    db.session.commit()
+
+    return redirect(url_for('view_conversation', conversation_id=conversation_id))
 
 
 @app.route('/', methods=["GET", "POST"])
@@ -982,6 +1171,36 @@ def profile():
         db.select(db.func.count(Follow.id)).where(Follow.follower_id == current_user.id)
     ).scalar()
 
+    # Query conversations where user is buyer or seller
+    user_convos = db.session.execute(
+        db.select(Conversation).where(
+            (Conversation.buyer_id == current_user.id) | (Conversation.seller_id == current_user.id)
+        ).order_by(Conversation.last_message_at.desc())
+    ).scalars().all()
+
+    # Prepare conversation list for inbox
+    conversations = []
+    unread_count = 0
+    for convo in user_convos:
+        # Determine the other user
+        other_user = db.session.get(User, convo.seller_id if convo.buyer_id == current_user.id else convo.buyer_id)
+        # Count unread messages for current user: messages sent by other user, unread (read_at is null)
+        unread = db.session.execute(
+            db.select(db.func.count(Message.id)).where(
+                Message.conversation_id == convo.id,
+                Message.sender_id != current_user.id,
+                Message.read_at.is_(None)
+            )
+        ).scalar()
+        unread_count += unread or 0
+        conversations.append({
+            'id': convo.id,
+            'product': db.session.get(Product, convo.product_id),
+            'other_user': other_user,
+            'last_message_at': convo.last_message_at,
+            'unread_count': unread or 0
+        })
+
     return render_template("profile.html",
                            current_user=current_user,
                            profile_user=current_user,
@@ -991,7 +1210,9 @@ def profile():
                            following_count=following_count,
                            is_following=False,
                            portfolio_narrative=portfolio_narrative,
-                           artisan_rating=artisan_rating)
+                           artisan_rating=artisan_rating,
+                           conversations=conversations,
+                           unread_count=unread_count)
 
 
 @app.route("/profile/<int:user_id>")
@@ -1054,6 +1275,32 @@ def view_profile(user_id):
             )
         ).scalar_one_or_none() is not None
 
+    # Query conversations for this user (if viewing own profile)
+    conversations = []
+    unread_count = 0
+    if current_user.is_authenticated and current_user.id == user_id:
+        user_convos = db.session.execute(
+            db.select(Conversation).where(
+                (Conversation.buyer_id == user_id) | (Conversation.seller_id == user_id)
+            ).order_by(Conversation.last_message_at.desc())
+        ).scalars().all()
+        for convo in user_convos:
+            other_user = db.session.get(User, convo.seller_id if convo.buyer_id == user_id else convo.buyer_id)
+            unread = db.session.execute(
+                db.select(db.func.count(Message.id)).where(
+                    Message.conversation_id == convo.id,
+                    Message.sender_id != user_id,
+                    Message.read_at.is_(None)
+                )
+            ).scalar()
+            unread_count += unread or 0
+            conversations.append({
+                'id': convo.id,
+                'product': db.session.get(Product, convo.product_id),
+                'other_user': other_user,
+                'last_message_at': convo.last_message_at,
+                'unread_count': unread or 0
+            })
     return render_template("profile.html",
                            current_user=current_user,
                            profile_user=user,
@@ -1063,7 +1310,9 @@ def view_profile(user_id):
                            following_count=following_count,
                            is_following=is_following,
                            portfolio_narrative=portfolio_narrative,
-                           artisan_rating=artisan_rating)
+                           artisan_rating=artisan_rating,
+                           conversations=conversations,
+                           unread_count=unread_count)
 
 
 @app.route("/product/<int:product_id>")
@@ -1121,6 +1370,48 @@ def product_buy(product_id):
     return render_template("product_buy.html",
                            current_user=current_user,
                            product=product)
+
+
+@app.route('/product/<int:product_id>/chat', methods=["POST"])
+def product_chat(product_id):
+    """Handle product chatbot questions"""
+    try:
+        data = request.get_json()
+        question = data.get('question', '').strip()
+        
+        if not question:
+            return jsonify({'success': False, 'error': 'Question is required'}), 400
+        
+        # Get product data
+        product = db.get_or_404(Product, product_id)
+        artist = db.session.get(User, product.artist_id)
+        
+        product_data = {
+            'title': product.title,
+            'description': product.description or '',
+            'price': product.price,
+            'artist_name': artist.name if artist else 'Unknown Artist'
+        }
+        
+        # Get Gemini API key from environment
+        api_key = os.getenv('GEMINI_API_KEY')
+        
+        # Call the hybrid chatbot
+        result = ai.chat_with_product(question, product_data, api_key)
+        
+        return jsonify({
+            'success': True,
+            'answer': result['answer'],
+            'source': result['source'],
+            'suggestions': result['suggestions']
+        })
+        
+    except Exception as e:
+        print(f"Product chat error: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Sorry, I encountered an error. Please try contacting the seller directly.'
+        }), 500
 
 
 @app.route('/product/<int:product_id>/comment', methods=["POST"])
