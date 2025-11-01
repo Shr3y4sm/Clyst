@@ -480,6 +480,8 @@ def home():
 def products_page():
     # Optional natural language query parsing for products
     q = (request.args.get('q') or '').strip()
+    sort_by = (request.args.get('sort') or 'newest').strip().lower()
+    
     prod_query = db.select(Product)
     if q:
         parsed = natural_search.parse_search_query(q)
@@ -506,6 +508,7 @@ def products_page():
                 prod_query = prod_query.where(Product.price >= min_price)
             except Exception:
                 pass
+    
     result = db.session.execute(prod_query)
     products = result.scalars().all()
     
@@ -523,7 +526,21 @@ def products_page():
             setattr(product, 'avg_rating', avg_rating)
             setattr(product, 'reviews_count', len(reviews_rows))
     
-    return render_template('products.html', products=products, current_user=current_user, q=q)
+    # Apply sorting
+    if sort_by == 'popular':
+        # Sort by average rating (descending), then by review count
+        products.sort(key=lambda p: (p.avg_rating, p.reviews_count), reverse=True)
+    elif sort_by == 'price_low':
+        # Sort by price ascending
+        products.sort(key=lambda p: float(p.price or 0))
+    elif sort_by == 'price_high':
+        # Sort by price descending
+        products.sort(key=lambda p: float(p.price or 0), reverse=True)
+    else:  # newest (default)
+        # Sort by product_id descending (most recent first)
+        products.sort(key=lambda p: p.product_id, reverse=True)
+    
+    return render_template('products.html', products=products, current_user=current_user, q=q, sort_by=sort_by)
 
 
 @app.route("/login", methods=["GET", "POST"])

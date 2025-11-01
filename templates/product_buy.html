@@ -330,7 +330,10 @@
           <div class="product-options">
             <button
               class="share-btn"
-              onclick="copyToClipboard(window.location.host + '{{ url_for('product_buy', product_id=product.product_id) }}')"
+              data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
+              data-share-title="{{ product.title }}"
+              data-share-text="By {{ product.artist.name }}"
+              onclick="openShareFromEl(this)"
               title="Share Product"
               type="button"
             >
@@ -390,8 +393,8 @@
         ></path>
       </svg>
       <span class="sr-only">Translate this page</span>
-    </button>
-
+  </button>
+  <script src="../static/js/app.js"></script>
     <script>
       function toggleMenu(e) {
         e?.stopPropagation?.();
