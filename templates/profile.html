@@ -49,7 +49,7 @@
           {% endif %}
         </div>
 
-        <div></div>
+        <div id="google_translate_element" class="translate-element"></div>
       </div>
 
       <div class="mobile-menu" id="mobileMenu">
@@ -395,239 +395,61 @@
             <button class="tab-button" onclick="showTab('products')">
               {{ products|length }} Products
             </button>
+
           </div>
 
           <div class="tab-content">
-            <!-- Posts Tab -->
-            <div id="posts-tab" class="tab-panel">
-              {% if posts %}
-              <div class="posts-grid">
-                {% for post in posts %}
-                <div class="post-item">
-                  <button
-                    class="btn say-aloud-btn"
-                    data-title="{{ post.post_title }}"
-                    data-artist="{{ post.artist.name }}"
-                    data-price="{{ post.price or '0' }}"
-                    data-description="{{ post.description | default('No description available') | striptags | replace('"', '&quot;') }}"
-                    onclick="sayAloudFromData(this)"
-                    title="Say Aloud"
-                    type="button"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      fill="#000000"
-                      viewBox="0 0 256 256"
-                    >
-                      <path
-                        d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
-                      ></path>
-                    </svg>
-                  </button>
-                  {% if current_user.is_authenticated and current_user.id ==
-                  post.artist_id %}
-                  <div class="post-actions">
+              <!-- Posts Tab -->
+              <div id="posts-tab" class="tab-panel">
+                {% if posts %}
+                <div class="posts-grid">
+                  {% for post in posts %}
+                  <div class="post-item">
                     <button
-                      class="action-btn edit-btn"
-                      onclick="openEditPostModal('{{ post.post_id }}', '{{ post.post_title|replace('\'', '\\\'') }}', '{{ post.description|replace('\'', '\\\'') }}', '{{ post.media_url }}', {{ post.is_promoted|tojson }})"
-                      title="Edit Post"
+                      class="btn say-aloud-btn"
+                      data-title="{{ post.post_title }}"
+                      data-artist="{{ post.artist.name }}"
+                      data-price="{{ post.price or '0' }}"
+                      data-description="{{ post.description | default('No description available') | striptags | replace('"', '&quot;') }}"
+                      onclick="sayAloudFromData(this)"
+                      title="Say Aloud"
+                      type="button"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
+                        width="32"
+                        height="32"
+                        fill="#000000"
+                        viewBox="0 0 256 256"
                       >
                         <path
-                          d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"
+                          d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
                         ></path>
                       </svg>
                     </button>
-                    <button
-                      class="action-btn delete-btn"
-                      onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'"
-                      title="Delete Post"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                      >
-                        <path
-                          d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
-                        ></path>
-                      </svg>
-                    </button>
-                  </div>
-                  {% endif %} {% if post.media_url %}
-                  <img
-                    src="{{ post.media_url }}"
-                    alt="{{ post.post_title }}"
-                    class="item-image"
-                  />
-                  {% else %}
-                  <div class="item-image placeholder">
-                    <i class="fas fa-image"></i>
-                  </div>
-                  {% endif %}
-                  <div class="item-content">
-                    <div class="item-actions">
-                      <span class="info-value">{{ post.created_at }}</span>
-                    </div>
-                    <h3 class="item-title">{{ post.post_title }}</h3>
-                    <p class="item-description">
-                      {{ post.description[:100] }}{% if post.description|length
-                      > 100 %}...{% endif %}
-                    </p>
-                  </div>
-                  <button
-                    class="share-btn"
-                    data-share-url="{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}"
-                    data-share-title="{{ post.post_title }}"
-                    data-share-text="By {{ post.artist.name }}"
-                    onclick="openShareFromEl(this)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      height="24"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
-                      ></path>
-                    </svg>
-                  </button>
-                </div>
-                {% endfor %}
-              </div>
-              {% else %}
-              <div class="empty-state">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M5 11.1005L7 9.1005L12.5 14.6005L16 11.1005L19 14.1005V5H5V11.1005ZM4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM15.5 10C14.6716 10 14 9.32843 14 8.5C14 7.67157 14.6716 7 15.5 7C16.3284 7 17 7.67157 17 8.5C17 9.32843 16.3284 10 15.5 10Z"
-                  ></path>
-                </svg>
-                {% if current_user.is_authenticated and current_user.id ==
-                profile_user.id %}
-                <h3>ADD POSTS TO START</h3>
-                <p>Start sharing your artwork with the community</p>
-                <a href="{{ url_for('add_posts') }}" class="btn btn-secondary">
-                  Add New Post
-                </a>
-                {% else %}
-                <h3>NO POSTS AVAILABLE</h3>
-                <p>{{ profile_user.name }} has not shared any posts yet.</p>
-                {% endif %}
-              </div>
-              {% endif %}
-            </div>
-
-            <!-- Products Tab -->
-            <div id="products-tab" class="tab-panel" style="display: none">
-              {% if products %}
-              <div class="products-grid">
-                {% for product in products %}
-                <div class="product-item">
-                  <button
-                    class="btn say-aloud-btn"
-                    data-title="{{ product.title }}"
-                    data-artist="{{ product.artist.name }}"
-                    data-price="{{ product.price }}"
-                    data-description="{{ product.description | default('No description available') | striptags | replace('"', '&quot;') }}"
-                    onclick="sayAloudFromData(this)"
-                    title="Say Aloud"
-                    type="button"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      fill="#000000"
-                      viewBox="0 0 256 256"
-                    >
-                      <path
-                        d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
-                      ></path>
-                    </svg>
-                  </button>
-                  <button
-                    class="share-btn"
-                    data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
-                    data-share-title="{{ product.title }}"
-                    data-share-text="By {{ product.artist.name }}"
-                    onclick="openShareFromEl(this)"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      width="24"
-                      height="24"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
-                      ></path>
-                    </svg>
-                  </button>
-                  {% if product.img_url %}
-                  <img
-                    src="{{ product.img_url }}"
-                    alt="{{ product.title }}"
-                    class="item-image"
-                  />
-                  {% else %}
-                  <div class="item-image placeholder">
-                    <i class="fas fa-image"></i>
-                  </div>
-                  {% endif %}
-                  <div class="item-content">
-                    <!-- Promote product button (new) -->
-                    {% if current_user.id == product.artist_id %}
-                    <form
-                      method="post"
-                      action="{{ url_for('promote_product', product_id=product.product_id) }}"
-                      class="promote-form"
-                    >
+                    {% if current_user.is_authenticated and current_user.id == post.artist_id %}
+                    <div class="post-actions">
                       <button
-                        type="submit"
-                        class="btn promote-btn"
-                        title="Promote Product"
+                        class="action-btn edit-btn"
+                        onclick="openEditPostModal({{ post.post_id|tojson }}, {{ post.post_title|tojson }}, {{ post.description|tojson }}, {{ post.media_url|tojson }}, {{ post.is_promoted|tojson }})"
+                        title="Edit Post"
                       >
-                        Promote Product
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"
+                          ></path>
+                        </svg>
                       </button>
-                    </form>
-                    {% endif %}
-                    <h3 class="item-title">{{ product.title }}</h3>
-                    <p class="item-description">
-                      {{ product.description[:100] if product.description else
-                      '' }}{% if product.description and
-                      product.description|length > 100 %}...{% endif %}
-                    </p>
-                    <div class="item-price">Rs.{{ product.price }}</div>
-                    <div class="item-actions">
-                      <a
-                        href="{{ url_for('product_buy', product_id=product.product_id) }}"
-                        class="btn btn-primary"
-                      >
-                        View
-                      </a>
-                      {% if current_user.is_authenticated and current_user.id ==
-                      product.artist_id %}
                       <button
-                        class="delete-btn"
-                        onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_products', product_id=product.product_id) }}'"
-                        title="Delete Product"
+                        class="action-btn delete-btn"
+                        onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'"
+                        title="Delete Post"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -641,61 +463,245 @@
                           ></path>
                         </svg>
                       </button>
-                      {% endif %}
+                    </div>
+                    {% endif %}
+                    {% if post.media_url %}
+                    <img
+                      src="{{ post.media_url }}"
+                      alt="{{ post.post_title }}"
+                      class="item-image"
+                    />
+                    {% else %}
+                    <div class="item-image placeholder">
+                      <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                    <div class="item-content">
+                      <div class="item-actions">
+                        <span class="info-value">{{ post.created_at }}</span>
+                      </div>
+                      <h3 class="item-title">{{ post.post_title }}</h3>
+                      <p class="item-description">
+                        {{ post.description[:100] }}{% if post.description|length > 100 %}...{% endif %}
+                      </p>
+                      <button
+                        class="share-btn"
+                        data-share-url="{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}"
+                        data-share-title="{{ post.post_title }}"
+                        data-share-text="By {{ post.artist.name }}"
+                        onclick="openShareFromEl(this)"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                          ></path>
+                        </svg>
+                      </button>
                     </div>
                   </div>
+                  {% endfor %}
                 </div>
-                {% endfor %}
-              </div>
-              {% else %}
-              <div class="empty-state">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM4.5 7.65311V7.65788L12 12V20.689L19.5 16.3469V7.65311L12 3.311L4.5 7.65311Z"
-                  ></path>
-                </svg>
-                {% if current_user.is_authenticated and current_user.id ==
-                profile_user.id %}
-                <h3>ADD PRODUCTS TO START</h3>
-                <p>Start selling your artwork in the marketplace</p>
-                <a
-                  href="{{ url_for('add_products') }}"
-                  class="btn btn-secondary"
-                >
-                  Add New Product
-                </a>
                 {% else %}
-                <h3>NO PRODUCTS AVAILABLE</h3>
-                <p>{{ profile_user.name }} has not added any products yet.</p>
+                <div class="empty-state">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M5 11.1005L7 9.1005L12.5 14.6005L16 11.1005L19 14.1005V5H5V11.1005ZM4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM15.5 10C14.6716 10 14 9.32843 14 8.5C14 7.67157 14.6716 7 15.5 7C16.3284 7 17 7.67157 17 8.5C17 9.32843 16.3284 10 15.5 10Z"
+                    ></path>
+                  </svg>
+                  {% if current_user.is_authenticated and current_user.id == profile_user.id %}
+                  <h3>ADD POSTS TO START</h3>
+                  <p>Start sharing your artwork with the community</p>
+                  <a href="{{ url_for('add_posts') }}" class="btn btn-secondary">
+                    Add New Post
+                  </a>
+                  {% else %}
+                  <h3>NO POSTS AVAILABLE</h3>
+                  <p>{{ profile_user.name }} has not shared any posts yet.</p>
+                  {% endif %}
+                </div>
                 {% endif %}
               </div>
-              {% endif %}
+
+              <!-- Products Tab -->
+              <div id="products-tab" class="tab-panel" style="display: none">
+                {% if products %}
+                <div class="products-grid">
+                  {% for product in products %}
+                  <div class="product-item">
+                    <button
+                      class="btn say-aloud-btn"
+                      data-title="{{ product.title }}"
+                      data-artist="{{ product.artist.name }}"
+                      data-price="{{ product.price }}"
+                      data-description="{{ product.description | default('No description available') | striptags | replace('"', '&quot;') }}"
+                      onclick="sayAloudFromData(this)"
+                      title="Say Aloud"
+                      type="button"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        fill="#000000"
+                        viewBox="0 0 256 256"
+                      >
+                        <path
+                          d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                        ></path>
+                      </svg>
+                    </button>
+                    <button
+                      class="share-btn"
+                      data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
+                      data-share-title="{{ product.title }}"
+                      data-share-text="By {{ product.artist.name }}"
+                      onclick="openShareFromEl(this)"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                        ></path>
+                      </svg>
+                    </button>
+                    {% if product.img_url %}
+                    <img
+                      src="{{ product.img_url }}"
+                      alt="{{ product.title }}"
+                      class="item-image"
+                    />
+                    {% else %}
+                    <div class="item-image placeholder">
+                      <i class="fas fa-image"></i>
+                    </div>
+                    {% endif %}
+                    <div class="item-content">
+                      {% if current_user.id == product.artist_id %}
+                      <form
+                        method="post"
+                        action="{{ url_for('promote_product', product_id=product.product_id) }}"
+                        class="promote-form"
+                      >
+                        <button
+                          type="submit"
+                          class="btn promote-btn"
+                          title="Promote Product"
+                        >
+                          Promote Product
+                        </button>
+                      </form>
+                      {% endif %}
+                      <div class="item-actions">
+                        <span class="info-value">{{ product.created_at }}</span>
+                      </div>
+                      <h3 class="item-title">{{ product.title }}</h3>
+                      <p class="item-description">
+                        {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                      </p>
+                      <span class="item-price">Rs.{{ product.price }}</span>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path
+                      d="M5 11.1005L7 9.1005L12.5 14.6005L16 11.1005L19 14.1005V5H5V11.1005ZM4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM15.5 10C14.6716 10 14 9.32843 14 8.5C14 7.67157 14.6716 7 15.5 7C16.3284 7 17 7.67157 17 8.5C17 9.32843 16.3284 10 15.5 10Z"
+                    ></path>
+                  </svg>
+                  {% if current_user.is_authenticated and current_user.id == profile_user.id %}
+                  <h3>ADD PRODUCTS TO START</h3>
+                  <p>Start selling your artwork in the marketplace</p>
+                  <a href="{{ url_for('add_products') }}" class="btn btn-secondary">
+                    Add New Product
+                  </a>
+                  {% else %}
+                  <h3>NO PRODUCTS AVAILABLE</h3>
+                  <p>{{ profile_user.name }} has not listed any products yet.</p>
+                  {% endif %}
+                </div>
+                {% endif %}
+              </div>
+
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div id="google_translate_element" class="translate-element"></div>
-    <button
-      id="translateButton"
-      onclick="googleTranslateElementInit()"
-      class="translate-btn"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-      >
-        <path
-          d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"
-        ></path>
+    <!-- Floating Inbox Button -->
+    {% if current_user.is_authenticated and (not profile_user or current_user.id == profile_user.id) %}
+    <button class="inbox-icon-btn" onclick="toggleInboxModal()" title="Inbox" aria-label="Open Inbox">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM20 7.23792L12.0718 14.338L4 7.21594V19H20V7.23792ZM4.51146 5L12.0619 11.662L19.501 5H4.51146Z"></path>
       </svg>
+      {% if unread_count and unread_count > 0 %}
+        <span class="inbox-badge">{{ unread_count }}</span>
+      {% endif %}
     </button>
+
+    <!-- Inbox Modal -->
+    <div class="inbox-modal" id="inboxModal">
+      <div class="inbox-modal-header">
+        <h3>Inbox</h3>
+        <button class="inbox-modal-close" onclick="toggleInboxModal()" aria-label="Close Inbox">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 10.586L16.95 5.63599L18.364 7.04999L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.04999 18.364L5.63599 16.95L10.586 12L5.63599 7.04999L7.04999 5.63599L12 10.586Z"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="inbox-modal-body">
+        {% if conversations %}
+          <ul class="inbox-list">
+            {% for convo in conversations %}
+            <li class="inbox-item">
+              <a href="{{ url_for('view_conversation', conversation_id=convo.id) }}">
+                <div>
+                  <strong>{{ convo.product.title }}</strong>
+                  {% if convo.unread_count > 0 %}
+                    <span class="badge">{{ convo.unread_count }} new</span>
+                  {% endif %}
+                </div>
+                <div style="font-size: 13px; color: var(--muted);">
+                  with {{ convo.other_user.name }}
+                </div>
+                <span class="inbox-date">{{ convo.last_message_at }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="empty-state" style="padding: 40px 20px; text-align: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3;">
+              <path d="M21 4H3C2.44772 4 2 4.44772 2 5V19C2 19.5523 2.44772 20 3 20H21C21.5523 20 22 19.5523 22 19V5C22 4.44772 21.5523 4 21 4ZM20 18H4V6H20V18ZM6 8H18V10H6V8ZM6 12H18V14H6V12ZM6 16H14V18H6V16Z"></path>
+            </svg>
+            <h3 style="margin: 0 0 8px; font-size: 16px;">No conversations yet</h3>
+            <p style="margin: 0; font-size: 14px; color: var(--muted);">Your messages with buyers and sellers will appear here.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
 
     <script>
           function toggleMenu(e) {
@@ -718,6 +724,25 @@
               );
         }
       }
+
+      // Toggle inbox modal
+      function toggleInboxModal() {
+        const modal = document.getElementById("inboxModal");
+        if (modal) {
+          modal.classList.toggle("show");
+        }
+      }
+
+      // Close inbox modal when clicking outside
+      document.addEventListener('click', function(event) {
+        const modal = document.getElementById("inboxModal");
+        const btn = document.querySelector(".inbox-icon-btn");
+        if (modal && modal.classList.contains("show") && 
+            !modal.contains(event.target) && 
+            !btn.contains(event.target)) {
+          modal.classList.remove("show");
+        }
+      });
 
       // Highlight active nav link
           document.addEventListener("DOMContentLoaded", function () {
@@ -1300,6 +1325,16 @@
         gap: 10px;
       }
 
+      .btn {
+        padding: 10px 20px;
+        border-radius: 2px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+
       .btn-primary {
         background: var(--accent);
         color: white;
@@ -1391,6 +1426,15 @@
           });
       }
     </script>
+    
+    <button
+      id="translateButton"
+      onclick="googleTranslateElementInit()"
+      class="translate-btn"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"></path></svg>
+    </button>
+    
     <script src="../static/js/app.js"></script>
   </body>
 </html>

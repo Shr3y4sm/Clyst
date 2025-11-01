@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conversation</title>
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/index.css" />
+    <link rel="stylesheet" href="../static/css/product_page.css" />
+  </head>
+  <body>
+    <nav id="topNav">
+      <div class="nav">
+        <div class="nav-left">
+          <a href="{{ url_for('home') }}">Clyst</a>
+        </div>
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="post" style="max-width: 900px; width: 100%">
+        <div class="post-info">
+          <div class="product-header">
+            <h1 class="product-title">
+              Conversation with {{ other_user.name }}
+            </h1>
+            {% if product %}
+            <div class="product-price" style="font-size: 14px">
+              About:
+              <a
+                href="{{ url_for('product_buy', product_id=product.product_id) }}"
+                >{{ product.title }}</a
+              >
+            </div>
+            {% endif %}
+          </div>
+
+          <div id="thread" class="comments-list">
+            {% for m in messages %}
+            <div class="comments">
+              <div class="user-id-info">
+                <div class="artist-avatar">
+                  {{ (m.sender.name[0].upper() if m.sender and m.sender.name
+                  else 'U') }}
+                </div>
+                <div class="artist-name">
+                  <span class="post-username"
+                    >{{ m.sender.name if m.sender else 'User' }}</span
+                  >
+                  <p class="post-user-email">{{ m.created_at }}</p>
+                </div>
+              </div>
+              {% if m.body %}
+              <p class="comment-p">{{ m.body }}</p>
+              {% endif %} {% if m.attachment_url %}
+              <div class="current-image">
+                <img
+                  src="{{ m.attachment_url }}"
+                  alt="Attachment"
+                  class="current-image-preview"
+                />
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+
+          <form
+            action="{{ url_for('send_message', conversation_id=conv.id) }}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="comment-section"
+            style="margin-top: 12px"
+          >
+            <div class="artist-avatar">{{ current_user.name[0].upper() }}</div>
+            <input
+              type="text"
+              name="message"
+              placeholder="Write a message..."
+            />
+            <input type="file" name="attachment" accept="image/*" />
+            <button class="btn btn-primary" type="submit">Send</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script src="../static/js/app.js"></script>
+  </body>
+</html>
