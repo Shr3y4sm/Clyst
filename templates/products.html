@@ -112,6 +112,16 @@
     <div class="container">
       <div class="header">
         <h1>Marketplace</h1>
+        <!-- ===== SORT OPTIONS ===== -->
+        <div class="sort-wrapper">
+          <label for="sort-select">Sort:</label>
+          <select id="sort-select" onchange="handleSortChange(this.value)">
+            <option value="newest" {{ 'selected' if sort_by == 'newest' else '' }}>Newest</option>
+            <option value="popular" {{ 'selected' if sort_by == 'popular' else '' }}>Popular</option>
+            <option value="price_low" {{ 'selected' if sort_by == 'price_low' else '' }}>Price: Low to High</option>
+            <option value="price_high" {{ 'selected' if sort_by == 'price_high' else '' }}>Price: High to Low</option>
+          </select>
+        </div>
       </div>
       <!-- ===== SEARCH BELOW NAV ===== -->
       <div id="searchBelow" class="search-below">
@@ -135,6 +145,7 @@
           </div>
         </div>
       </div>
+      
       <div class="main-content">
         {% if products %}
         <div class="products-grid">
@@ -142,7 +153,11 @@
           <div class="product-card">
             <button
               class="btn say-aloud-btn"
-              onclick="sayAloud({title: '{{ product.title }}', artist: '{{ product.artist.name }}', price: '{{ product.price }}', description: '{{ product.description | default('No description available') }}' })"
+              data-title="{{ product.title }}"
+              data-artist="{{ product.artist.name }}"
+              data-price="{{ product.price }}"
+              data-description="{{ product.description | default('No description available') | striptags | replace('"', '&quot;') }}"
+              onclick="sayAloudFromData(this)"
               title="Say Aloud"
               type="button"
             >
@@ -160,7 +175,10 @@
             </button>
             <button
               class="share-btn"
-              onclick="copyToClipboard(window.location.host + '{{ url_for('product_buy', product_id=product.product_id) }}')"
+              data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
+              data-share-title="{{ product.title }}"
+              data-share-text="By {{ product.artist.name }}"
+              onclick="openShareFromEl(this)"
               title="Share Product"
               type="button"
             >
@@ -395,6 +413,17 @@
         window.speechSynthesis.speak(message); // Start speaking
       }
 
+      // Helper function to read data from button attributes
+      function sayAloudFromData(button) {
+        const text = {
+          title: button.dataset.title || '',
+          artist: button.dataset.artist || '',
+          price: button.dataset.price || '',
+          description: button.dataset.description || 'No description available'
+        };
+        sayAloud(text);
+      }
+
       // Submit search to products page
       document.addEventListener("DOMContentLoaded", function () {
         const global = document.getElementById("globalSearchInput");
@@ -512,7 +541,15 @@
       document.addEventListener("DOMContentLoaded", function () {
         updateCartCount();
       });
+
+      // Handle sort change
+      function handleSortChange(sortValue) {
+        const url = new URL(window.location);
+        url.searchParams.set('sort', sortValue);
+        window.location.href = url.toString();
+      }
     </script>
+    <script src="../static/js/app.js"></script>
     <script type="text/javascript">
       function googleTranslateElementInit() {
         new google.translate.TranslateElement(

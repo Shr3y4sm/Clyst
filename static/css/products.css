@@ -12,6 +12,25 @@
 }
 
 /* ================================
+   HEADER WITH SORT
+   ================================ */
+.container .header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 24px;
+	padding: 0 20px;
+}
+
+.container .header h1 {
+	margin: 0;
+	font-size: 32px;
+	font-weight: 700;
+}
+
+/* ================================
    PRODUCT GRID
    ================================ */
 .products-grid {
@@ -149,55 +168,76 @@
 	position: absolute;
 	top: 10px;
 	left: 10px;
-	background: #005c61cd;
-	backdrop-filter: blur(2px);
-	border: none;
+	background: rgba(0, 0, 0, 0.75);
+	backdrop-filter: blur(4px);
+	-webkit-backdrop-filter: blur(4px);
+	border: 2px solid rgba(255, 255, 255, 0.3);
 	padding: 0;
 	width: 40px;
 	height: 40px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 2px;
+	border-radius: 50%;
 	cursor: pointer;
 	font-size: 16px;
 	fill: #fff;
-	transition: opacity 0.2s;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .say-aloud-btn svg {
-	fill: inherit;
+	fill: #fff;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .say-aloud-btn:hover {
-	background-color: #d8feff;
-	color: #005c61;
-	fill: #005c61;
-	transform: translateY(-1px);
+	background: var(--accent);
+	border-color: var(--accent);
+	fill: #fff;
+	transform: scale(1.1);
+	box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.say-aloud-btn:hover svg {
+	fill: #fff;
 }
 .share-btn {
 	position: absolute;
 	right: 10px;
 	top: 10px;
-	background: #005c61cd;
-	backdrop-filter: blur(2px);
-	border: none;
+	background: rgba(0, 0, 0, 0.75);
+	-webkit-backdrop-filter: blur(4px);
+	backdrop-filter: blur(4px);
+	border: 2px solid rgba(255, 255, 255, 0.3);
 	width: 40px;
 	height: 40px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 2px;
+	border-radius: 50%;
 	cursor: pointer;
 	font-size: 16px;
 	color: #fff;
-	transition: all 0.2s ease;
+	transition: all 0.3s ease;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.share-btn svg {
+	fill: #fff;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .share-btn:hover {
-	background-color: #d8feffcd;
-	color: #005c61;
+	background: var(--accent);
+	border-color: var(--accent);
+	color: #fff;
 	transform: scale(1.1);
+	box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+}
+
+.share-btn:hover svg {
+	fill: #fff;
 }
 
 .product-card .delete-btn {

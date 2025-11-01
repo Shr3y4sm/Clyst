@@ -565,17 +565,31 @@ button {
 	height: 40px;
 	top: 10px;
 	left: 10px;
-	background: #151515cd;
-	backdrop-filter: blur(2px);
+	background: rgba(0, 0, 0, 0.75);
+	-webkit-backdrop-filter: blur(4px);
+	backdrop-filter: blur(4px);
+	border: 2px solid rgba(255, 255, 255, 0.3);
+	border-radius: 50%;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.post-item .say-aloud-btn:hover,
+.product-item .say-aloud-btn:hover {
+	background: var(--accent);
+	border-color: var(--accent);
+	transform: scale(1.1);
+	box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
 }
 
 .product-item .share-btn svg {
 	fill: #fff;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .post-item .say-aloud-btn svg,
 .product-item .say-aloud-btn svg {
 	fill: #fff;
+	filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .post-delete-btn:hover {

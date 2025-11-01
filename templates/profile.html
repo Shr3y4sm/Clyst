@@ -406,8 +406,13 @@
                 <div class="post-item">
                   <button
                     class="btn say-aloud-btn"
-                    onclick="sayAloud({title: '{{ post.post_title }}', artist: '{{ post.artist.name }}', price: '{{ post.price }}', description: '{{ post.description | default('No description available') }}' })"
+                    data-title="{{ post.post_title }}"
+                    data-artist="{{ post.artist.name }}"
+                    data-price="{{ post.price or '0' }}"
+                    data-description="{{ post.description | default('No description available') | striptags | replace('"', '&quot;') }}"
+                    onclick="sayAloudFromData(this)"
                     title="Say Aloud"
+                    type="button"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -482,7 +487,10 @@
                   </div>
                   <button
                     class="share-btn"
-                    onclick="copyToClipboard(window.location.host + '{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}')"
+                    data-share-url="{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}"
+                    data-share-title="{{ post.post_title }}"
+                    data-share-text="By {{ post.artist.name }}"
+                    onclick="openShareFromEl(this)"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -533,8 +541,13 @@
                 <div class="product-item">
                   <button
                     class="btn say-aloud-btn"
-                    onclick="sayAloud({title: '{{ product.title }}', artist: '{{ product.artist.name }}', price: '{{ product.price }}', description: '{{ product.description | default('No description available') }}' })"
+                    data-title="{{ product.title }}"
+                    data-artist="{{ product.artist.name }}"
+                    data-price="{{ product.price }}"
+                    data-description="{{ product.description | default('No description available') | striptags | replace('"', '&quot;') }}"
+                    onclick="sayAloudFromData(this)"
                     title="Say Aloud"
+                    type="button"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -550,7 +563,10 @@
                   </button>
                   <button
                     class="share-btn"
-                    onclick="copyToClipboard(window.location.host + '{{ url_for('product_buy', product_id=product.product_id) }}')"
+                    data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
+                    data-share-title="{{ product.title }}"
+                    data-share-text="By {{ product.artist.name }}"
+                    onclick="openShareFromEl(this)"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -737,6 +753,17 @@
             const message = new SpeechSynthesisUtterance();
             message.text = `The title of the artwork is ${text.title}. It is created by ${text.artist}. The price of the artwork is Rs.${text.price}. The description says it is ${text.description}.`;
             window.speechSynthesis.speak(message); // Start speaking
+          }
+
+          // Helper function to read data from button attributes
+          function sayAloudFromData(button) {
+            const text = {
+              title: button.dataset.title || '',
+              artist: button.dataset.artist || '',
+              price: button.dataset.price || '',
+              description: button.dataset.description || 'No description available'
+            };
+            sayAloud(text);
           }
 
           async function copyToClipboard(textToCopy) {
@@ -1155,7 +1182,9 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -1169,15 +1198,17 @@
       }
 
       .modal-content {
-        background: white;
+        background: var(--card);
+        border: 1px solid var(--border);
         padding: 20px;
-        border-radius: 8px;
+        border-radius: 2px;
         width: 90%;
         max-width: 500px;
         max-height: 90vh;
         overflow-y: auto;
         transform: translateY(20px);
         transition: transform 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       }
 
       .modal.open .modal-content {
@@ -1189,6 +1220,12 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .modal-header h2 {
+        color: var(--text);
       }
 
       .close-btn {
@@ -1196,11 +1233,20 @@
         border: none;
         cursor: pointer;
         padding: 8px;
+        color: var(--muted);
+        transition: all 0.2s;
+        border-radius: 2px;
+      }
+
+      .close-btn:hover {
+        color: var(--accent);
+        background: var(--bg);
       }
 
       .close-btn svg {
         width: 24px;
         height: 24px;
+        fill: currentColor;
       }
 
       .form-group {
@@ -1209,26 +1255,42 @@
 
       .form-group label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
+        color: var(--text);
+        font-weight: 500;
       }
 
       .form-group input[type="text"],
-      .form-group textarea {
+      .form-group textarea,
+      .form-group input[type="file"] {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: inherit;
+        transition: border-color 0.2s;
+      }
+
+      .form-group input[type="text"]:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.1);
       }
 
       .form-group textarea {
         min-height: 100px;
+        resize: vertical;
       }
 
       .preview-image {
         max-width: 100%;
         height: auto;
         margin-top: 10px;
-        border-radius: 4px;
+        border-radius: 2px;
+        border: 1px solid var(--border);
       }
 
       .modal-footer {
@@ -1239,13 +1301,23 @@
       }
 
       .btn-primary {
-        background: #007bff;
+        background: var(--accent);
         color: white;
+        border: none;
+      }
+
+      .btn-primary:hover {
+        background: #ff5252;
       }
 
       .btn-secondary {
-        background: #6c757d;
-        color: white;
+        background: var(--bg);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--card);
       }
 
       .post-actions {
@@ -1319,5 +1391,6 @@
           });
       }
     </script>
+    <script src="../static/js/app.js"></script>
   </body>
 </html>
