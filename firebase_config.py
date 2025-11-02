@@ -5,13 +5,14 @@ import os
 import requests
 
 # Firebase Web SDK config (for frontend)
+# Load from environment variables to avoid exposing secrets in source code
 FIREBASE_WEB_CONFIG = {
-    "apiKey": "AIzaSyCgFUiH7sCILiy7C5RzIfNByr5vQQI1iKw",
-    "authDomain": "clyst-2f40e.firebaseapp.com",
-    "projectId": "clyst-2f40e",
-    "storageBucket": "clyst-2f40e.firebasestorage.app",
-    "messagingSenderId": "688738219775",
-    "appId": "1:688738219775:web:6ed440ac392d275a927eca"
+    "apiKey": os.environ.get("FIREBASE_API_KEY", ""),
+    "authDomain": os.environ.get("FIREBASE_AUTH_DOMAIN", ""),
+    "projectId": os.environ.get("FIREBASE_PROJECT_ID", ""),
+    "storageBucket": os.environ.get("FIREBASE_STORAGE_BUCKET", ""),
+    "messagingSenderId": os.environ.get("FIREBASE_MESSAGING_SENDER_ID", ""),
+    "appId": os.environ.get("FIREBASE_APP_ID", "")
 }
 
 # Initialize Firebase Admin SDK (for backend token verification)
