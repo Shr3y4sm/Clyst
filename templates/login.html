@@ -4,23 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Clyst - Login</title>
-    
+
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
       rel="stylesheet"
-    /><link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/css/styles.css">
-    <link
-      rel="stylesheet"
-      href="../static/css/auth.css"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/auth.css" />
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
-    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
+    <link
+      type="text/css"
+      rel="stylesheet"
+      href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css"
+    />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -37,23 +42,27 @@
           <p>Welcome back to Clyst</p>
         </div>
 
-          {% with messages = get_flashed_messages() %}
-            {% if messages %}
-              {% for message in messages %}
-                <div class="flash-message" style="display: block; margin-bottom: 16px;">{{ message }}</div>
-              {% endfor %}
-            {% endif %}
-          {% endwith %}
+        {% with messages = get_flashed_messages() %} {% if messages %} {% for
+        message in messages %}
+        <div class="flash-message" style="display: block; margin-bottom: 16px">
+          {{ message }}
+        </div>
+        {% endfor %} {% endif %} {% endwith %}
 
         <!-- Firebase Auth UI Container -->
         <div id="firebaseui-auth-container"></div>
-        
+
         <div class="divider">
           <span>or continue with email</span>
         </div>
 
         <!-- Legacy Email/Password Form (fallback) -->
-        <form method="POST" action="{{ url_for('login') }}" class="auth-form" id="legacyLoginForm">
+        <form
+          method="POST"
+          action="{{ url_for('login') }}"
+          class="auth-form"
+          id="legacyLoginForm"
+        >
           <div class="form-group">
             <label for="email" class="form-label">Email</label>
             <input
@@ -84,9 +93,7 @@
         <div class="not-registered">
           <p>
             Don't have an account?
-            <a
-              href="{{ url_for('register') }}"
-              class="register-link"
+            <a href="{{ url_for('register') }}" class="register-link"
               >Register here</a
             >
           </p>
@@ -100,7 +107,15 @@
       onclick="googleTranslateElementInit()"
       class="translate-btn"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"></path></svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path
+          d="M18.5 10L22.9 21H20.745L19.544 18H15.454L14.255 21H12.101L16.5 10H18.5ZM10 2V4H16V6L14.0322 6.0006C13.2425 8.36616 11.9988 10.5057 10.4115 12.301C11.1344 12.9457 11.917 13.5176 12.7475 14.0079L11.9969 15.8855C10.9237 15.2781 9.91944 14.5524 8.99961 13.7249C7.21403 15.332 5.10914 16.5553 2.79891 17.2734L2.26257 15.3442C4.2385 14.7203 6.04543 13.6737 7.59042 12.3021C6.46277 11.0281 5.50873 9.57985 4.76742 8.00028L7.00684 8.00037C7.57018 9.03885 8.23979 10.0033 8.99967 10.877C10.2283 9.46508 11.2205 7.81616 11.9095 6.00101L2 6V4H8V2H10ZM17.5 12.8852L16.253 16H18.745L17.5 12.8852Z"
+        ></path>
+      </svg>
     </button>
 
     <script
@@ -120,7 +135,7 @@
         );
       }
     </script>
-    
+
     <!-- Firebase Auth Initialization -->
     <script>
       // Initialize Firebase
@@ -130,57 +145,59 @@
         projectId: "{{ firebase_config.projectId }}",
         storageBucket: "{{ firebase_config.storageBucket }}",
         messagingSenderId: "{{ firebase_config.messagingSenderId }}",
-        appId: "{{ firebase_config.appId }}"
+        appId: "{{ firebase_config.appId }}",
       };
-      
+
       firebase.initializeApp(firebaseConfig);
-      
+
       // Initialize FirebaseUI
       const ui = new firebaseui.auth.AuthUI(firebase.auth());
-      
+
       // FirebaseUI configuration
       const uiConfig = {
         callbacks: {
-          signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+          signInSuccessWithAuthResult: function (authResult, redirectUrl) {
             // User successfully signed in
             const user = authResult.user;
-            
+
             // Get the ID token
-            user.getIdToken().then(function(idToken) {
+            user.getIdToken().then(function (idToken) {
               // Send token to backend
               fetch("{{ url_for('login') }}", {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                  'Content-Type': 'application/json',
+                  "Content-Type": "application/json",
                 },
-                credentials: 'same-origin',
+                credentials: "same-origin",
                 body: JSON.stringify({
-                  firebase_token: idToken
+                  firebase_token: idToken,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    window.location.href =
+                      data.redirect || "{{ url_for('home') }}";
+                  } else {
+                    alert(data.message || "Login failed");
+                  }
                 })
-              })
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  window.location.href = data.redirect || "{{ url_for('home') }}";
-                } else {
-                  alert(data.message || 'Login failed');
-                }
-              })
-              .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred during login');
-              });
+                .catch((error) => {
+                  console.error("Error:", error);
+                  alert("An error occurred during login");
+                });
             });
-            
+
             // Prevent redirect until backend confirms
             return false;
           },
-          uiShown: function() {
+          uiShown: function () {
             // Hide loader if any
-            document.getElementById('loader') && (document.getElementById('loader').style.display = 'none');
-          }
+            document.getElementById("loader") &&
+              (document.getElementById("loader").style.display = "none");
+          },
         },
-        signInFlow: 'popup',
+        signInFlow: "popup",
         signInOptions: [
           // Email/Password
           firebase.auth.EmailAuthProvider.PROVIDER_ID,
@@ -188,20 +205,20 @@
           {
             provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
             recaptchaParameters: {
-              size: 'invisible',
-              badge: 'bottomleft'
+              size: "invisible",
+              badge: "bottomleft",
             },
-            defaultCountry: 'IN'
+            defaultCountry: "IN",
           },
           // Google
-          firebase.auth.GoogleAuthProvider.PROVIDER_ID
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         ],
-        tosUrl: '#',
-        privacyPolicyUrl: '#'
+        tosUrl: "#",
+        privacyPolicyUrl: "#",
       };
-      
+
       // Start FirebaseUI
-      ui.start('#firebaseui-auth-container', uiConfig);
+      ui.start("#firebaseui-auth-container", uiConfig);
     </script>
   </body>
 </html>
