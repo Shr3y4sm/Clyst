@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pay Order • Clyst</title>
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <style>
+      .page {
+        max-width: 720px;
+        margin: 80px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        padding: 16px;
+      }
+      .title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 12px;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .row {
+        display: flex;
+        justify-content: space-between;
+        margin: 8px 0;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+      .btn {
+        padding: 10px 16px;
+        border-radius: 2px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+      }
+      .btn-danger {
+        background: #b00020;
+        color: #fff;
+        border: none;
+      }
+      .note {
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <nav id="topNav" style="position: sticky; top: 0">
+      <div class="nav">
+        <div class="nav-left">
+          <a
+            href="{{ url_for('home') }}"
+            style="text-decoration: none; color: inherit"
+            >Clyst</a
+          >
+        </div>
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('orders_list') }}">My Orders</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="page">
+      <div class="card">
+        <div class="title">DummyPay Checkout</div>
+        <div class="row">
+          <span>Order ID</span><strong>#{{ order.order_id }}</strong>
+        </div>
+        <div class="row">
+          <span>Amount</span
+          ><strong>₹ {{ '%.2f'|format(order.total_price or 0) }}</strong>
+        </div>
+        <div class="row">
+          <span>Status</span
+          ><strong>{{ order.payment_status or 'unpaid' }}</strong>
+        </div>
+
+        <form
+          method="post"
+          action="{{ url_for('create_payment', order_id=order.order_id) }}"
+          class="actions"
+        >
+          <input type="hidden" name="outcome" value="success" />
+          <button class="btn btn-primary" type="submit">
+            Pay with DummyPay
+          </button>
+          <a
+            class="btn"
+            href="{{ url_for('simulate_payment', order_id=order.order_id, outcome='fail') }}"
+            >Simulate Failure</a
+          >
+          <a
+            class="btn btn-danger"
+            href="{{ url_for('simulate_payment', order_id=order.order_id, outcome='cancel') }}"
+            >Cancel</a
+          >
+        </form>
+
+        <div class="note">
+          This is a sandbox payment flow for testing only. No real payment is
+          processed.
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

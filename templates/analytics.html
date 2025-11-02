@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Analytics • Clyst</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <style>
+      .page {
+        max-width: 1100px;
+        margin: 80px auto 40px;
+        padding: 0 16px;
+      }
+      .title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--text);
+      }
+      .muted {
+        color: var(--muted);
+      }
+
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        padding: 16px;
+      }
+      .kpi .label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .kpi .value {
+        font-size: 24px;
+        font-weight: 700;
+        margin-top: 6px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .list li {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .list li:last-child {
+        border-bottom: 0;
+      }
+
+      .chart {
+        height: 220px;
+      }
+      .legend {
+        display: flex;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend i {
+        width: 10px;
+        height: 10px;
+        display: inline-block;
+        border-radius: 2px;
+      }
+      .legend .pv {
+        background: var(--accent);
+      }
+      .legend .pr {
+        background: #4db6ac;
+      }
+
+      .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+      .sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: -4px;
+      }
+
+      @media (max-width: 900px) {
+        .kpi-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- top nav reuse -->
+    <nav id="topNav" style="position: sticky; top: 0">
+      <div class="nav">
+        <div class="nav-left">
+          <a
+            href="{{ url_for('home') }}"
+            style="text-decoration: none; color: inherit"
+            >Clyst</a
+          >
+        </div>
+        <div class="nav-center" id="navLinks">
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          <a href="{{ url_for('profile') }}">Your Profile</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="page">
+      <div>
+        <div class="title">Your Analytics</div>
+        <div class="muted">Private dashboard only visible to you.</div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="card kpi">
+          <div class="label">Views</div>
+          <div class="value">{{ kpis.views }}</div>
+        </div>
+        <div class="card kpi">
+          <div class="label">Engagement</div>
+          <div class="value">{{ kpis.engagement }}</div>
+        </div>
+        <div class="card kpi">
+          <div class="label">Items Sold</div>
+          <div class="value">{{ kpis.sales }}</div>
+        </div>
+        <div class="card kpi">
+          <div class="label">Revenue</div>
+          <div class="value">₹ {{ '%.2f'|format(kpis.revenue) }}</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Views (last 30 days)</div>
+          <canvas id="viewsChart" class="chart"></canvas>
+          <div class="legend">
+            <span><i class="pv"></i>Product views</span>
+            <span><i class="pr"></i>Profile views</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">Revenue (last 30 days)</div>
+          <canvas id="revenueChart" class="chart"></canvas>
+          <div class="sub">
+            Orders: {{ total_orders }} • Gross: ₹ {{
+            '%.2f'|format(total_revenue) }} • Paid: ₹ {{
+            '%.2f'|format(paid_revenue) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Top Products by Views</div>
+          <ul class="list">
+            {% for p in top_products_by_views %}
+            <li><span>{{ p.title }}</span><span>{{ p.count }}</span></li>
+            {% else %}
+            <li class="muted">No data yet.</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="card">
+          <div class="section-title">Top Products by Sales</div>
+          <ul class="list">
+            {% for p in top_products_by_sales %}
+            <li><span>{{ p.title }}</span><span>{{ p.count }}</span></li>
+            {% else %}
+            <li class="muted">No data yet.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 12px">
+        <div class="section-title">Top Posts by Engagement</div>
+        <ul class="list">
+          {% for p in top_posts_by_engagement %}
+          <li><span>{{ p.title }}</span><span>{{ p.score }}</span></li>
+          {% else %}
+          <li class="muted">No posts yet.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- lightweight charts without external libs -->
+    <script>
+      const days = {{ days|tojson }};
+      const pv = {{ product_views_daily|tojson }};
+      const pr = {{ profile_views_daily|tojson }};
+      const rev = {{ revenue_daily|tojson }};
+
+      function miniLineChart(canvas, labels, series, colors) {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width = canvas.clientWidth; const h = canvas.height = canvas.clientHeight;
+        const pad = 26;
+        const max = Math.max(1, ...series.flat());
+        // axes
+        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border');
+        ctx.beginPath(); ctx.moveTo(pad, h-pad); ctx.lineTo(w-pad, h-pad); ctx.moveTo(pad, pad); ctx.lineTo(pad, h-pad); ctx.stroke();
+        // y ticks
+        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+        ctx.font = '12px Inter';
+        const steps = 3;
+        for (let i=0;i<=steps;i++) { const y = h-pad - (i/steps)*(h-2*pad); const val = Math.round((i/steps)*max); ctx.fillText(val, 4, y+4); ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w-pad, y); ctx.stroke(); }
+        // series
+        series.forEach((arr, idx) => {
+          const color = colors[idx];
+          ctx.strokeStyle = color; ctx.fillStyle = color;
+          ctx.beginPath();
+          arr.forEach((v, i) => {
+            const x = pad + i*(w-2*pad)/(labels.length-1);
+            const y = h-pad - (v/max)*(h-2*pad);
+            if (i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+          // points
+          arr.forEach((v, i) => {
+            const x = pad + i*(w-2*pad)/(labels.length-1);
+            const y = h-pad - (v/max)*(h-2*pad);
+            ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI*2); ctx.fill();
+          });
+        });
+      }
+
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#ff6b6b';
+      miniLineChart(document.getElementById('viewsChart'), days, [pv, pr], [accent, '#4db6ac']);
+      miniLineChart(document.getElementById('revenueChart'), days, [rev], ['#7e57c2']);
+    </script>
+  </body>
+</html>

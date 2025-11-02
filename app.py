@@ -5,9 +5,15 @@ from dotenv import load_dotenv
 import natural_search
 import ai
 import uuid
+import firebase_config
+import firebase_admin
+from firebase_admin import auth
 
 # Load environment variables from .env file
 load_dotenv()
+
+# Initialize Firebase Admin SDK
+firebase_config.init_firebase_admin()
 from werkzeug.utils import secure_filename
 from flask import Flask, abort, render_template, redirect, url_for, flash, request, jsonify, session
 import json
@@ -373,6 +379,40 @@ class Message(db.Model):
     sender = relationship('User')
 
 
+# ===== ANALYTICS MODELS =====
+class ProductView(db.Model):
+    __tablename__ = 'product_views'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('products.product_id', ondelete='CASCADE'), nullable=False)
+    artist_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    viewer_id: Mapped[Optional[int]] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+
+class ProfileView(db.Model):
+    __tablename__ = 'profile_views'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    profile_user_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    viewer_id: Mapped[Optional[int]] = mapped_column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+
+# ===== PAYMENTS (Dummy Gateway) =====
+class Payment(db.Model):
+    __tablename__ = 'payments'
+
+    id: Mapped[int] = mapped_column(db.Integer, primary_key=True, autoincrement=True)
+    order_id: Mapped[int] = mapped_column(db.Integer, db.ForeignKey('orders.order_id', ondelete='CASCADE'), nullable=False)
+    amount: Mapped[Optional[float]] = mapped_column(db.Numeric(10, 2))
+    currency: Mapped[str] = mapped_column(db.String(10), default='INR')
+    status: Mapped[str] = mapped_column(db.String(20), default='created')  # created, processing, paid, failed, canceled
+    reference: Mapped[Optional[str]] = mapped_column(db.String(120))
+    created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+    updated_at: Mapped[Optional[str]] = mapped_column(db.String(250))
+
+
 # ===== HELPER FUNCTIONS =====
 
 def extract_hashtags(text):
@@ -464,6 +504,156 @@ def linkify_hashtags(text):
         return f'<a href="/hashtag/{tag}" class="hashtag-link">#{tag}</a>'
     linked = pattern.sub(_repl, str(escaped))
     return Markup(linked)
+
+
+# ========= Analytics dashboard =========
+@app.route('/analytics')
+@login_required
+def analytics_dashboard():
+    """Analytics for the logged-in artist (only visible to self)."""
+    artist_id = current_user.id
+
+    # Helper: last N day labels matching our stored created_at format
+    def last_n_days(n: int):
+        days = []
+        for i in range(n - 1, -1, -1):
+            d = datetime.today().date() - timedelta(days=i)
+            days.append(d.strftime('%B %d, %Y'))
+        return days
+
+    from datetime import timedelta
+
+    # Views
+    product_views = db.session.execute(
+        db.select(ProductView).where(ProductView.artist_id == artist_id)
+    ).scalars().all()
+    profile_views = db.session.execute(
+        db.select(ProfileView).where(ProfileView.profile_user_id == artist_id)
+    ).scalars().all()
+
+    total_product_views = len(product_views)
+    total_profile_views = len(profile_views)
+
+    # Views trend (last 30 days)
+    days30 = last_n_days(30)
+    product_views_daily = [sum(1 for v in product_views if (v.created_at or '') == d) for d in days30]
+    profile_views_daily = [sum(1 for v in profile_views if (v.created_at or '') == d) for d in days30]
+
+    # Engagement
+    artist_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == artist_id)).scalars().all()
+    post_ids = [p.post_id for p in artist_posts]
+    total_post_likes = 0
+    total_post_comments = 0
+    if post_ids:
+        total_post_likes = db.session.execute(
+            db.select(db.func.count(PostLike.id)).where(PostLike.post_id.in_(post_ids))
+        ).scalar() or 0
+        total_post_comments = db.session.execute(
+            db.select(db.func.count(Comments.comment_id)).where(Comments.post_id.in_(post_ids))
+        ).scalar() or 0
+
+    artist_products = db.session.execute(db.select(Product).where(Product.artist_id == artist_id)).scalars().all()
+    product_ids = [p.product_id for p in artist_products]
+    total_product_reviews = 0
+    total_product_comments = 0
+    if product_ids:
+        total_product_reviews = db.session.execute(
+            db.select(db.func.count(ProductReview.review_id)).where(ProductReview.product_id.in_(product_ids))
+        ).scalar() or 0
+        total_product_comments = db.session.execute(
+            db.select(db.func.count(ProductComments.comment_id)).where(ProductComments.product_id.in_(product_ids))
+        ).scalar() or 0
+
+    # Sales & revenue
+    oi_rows = []
+    total_orders = 0
+    paid_revenue = 0.0
+    total_revenue = 0.0
+    items_sold = 0
+
+    if product_ids:
+        # Join OrderItem -> Product -> Order
+        join_stmt = (
+            db.select(OrderItem, Order).join(Product, OrderItem.product_id == Product.product_id)
+            .join(Order, OrderItem.order_id == Order.order_id)
+            .where(Product.artist_id == artist_id)
+        )
+        result = db.session.execute(join_stmt).all()
+        # Aggregate
+        orders_seen = set()
+        for oi, order in result:
+            oi_rows.append({'oi': oi, 'order': order})
+            total_revenue += float(oi.total_price or 0)
+            items_sold += int(oi.quantity or 0)
+            if order.order_id not in orders_seen:
+                orders_seen.add(order.order_id)
+            if (order.payment_status or '').lower() == 'paid' or (order.status or '').lower() in {'paid', 'shipped', 'delivered'}:
+                paid_revenue += float(oi.total_price or 0)
+        total_orders = len(orders_seen)
+
+    # Revenue trend (last 30 days)
+    revenue_daily = []
+    for d in days30:
+        rev = 0.0
+        for row in oi_rows:
+            if (row['order'].created_at or '') == d and ((row['order'].payment_status or '').lower() == 'paid' or (row['order'].status or '').lower() in {'paid', 'shipped', 'delivered'}):
+                rev += float(row['oi'].total_price or 0)
+        revenue_daily.append(rev)
+
+    # Popular items
+    # Top products by views
+    top_product_views = {}
+    for v in product_views:
+        top_product_views[v.product_id] = top_product_views.get(v.product_id, 0) + 1
+    top_products_by_views = []
+    for pid, cnt in sorted(top_product_views.items(), key=lambda x: x[1], reverse=True)[:5]:
+        prod = db.session.get(Product, pid)
+        if prod:
+            top_products_by_views.append({'title': prod.title, 'count': cnt, 'id': pid})
+
+    # Top products by sales
+    sales_by_product = {}
+    for row in oi_rows:
+        oi, order = row['oi'], row['order']
+        sales_by_product[oi.product_id] = sales_by_product.get(oi.product_id, 0) + int(oi.quantity or 0)
+    top_products_by_sales = []
+    for pid, cnt in sorted(sales_by_product.items(), key=lambda x: x[1], reverse=True)[:5]:
+        prod = db.session.get(Product, pid)
+        if prod:
+            top_products_by_sales.append({'title': prod.title, 'count': cnt, 'id': pid})
+
+    # Top posts by engagement (likes + comments)
+    post_eng = []
+    for p in artist_posts:
+        likes = db.session.execute(db.select(db.func.count(PostLike.id)).where(PostLike.post_id == p.post_id)).scalar() or 0
+        comments = db.session.execute(db.select(db.func.count(Comments.comment_id)).where(Comments.post_id == p.post_id)).scalar() or 0
+        post_eng.append({'title': p.post_title or f'Post #{p.post_id}', 'score': (likes + comments), 'id': p.post_id})
+    top_posts_by_engagement = sorted(post_eng, key=lambda x: x['score'], reverse=True)[:5]
+
+    # KPIs
+    kpis = {
+        'views': total_product_views + total_profile_views,
+        'engagement': total_post_likes + total_post_comments + total_product_reviews + total_product_comments,
+        'sales': items_sold,
+        'revenue': paid_revenue
+    }
+
+    return render_template(
+        'analytics.html',
+        current_user=current_user,
+        kpis=kpis,
+        days=days30,
+        product_views_daily=product_views_daily,
+        profile_views_daily=profile_views_daily,
+        revenue_daily=revenue_daily,
+        total_orders=total_orders,
+        total_revenue=total_revenue,
+        paid_revenue=paid_revenue,
+        items_sold=items_sold,
+        top_products_by_views=top_products_by_views,
+        top_products_by_sales=top_products_by_sales,
+        top_posts_by_engagement=top_posts_by_engagement
+    )
 
 
 # ========= Messaging routes =========
@@ -737,21 +927,81 @@ def login():
     # Get next page from query params
     next_page = request.args.get('next')
     
-    if request.method == "POST":
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = db.session.execute(db.select(User).where(User.email == email)).scalar()
-
-        if user and password and check_password_hash(user.password_hash, password):
-            login_user(user)
-            # Redirect to next_page if it exists and is a relative path, otherwise go home
-            if next_page and next_page.startswith('/'):
-                return redirect(next_page)
-            return redirect(url_for('home'))
+    # Debug/logging: show incoming request characteristics for Firebase flows
+    try:
+        print(f"[Auth][login] Incoming request: method={request.method}, content_type={request.content_type}, is_json={request.is_json}")
+        if request.is_json:
+            try:
+                print("[Auth][login] request.json=", request.get_json())
+            except Exception as _:
+                print("[Auth][login] request.get_json() failed")
         else:
-            flash('Invalid email or password')
+            print("[Auth][login] form keys=", dict(request.form))
+        # Print cookie header presence (not full cookie for privacy)
+        print("[Auth][login] Cookie header present:", bool(request.headers.get('Cookie')))
+    except Exception as _:
+        pass
 
-    return render_template("login.html", current_user=current_user)
+    if request.method == "POST":
+        # Check if Firebase ID token is provided (modern auth)
+        firebase_token = request.form.get('firebase_token') or request.json.get('firebase_token') if request.is_json else None
+        
+        if firebase_token:
+            # Firebase authentication flow
+            decoded_token = firebase_config.verify_firebase_token(firebase_token)
+            if decoded_token:
+                firebase_uid = decoded_token.get('uid')
+                email = decoded_token.get('email')
+                if email:
+                    email = email.strip().lower()
+                phone = decoded_token.get('phone_number')
+                name = decoded_token.get('name', email.split('@')[0] if email else 'User')
+                
+                # Find or create user
+                user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+                if not user:
+                    user = User(
+                        name=name,
+                        email=email,
+                        phone=phone,
+                        password_hash='',  # Firebase handles auth, no password needed
+                        is_verified=bool(decoded_token.get('email_verified')),
+                        created_at=date.today().strftime("%B %d, %Y")
+                    )
+                    db.session.add(user)
+                    db.session.commit()
+                    print(f"[Auth] Created new user from Firebase: email={email}, uid={firebase_uid}")
+                else:
+                    print(f"[Auth] Existing user logged in: email={email}")
+                
+                login_user(user)
+                print(f"[Auth] login_user successful for: {email}")
+                
+                if request.is_json:
+                    return jsonify({'success': True, 'redirect': next_page or url_for('home')})
+                
+                if next_page and next_page.startswith('/'):
+                    return redirect(next_page)
+                return redirect(url_for('home'))
+            else:
+                if request.is_json:
+                    return jsonify({'success': False, 'error': 'Invalid Firebase token'}), 401
+                flash('Authentication failed. Please try again.')
+        else:
+            # Legacy email/password flow (fallback)
+            email = request.form.get('email')
+            password = request.form.get('password')
+            user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+
+            if user and password and user.password_hash and check_password_hash(user.password_hash, password):
+                login_user(user)
+                if next_page and next_page.startswith('/'):
+                    return redirect(next_page)
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid email or password')
+
+    return render_template("login.html", current_user=current_user, firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
 
 @app.route("/logout")
@@ -761,42 +1011,201 @@ def logout():
     return redirect(url_for('home'))
 
 
+@app.route("/delete_account", methods=["POST"])
+@login_required
+def delete_account():
+    """
+    Delete user account from local database and Firebase Authentication.
+    Also deletes all associated posts, products, and other user data.
+    """
+    try:
+        user_id = current_user.id
+        user_email = current_user.email
+        # Optional Firebase ID token from client, for REST deletion fallback
+        payload = request.get_json(silent=True) or {}
+        client_id_token = payload.get('firebase_token')
+        
+        # 1. Delete from Firebase Authentication (if user was created via Firebase)
+        if user_email or client_id_token:
+            # Try delete via Admin SDK (email) or REST (idToken) using helper
+            try:
+                from firebase_config import delete_firebase_user
+                success, msg = delete_firebase_user(email=user_email, id_token=client_id_token)
+                print(f"[DeleteAccount] Firebase delete: success={success}, msg={msg}")
+            except Exception as e:
+                print(f"[DeleteAccount] Firebase deletion attempt failed: {e}")
+        
+        # 2. Delete all user data from local database
+        # Note: Most relations have CASCADE delete configured, but we'll be explicit
+        
+        # Delete user's posts (CASCADE will handle post_likes, comments, post_hashtags)
+        Posts.query.filter_by(artist_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's products (CASCADE will handle product_comments, product_reviews, product_hashtags, cart_items with this product)
+        Product.query.filter_by(artist_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's comments on other posts
+        Comments.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's post likes
+        PostLike.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's product comments
+        ProductComments.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's product reviews
+        ProductReview.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's cart (CASCADE will handle cart_items)
+        Cart.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's orders (CASCADE will handle order_items and payments)
+        Order.query.filter_by(user_id=user_id).delete(synchronize_session=False)
+        
+        # Delete follow relationships
+        Follow.query.filter((Follow.follower_id == user_id) | (Follow.followed_id == user_id)).delete(synchronize_session=False)
+        
+        # Delete conversations and messages (buyer/seller based)
+        conversations = Conversation.query.filter(
+            (Conversation.buyer_id == user_id) | (Conversation.seller_id == user_id)
+        ).all()
+        for conv in conversations:
+            # Messages have relationship cascade, but explicitly clear to be safe
+            Message.query.filter_by(conversation_id=conv.id).delete(synchronize_session=False)
+            db.session.delete(conv)
+        
+        # Delete product and profile views (for both artist and viewer roles)
+        ProductView.query.filter(
+            (ProductView.artist_id == user_id) | (ProductView.viewer_id == user_id)
+        ).delete(synchronize_session=False)
+        ProfileView.query.filter_by(viewer_id=user_id).delete(synchronize_session=False)
+        ProfileView.query.filter_by(profile_user_id=user_id).delete(synchronize_session=False)
+        
+        # Delete user's cart(s) and items using ORM cascade (avoid bulk delete bypassing cascade)
+        user_carts = Cart.query.filter_by(user_id=user_id).all()
+        for cart in user_carts:
+            db.session.delete(cart)
+
+        # Delete user's orders with items and payments
+        user_orders = Order.query.filter_by(user_id=user_id).all()
+        for order in user_orders:
+            # Explicitly delete related payments and items for safety
+            Payment.query.filter_by(order_id=order.order_id).delete(synchronize_session=False)
+            OrderItem.query.filter_by(order_id=order.order_id).delete(synchronize_session=False)
+            db.session.delete(order)
+
+        # Finally, delete the user
+        user = db.session.get(User, user_id) if hasattr(db.session, "get") else User.query.get(user_id)
+        db.session.delete(user)
+        
+        # Commit all deletions
+        db.session.commit()
+        
+        # Logout the user
+        logout_user()
+        
+        flash('Your account has been permanently deleted.')
+        print(f"[DeleteAccount] Successfully deleted user {user_email} (ID: {user_id})")
+        
+        return jsonify({'success': True, 'redirect': url_for('home')})
+        
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        print(f"[DeleteAccount] Error deleting account: {e}")
+        print(f"[DeleteAccount] Full traceback:")
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': 'Failed to delete account. Please try again.'}), 500
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        name = request.form.get('name')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        phone = request.form.get('phone')
-        location = request.form.get('location')
+        # Check if Firebase ID token is provided (modern auth)
+        firebase_token = request.form.get('firebase_token') or request.json.get('firebase_token') if request.is_json else None
+        
+        if firebase_token:
+            # Firebase authentication flow (same as login - auto-creates user)
+            decoded_token = firebase_config.verify_firebase_token(firebase_token)
+            if decoded_token:
+                firebase_uid = decoded_token.get('uid')
+                email = decoded_token.get('email')
+                if email:
+                    email = email.strip().lower()
+                phone_from_token = decoded_token.get('phone_number')
+                name_from_token = decoded_token.get('name')
+                
+                # Get additional data from request if provided
+                if request.is_json:
+                    name = request.json.get('name') or name_from_token or (email.split('@')[0] if email else 'User')
+                    phone = request.json.get('phone') or phone_from_token or ''
+                else:
+                    name = request.form.get('name') or name_from_token or (email.split('@')[0] if email else 'User')
+                    phone = request.form.get('phone') or phone_from_token or ''
+                
+                # Check if user already exists
+                user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+                if user:
+                    if request.is_json:
+                        return jsonify({'success': False, 'error': 'User already exists'}), 400
+                    flash('Email already registered. Please login.')
+                    return redirect(url_for('login'))
+                
+                # Create new user
+                user = User(
+                    name=name,
+                    email=email,
+                    phone=phone,
+                    password_hash='',  # Firebase handles auth
+                    is_verified=bool(decoded_token.get('email_verified')),
+                    created_at=date.today().strftime("%B %d, %Y")
+                )
+                db.session.add(user)
+                db.session.commit()
+                
+                login_user(user)
+                
+                if request.is_json:
+                    return jsonify({'success': True, 'redirect': url_for('home')})
+                return redirect(url_for('home'))
+            else:
+                if request.is_json:
+                    return jsonify({'success': False, 'error': 'Invalid Firebase token'}), 401
+                flash('Authentication failed. Please try again.')
+        else:
+            # Legacy flow (fallback for email/password)
+            name = request.form.get('name')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            phone = request.form.get('phone')
+            location = request.form.get('location')
 
-        # Check if user already exists
-        existing_user = db.session.execute(db.select(User).where(User.email == email)).scalar()
-        if existing_user:
-            flash('Email already registered')
-            return render_template("register.html", current_user=current_user)
+            # Check if user already exists
+            existing_user = db.session.execute(db.select(User).where(User.email == email)).scalar()
+            if existing_user:
+                flash('Email already registered')
+                return render_template("register.html", current_user=current_user, firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
-        # Create new user
-        if not password:
-            flash('Password is required')
-            return render_template("register.html", current_user=current_user)
+            # Create new user
+            if not password:
+                flash('Password is required')
+                return render_template("register.html", current_user=current_user, firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
-        # type: ignore[call-arg]
-        new_user = User(
-            name=name,
-            email=email,
-            password_hash=generate_password_hash(password),
-            phone=phone,
-            location=location,
-            created_at=date.today().strftime("%B %d, %Y")
-        )
-        db.session.add(new_user)
-        db.session.commit()
+            new_user = User(
+                name=name,
+                email=email,
+                password_hash=generate_password_hash(password),
+                phone=phone,
+                location=location,
+                created_at=date.today().strftime("%B %d, %Y")
+            )
+            db.session.add(new_user)
+            db.session.commit()
 
-        login_user(new_user)
-        return redirect(url_for('home'))
+            login_user(new_user)
+            return redirect(url_for('home'))
 
-    return render_template("register.html", current_user=current_user)
+    return render_template("register.html", current_user=current_user, firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
 
 @app.route("/add", methods=["GET", "POST"])
@@ -1212,13 +1621,26 @@ def profile():
                            portfolio_narrative=portfolio_narrative,
                            artisan_rating=artisan_rating,
                            conversations=conversations,
-                           unread_count=unread_count)
+                           unread_count=unread_count,
+                           firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
 
 @app.route("/profile/<int:user_id>")
 def view_profile(user_id):
     # Get user's posts and products for public profile view
     user = db.get_or_404(User, user_id)
+    # Track a profile view (skip self-views)
+    try:
+        viewer_id = current_user.id if getattr(current_user, 'is_authenticated', False) else None
+        if viewer_id is None or viewer_id != user_id:
+            db.session.add(ProfileView(
+                profile_user_id=user_id,
+                viewer_id=viewer_id,
+                created_at=date.today().strftime('%B %d, %Y')
+            ))
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
     user_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == user_id)).scalars().all()
     user_products = db.session.execute(db.select(Product).where(Product.artist_id == user_id)).scalars().all()
 
@@ -1312,12 +1734,26 @@ def view_profile(user_id):
                            portfolio_narrative=portfolio_narrative,
                            artisan_rating=artisan_rating,
                            conversations=conversations,
-                           unread_count=unread_count)
+                           unread_count=unread_count,
+                           firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
 
 @app.route("/product/<int:product_id>")
 def product_buy(product_id):
     product = db.get_or_404(Product, product_id)
+    # Track a product view (skip if artist views own product)
+    try:
+        viewer_id = current_user.id if getattr(current_user, 'is_authenticated', False) else None
+        if viewer_id is None or viewer_id != product.artist_id:
+            db.session.add(ProductView(
+                product_id=product.product_id,
+                artist_id=product.artist_id,
+                viewer_id=viewer_id,
+                created_at=date.today().strftime('%B %d, %Y')
+            ))
+            db.session.commit()
+    except Exception:
+        db.session.rollback()
     # Load comments for this product
     comments_rows = db.session.execute(db.select(ProductComments).where(ProductComments.product_id == product.product_id)).scalars().all()
     comments_data = []
@@ -1937,9 +2373,8 @@ def checkout():
         db.session.execute(db.delete(CartItem).where(CartItem.cart_id == cart.cart_id))
         cart.updated_at = date.today().strftime("%B %d, %Y")
         db.session.commit()
-
-        # Redirect to order detail
-        return redirect(url_for('order_detail', order_id=new_order.order_id))
+        # Redirect to payment page to simulate payment (POST only)
+        return redirect(url_for('pay_order', order_id=new_order.order_id))
 
     # GET: show checkout page populated from user/cart
     return render_template(
@@ -2006,6 +2441,102 @@ def admin_update_order_status(order_id: int):
     order.updated_at = date.today().strftime("%B %d, %Y")
     db.session.commit()
     flash('Order updated.', 'success')
+    return redirect(url_for('order_detail', order_id=order_id))
+
+
+@app.route('/pay/<int:order_id>')
+@login_required
+def pay_order(order_id: int):
+    """Start a dummy payment for an order.
+    Only order owner can pay.
+    """
+    order = db.get_or_404(Order, order_id)
+    if order.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+    # If already paid, go to order detail
+    if (order.payment_status or '').lower() == 'paid':
+        flash('Order already paid.', 'info')
+        return redirect(url_for('order_detail', order_id=order_id))
+
+    # Find or create a Payment record
+    pay = db.session.execute(db.select(Payment).where(Payment.order_id == order_id).order_by(db.desc(Payment.id))).scalar()
+    if not pay:
+        pay = Payment(
+            order_id=order_id,
+            amount=order.total_price or 0,
+            currency='INR',
+            status='created',
+            created_at=date.today().strftime('%B %d, %Y'),
+            updated_at=date.today().strftime('%B %d, %Y'),
+        )
+        db.session.add(pay)
+        db.session.commit()
+
+    return render_template('payment.html', current_user=current_user, order=order, payment=pay)
+
+
+@app.route('/pay/<int:order_id>/create', methods=['POST'])
+@login_required
+def create_payment(order_id: int):
+    order = db.get_or_404(Order, order_id)
+    if order.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+    pay = db.session.execute(db.select(Payment).where(Payment.order_id == order_id).order_by(db.desc(Payment.id))).scalar()
+    if not pay:
+        pay = Payment(
+            order_id=order_id,
+            amount=order.total_price or 0,
+            currency='INR',
+            status='processing',
+            created_at=date.today().strftime('%B %d, %Y'),
+        )
+        db.session.add(pay)
+    else:
+        pay.status = 'processing'
+        pay.updated_at = date.today().strftime('%B %d, %Y')
+    db.session.commit()
+    # Simulate gateway redirect — go to simulate endpoint
+    outcome = (request.form.get('outcome') or 'success').lower()
+    return redirect(url_for('simulate_payment', order_id=order_id, payment_id=pay.id, outcome=outcome))
+
+
+@app.route('/pay/<int:order_id>/simulate')
+@login_required
+def simulate_payment(order_id: int):
+    outcome = (request.args.get('outcome') or 'success').lower()
+    payment_id = request.args.get('payment_id')
+    order = db.get_or_404(Order, order_id)
+    if order.user_id != current_user.id and current_user.id != 1:
+        abort(403)
+
+    pay = None
+    if payment_id:
+        pay = db.session.get(Payment, int(payment_id))
+    if not pay:
+        pay = db.session.execute(db.select(Payment).where(Payment.order_id == order_id).order_by(db.desc(Payment.id))).scalar()
+        if not pay:
+            flash('Payment session not found.', 'error')
+            return redirect(url_for('pay_order', order_id=order_id))
+
+    if outcome == 'success':
+        pay.status = 'paid'
+        order.payment_status = 'paid'
+        order.status = 'paid'
+        order.updated_at = date.today().strftime('%B %d, %Y')
+        msg = 'Payment successful! Thank you.'
+        category = 'success'
+    elif outcome == 'fail':
+        pay.status = 'failed'
+        msg = 'Payment failed. Please try again.'
+        category = 'error'
+    else:
+        pay.status = 'canceled'
+        msg = 'Payment canceled.'
+        category = 'info'
+
+    pay.updated_at = date.today().strftime('%B %d, %Y')
+    db.session.commit()
+    flash(msg, category)
     return redirect(url_for('order_detail', order_id=order_id))
 
 
