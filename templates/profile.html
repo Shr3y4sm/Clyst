@@ -111,6 +111,22 @@
                   ><a href="{{ url_for('orders_list') }}">MY ORDERS</a></span
                 >
               </div>
+              <div
+                class="btn promote-btn profile-verify"
+                style="margin-left: 8px"
+              >
+                <span>
+                  <a href="{{ url_for('analytics_dashboard') }}">YOUR ANALYTICS</a>
+                </span>
+              </div>
+              <div
+                class="btn promote-btn"
+                style="margin-left: 8px; background: #dc3545; border-color: #dc3545;"
+              >
+                <span>
+                  <a href="#" onclick="confirmDeleteAccount(event)" style="color: white;">DELETE ACCOUNT</a>
+                </span>
+              </div>
               {% endif %}
 
               <!-- Follow/Unfollow Button (only on other users' profiles) -->
@@ -1062,14 +1078,14 @@
          });
 
          // Also listen for Google Translate's language change events
-         if (window.google && window.google.translate) {
+         if (window.google && window.google.translate && window.google.translate.TranslateElement && window.google.translate.TranslateElement.prototype) {
            window.google.translate.TranslateElement.prototype.onLanguageChange = function() {
              console.log('Google Translate language changed');
            };
          }
 
          // Override Google Translate's language change function
-         if (window.google && window.google.translate) {
+         if (window.google && window.google.translate && window.google.translate.TranslateElement && window.google.translate.TranslateElement.prototype) {
            const originalOnLanguageChange = window.google.translate.TranslateElement.prototype.onLanguageChange;
            window.google.translate.TranslateElement.prototype.onLanguageChange = function() {
              console.log('Google Translate language changed - intercepted');
@@ -1424,6 +1440,117 @@
             console.error("Error:", error);
             alert("An error occurred. Please try again.");
           });
+      }
+
+      // Delete Account Confirmation and Handler
+      function confirmDeleteAccount(event) {
+        event.preventDefault();
+        
+        const confirmed = confirm(
+          "⚠️ WARNING: This action is permanent and cannot be undone!\n\n" +
+          "Deleting your account will:\n" +
+          "• Delete all your posts and products\n" +
+          "• Delete all your comments and reviews\n" +
+          "• Delete all your orders and cart items\n" +
+          "• Delete all your messages and conversations\n" +
+          "• Remove your account from Firebase Authentication\n\n" +
+          "Are you absolutely sure you want to delete your account?"
+        );
+        
+        if (!confirmed) {
+          return;
+        }
+        
+        // Double confirmation
+        const doubleConfirm = confirm(
+          "This is your last chance!\n\n" +
+          "Type your confirmation: Click OK to permanently delete your account."
+        );
+        
+        if (!doubleConfirm) {
+          return;
+        }
+        
+        // Show loading state
+        const deleteBtn = event.target;
+        const originalText = deleteBtn.textContent;
+        deleteBtn.textContent = "DELETING...";
+        deleteBtn.style.pointerEvents = "none";
+        
+        // Prepare request body with optional Firebase id token
+        const sendDelete = (idToken) => {
+          const body = idToken ? { firebase_token: idToken } : {};
+          return fetch("{{ url_for('delete_account') }}", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(body)
+          });
+        };
+
+        // If Firebase SDK is available and user is signed in, include an ID token
+        try {
+          if (window.firebase && firebase.apps && firebase.apps.length && firebase.auth().currentUser) {
+            firebase.auth().currentUser.getIdToken()
+              .then((token) => sendDelete(token))
+              .catch(() => sendDelete())
+              .then(res => res.json())
+              .then(handleDeleteResponse)
+              .catch(handleDeleteError);
+          } else {
+            sendDelete()
+              .then(res => res.json())
+              .then(handleDeleteResponse)
+              .catch(handleDeleteError);
+          }
+        } catch (e) {
+          // Fallback if Firebase isn't initialized
+          sendDelete()
+            .then(res => res.json())
+            .then(handleDeleteResponse)
+            .catch(handleDeleteError);
+        }
+
+        function handleDeleteResponse(data) {
+          if (data.success) {
+            alert("Your account has been successfully deleted.");
+            window.location.href = data.redirect || "{{ url_for('home') }}";
+          } else {
+            alert(data.error || "Failed to delete account. Please try again.");
+            deleteBtn.textContent = originalText;
+            deleteBtn.style.pointerEvents = "auto";
+          }
+        }
+
+        function handleDeleteError(error) {
+          console.error("Error:", error);
+          alert("An error occurred while deleting your account. Please try again.");
+          deleteBtn.textContent = originalText;
+          deleteBtn.style.pointerEvents = "auto";
+        }
+      }
+    </script>
+
+    <!-- Firebase SDK for optional ID token during delete -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script>
+      try {
+        const firebaseConfig = {
+          apiKey: "{{ firebase_config.apiKey }}",
+          authDomain: "{{ firebase_config.authDomain }}",
+          projectId: "{{ firebase_config.projectId }}",
+          storageBucket: "{{ firebase_config.storageBucket }}",
+          messagingSenderId: "{{ firebase_config.messagingSenderId }}",
+          appId: "{{ firebase_config.appId }}"
+        };
+        if (window.firebase && (!firebase.apps || !firebase.apps.length)) {
+          firebase.initializeApp(firebaseConfig);
+        }
+      } catch (e) {
+        // Non-blocking if Firebase isn't used on this page
       }
     </script>
     

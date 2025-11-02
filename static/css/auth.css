@@ -133,3 +133,47 @@ nav#topNav {
 	text-decoration: none;
 	font-weight: 500;
 }
+
+/* Firebase Auth UI Styling */
+#firebaseui-auth-container {
+	margin-bottom: 24px;
+}
+
+.divider {
+	display: flex;
+	align-items: center;
+	text-align: center;
+	margin: 24px 0;
+	color: var(--muted);
+}
+
+.divider::before,
+.divider::after {
+	content: '';
+	flex: 1;
+	border-bottom: 1px solid light-dark(#ddd, #333);
+}
+
+.divider span {
+	padding: 0 16px;
+	font-size: 14px;
+}
+
+/* Flash Message Styling */
+.flash-message {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: light-dark(#dc3545, #ffd2d2);
+	text-align: center;
+	padding: 12px;
+	background: light-dark(#ffd2d2, #dc3545);
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+}
+
+.flash-message.success {
+	color: light-dark(#008b27, #003b0c);
+	background: light-dark(#acffbc, #35dc64);
+}

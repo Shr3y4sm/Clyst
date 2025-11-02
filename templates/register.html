@@ -13,6 +13,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/styles.css">
     <link rel="stylesheet" href="../static/css/auth.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/6.1.0/firebase-ui-auth.css" />
     </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -34,9 +40,17 @@
         <div class="flash-message" style="display: block;">{{ message }}</div>
         {% endfor %} {% endif %} {% endwith %}
 
-        <form method="POST" action="{{ url_for('register') }}">
+        <!-- Firebase Auth UI Container -->
+        <div id="firebaseui-auth-container"></div>
+        
+        <div class="divider">
+          <span>or register with email</span>
+        </div>
+
+        <!-- Legacy Registration Form (fallback) -->
+        <form method="POST" action="{{ url_for('register') }}" id="legacyRegisterForm">
           <div class="form-group">
-            <label for="name" class="form-label">Full Name</label>
+            <label for="name" class="form-label">Full Name*</label>
             <input
               type="text"
               id="name"
@@ -48,7 +62,7 @@
           </div>
 
           <div class="form-group">
-            <label for="email" class="form-label">Email</label>
+            <label for="email" class="form-label">Email*</label>
             <input
               type="email"
               id="email"
@@ -60,7 +74,7 @@
           </div>
 
           <div class="form-group">
-            <label for="password" class="form-label">Password</label>
+            <label for="password" class="form-label">Password*</label>
             <input
               type="password"
               id="password"
@@ -72,7 +86,7 @@
           </div>
 
           <div class="form-group">
-            <label for="phone" class="form-label">Phone (Optional)</label>
+            <label for="phone" class="form-label">Phone*</label>
             <input
               type="tel"
               id="phone"
@@ -83,7 +97,7 @@
           </div>
 
           <div class="form-group">
-            <label for="location" class="form-label">Location (Optional)</label>
+            <label for="location" class="form-label">Location </label>
             <input
               type="text"
               id="location"
@@ -93,7 +107,7 @@
             />
           </div>
 
-          <div class="form-actions" style="margin-top: 24px">
+          <div class="form-actions">
             <button
               type="submit"
               class="btn btn-primary">
@@ -141,6 +155,92 @@
           "google_translate_element"
         );
       }
+    </script>
+    
+    <!-- Firebase Auth Initialization -->
+    <script>
+      // Initialize Firebase
+      const firebaseConfig = {
+        apiKey: "{{ firebase_config.apiKey }}",
+        authDomain: "{{ firebase_config.authDomain }}",
+        projectId: "{{ firebase_config.projectId }}",
+        storageBucket: "{{ firebase_config.storageBucket }}",
+        messagingSenderId: "{{ firebase_config.messagingSenderId }}",
+        appId: "{{ firebase_config.appId }}"
+      };
+      
+      firebase.initializeApp(firebaseConfig);
+      
+      // Initialize FirebaseUI
+      const ui = new firebaseui.auth.AuthUI(firebase.auth());
+      
+      // FirebaseUI configuration
+      const uiConfig = {
+        callbacks: {
+          signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+            // User successfully signed in/registered
+            const user = authResult.user;
+            
+            // Get the ID token
+            user.getIdToken().then(function(idToken) {
+              // Send token to backend for registration
+              // Use the login endpoint for unified handling (auto-creates user on first sign-in)
+              fetch("{{ url_for('login') }}", {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                  firebase_token: idToken,
+                  name: user.displayName || user.email.split('@')[0],
+                  phone: user.phoneNumber || ''
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  window.location.href = data.redirect || "{{ url_for('home') }}";
+                } else {
+                  alert(data.message || 'Registration failed');
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during registration');
+              });
+            });
+            
+            // Prevent redirect until backend confirms
+            return false;
+          },
+          uiShown: function() {
+            // Hide loader if any
+            document.getElementById('loader') && (document.getElementById('loader').style.display = 'none');
+          }
+        },
+        signInFlow: 'popup',
+        signInOptions: [
+          // Email/Password
+          firebase.auth.EmailAuthProvider.PROVIDER_ID,
+          // Phone
+          {
+            provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+            recaptchaParameters: {
+              size: 'invisible',
+              badge: 'bottomleft'
+            },
+            defaultCountry: 'IN'
+          },
+          // Google
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID
+        ],
+        tosUrl: '#',
+        privacyPolicyUrl: '#'
+      };
+      
+      // Start FirebaseUI
+      ui.start('#firebaseui-auth-container', uiConfig);
     </script>
   </body>
 </html>
