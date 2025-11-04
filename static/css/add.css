@@ -117,7 +117,7 @@
 	width: 100%;
 	background: var(--card);
 	border: light-dark(#ddd, #222) 1px solid;
-	border-radius: 2px;
+	border-radius: 20px;
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	padding: 32px;
 }
@@ -131,7 +131,6 @@
 }
 
 .form-label {
-	display: block;
 	font-size: 16px;
 	font-weight: 500;
 	color: var(--text);
@@ -140,9 +139,10 @@
 
 .form-input {
 	width: 100%;
-	padding: 12px 16px;
+	margin: 4px 0 0 0;
+	padding: 8px 16px;
 	border: light-dark(#ddd, #222) 1px solid;
-	border-radius: 2px;
+	border-radius: 20em;
 	font-size: 16px;
 	transition: all 0.2s;
 	background: light-dark(#dbdbdb, #2a2a2a);
@@ -170,7 +170,8 @@
 	width: 100%;
 	padding: 12px 16px;
 	border: light-dark(#ddd, #222) 1px solid;
-	border-radius: 2px;
+	border-radius: 16px;
+	margin: 4px 0 0 0;
 	font-size: 16px;
 	font-family: inherit;
 	resize: vertical;
@@ -193,10 +194,8 @@
 
 .form-actions {
 	display: flex;
-	flex-direction: column;
 	gap: 12px;
-	justify-content: flex-end;
-	margin-top: 32px;
+	justify-content: space-between;
 }
 
 .form-input[type="file"]::file-selector-button {
@@ -241,42 +240,41 @@
 	position: relative;
 }
 
-.mic {
-	position: absolute;
-	right: 5px;
-	top: 25px;
-	color: var(--text);
+.price-translate-group {
 	display: flex;
+	margin: 0 0 24px 0;
+	justify-content: space-between;
 	align-items: center;
-	justify-content: center;
-	border-radius: 2px;
-	border: none;
-	font-size: 20px;
-	width: 36px;
-	height: 36px;
-	cursor: pointer;
+	gap: 12px;
+	flex-wrap: wrap;
 }
 
-.mic:hover {
-	background-color: #d8feff;
-	color: #005c61;
+.price-translate-group .form-group {
+	flex: 1;
+	margin: 0;
 }
 
 .btn-secondary {
-	color: light-dark(#006d77, #63ddff);
-	border-color: light-dark(#006d77, #63ddff);
+	border: none;
+	color: var(--text);
+	background: #006d77;
 }
 
 .cancel-btn {
+	width: 50%;
 	color: light-dark(#ef233c, #ff6b6b);
-	border-color: light-dark(#ef233c, #ff6b6b);
+	border: 1px solid light-dark(#ef233c, #ff6b6b);
+	background: none;
+}
+
+.form-actions .btn-primary {
+	width: 50%;
 }
 
 /* Image Upload Tabs */
 .image-upload-tabs {
 	display: flex;
-	gap: 8px;
-	margin-bottom: 16px;
+	margin: 4px 0 4px 0;
 	border-bottom: 2px solid var(--border);
 }
 
@@ -284,7 +282,8 @@
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	padding: 10px 20px;
+	padding: 10px 20px 10px 10px;
+	border-radius: 8px 8px 0 0;
 	background: transparent;
 	border: none;
 	border-bottom: 2px solid transparent;
@@ -307,6 +306,7 @@
 }
 
 .tab-btn.active {
+	background: light-dark(#e6e6e6, #222222);
 	color: var(--accent);
 	border-bottom-color: var(--accent);
 	font-weight: 600;
@@ -314,7 +314,7 @@
 
 .tab-content {
 	display: none;
-	padding: 20px 0;
+	padding: 0;
 }
 
 .tab-content.active {
@@ -336,9 +336,10 @@
 	align-items: center;
 	justify-content: center;
 	padding: 48px 24px;
+	margin: 12px 0 0 0;
 	background: var(--bg);
-	border: 2px dashed var(--border);
-	border-radius: 2px;
+	border: 2px dashed black;
+	border-radius: 20px;
 	cursor: pointer;
 	transition: all 0.3s;
 	text-align: center;
@@ -351,7 +352,6 @@
 
 .file-upload-label svg {
 	color: var(--muted);
-	margin-bottom: 16px;
 	transition: color 0.3s;
 }
 
@@ -383,8 +383,8 @@
 	gap: 12px;
 	padding: 16px;
 	background: var(--bg);
-	border: 1px solid var(--border);
-	border-radius: 2px;
+	border: 1px solid black;
+	border-radius: 20px;
 }
 
 .preview-wrapper img {
@@ -399,13 +399,14 @@
 }
 
 .remove-preview {
+	width: 24px;
+	height: 24px;
 	position: absolute;
-	top: 24px;
-	right: 24px;
+	top: 10px;
+	right: 14px;
 	background: rgba(0, 0, 0, 0.7);
 	border: none;
 	border-radius: 50%;
-	padding: 8px;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
@@ -420,6 +421,8 @@
 }
 
 .remove-preview svg {
+	width: 24px;
+	height: 24px;
 	fill: white;
 }
 
@@ -444,19 +447,67 @@
 .current-image-badge {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 4px;
 	margin-top: 12px;
-	padding: 10px 14px;
+	padding: 4px;
 	background: light-dark(#e8f5e9, #1b3a1e);
 	border: 1px solid light-dark(#81c784, #2e7d32);
-	border-radius: 2px;
-	font-size: 13px;
+	border-radius: 20em;
+	font-size: 16px;
 	color: light-dark(#2e7d32, #81c784);
 }
 
 .current-image-badge svg {
+	width: 24px;
+	height: 24px;
 	fill: currentColor;
 	flex-shrink: 0;
+}
+
+.gen-input {
+	display: flex;
+	height: 40px;
+	align-items: center;
+	justify-content: center;
+	margin: 4px 0 0 0;
+}
+
+.gen-input .form-input {
+	margin: 0;
+	border-radius: 20em 0 0 20em;
+}
+
+.gen-input .btn {
+	height: 40px;
+	border-radius: 0 20em 20em 0;
+}
+
+select.form-input {
+	font-family: inherit;
+	height: 40px;
+	margin: 0;
+	flex: 1;
+}
+
+.translate-form {
+	height: 40px;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	overflow: hidden;
+	border-radius: 20px;
+	margin: 4px 0 0 0;
+}
+
+.translate-form .form-input,
+.translate-form .btn {
+	border-radius: 0;
+}
+
+.translate-form .btn {
+	height: 40px;
+	border-radius: 0 20em 20em 0;
+	padding: 8px 16px 8px 12px;
 }
 
 /* ================================
@@ -565,7 +616,8 @@
 .modal-body .form-group select:focus {
 	outline: none;
 	border-color: light-dark(#3b82f6, #60a5fa);
-	box-shadow: 0 0 0 3px light-dark(rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.2));
+	box-shadow: 0 0 0 3px
+		light-dark(rgba(59, 130, 246, 0.1), rgba(96, 165, 250, 0.2));
 }
 
 .modal-body .form-group textarea {
@@ -657,7 +709,7 @@
 }
 
 .modal-body .preview-wrapper.loading::after {
-	content: 'Loading...';
+	content: "Loading...";
 	position: absolute;
 	top: 50%;
 	left: 50%;

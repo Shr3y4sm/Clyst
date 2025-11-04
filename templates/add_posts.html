@@ -113,6 +113,35 @@
                 />
                 <div class="form-help">Make it engaging and descriptive</div>
               </div>
+                  <div class="form-group">
+                    <label class="form-label">Translate title & description</label>
+                    <div class="translate-form" style="display:flex; align-items:center;">
+                      <select id="tr_lang" class="form-input">
+                        <option value="">Select language</option>
+                        <option value="en">English (en)</option>
+                        <option value="hi">Hindi (hi)</option>
+                        <option value="bn">Bengali (bn)</option>
+                        <option value="ta">Tamil (ta)</option>
+                        <option value="te">Telugu (te)</option>
+                        <option value="mr">Marathi (mr)</option>
+                        <option value="gu">Gujarati (gu)</option>
+                        <option value="kn">Kannada (kn)</option>
+                        <option value="ml">Malayalam (ml)</option>
+                        <option value="pa">Punjabi (pa)</option>
+                        <option value="ur">Urdu (ur)</option>
+                        <option value="es">Spanish (es)</option>
+                        <option value="fr">French (fr)</option>
+                        <option value="de">German (de)</option>
+                        <option value="zh">Chinese (zh)</option>
+                        <option value="ja">Japanese (ja)</option>
+                      </select>
+                      <button type="button" id="do_translate" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.7134 8.12811L19.4668 8.69379C19.2864 9.10792 18.7136 9.10792 18.5331 8.69379L18.2866 8.12811C17.8471 7.11947 17.0555 6.31641 16.0677 5.87708L15.308 5.53922C14.8973 5.35653 14.8973 4.75881 15.308 4.57612L16.0252 4.25714C17.0384 3.80651 17.8442 2.97373 18.2761 1.93083L18.5293 1.31953C18.7058 0.893489 19.2942 0.893489 19.4706 1.31953L19.7238 1.93083C20.1558 2.97373 20.9616 3.80651 21.9748 4.25714L22.6919 4.57612C23.1027 4.75881 23.1027 5.35653 22.6919 5.53922L21.9323 5.87708C20.9445 6.31641 20.1529 7.11947 19.7134 8.12811ZM22.9 21L18.5 10H16.5L12.101 21H14.255L15.454 18H19.544L20.745 21H22.9ZM16.253 16L17.5 12.8852L18.745 16H16.253ZM7.5466 12.3036C6.41407 11.0171 5.45992 9.56967 4.72266 8H6.96329C7.53108 9.04434 8.21011 10.0196 8.98442 10.9097C10.2737 9.48824 11.3027 7.82653 11.9961 6H2V4H8V2H10V4H14.6497C14.5624 4.42994 14.4594 4.85421 14.3412 5.27216C13.5862 7.94155 12.2142 10.3512 10.389 12.3375C11.1089 12.9848 11.8869 13.5688 12.7142 14.0805L11.9615 15.9627C10.8814 15.3228 9.87297 14.5749 8.95119 13.7336C7.17781 15.2694 5.09248 16.4547 2.8027 17.1819L2.1973 15.2757C4.18364 14.6449 5.99672 13.6242 7.5466 12.3036Z"></path></svg>
+                      </button>
+                    </div>
+                    <div id="tr_result" class="ai-suggestions"></div>
+                  </div>
+
 
               <div class="form-group">
                 <label for="description" class="form-label">
@@ -130,6 +159,36 @@
                 <div class="form-help">
                   Share the story behind your creation
                 </div>
+              </div>
+
+              <div class="form-group prompt-group">
+                <label class="form-label">Generate with AI</label>
+                <div class="gen-input">
+                <input
+                  type="text"
+                  id="ai_prompt"
+                  class="form-input"
+                  placeholder="Add prompt or image for AI to generate title & description..."
+                />
+                <div class="form-actions form-actions-ai">
+                  <button
+                    type="button"
+                    id="generate_ai"
+                    class="btn btn-secondary"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M17.0007 1.20825 18.3195 3.68108 20.7923 4.99992 18.3195 6.31876 17.0007 8.79159 15.6818 6.31876 13.209 4.99992 15.6818 3.68108 17.0007 1.20825ZM8.00065 4.33325 10.6673 9.33325 15.6673 11.9999 10.6673 14.6666 8.00065 19.6666 5.33398 14.6666.333984 11.9999 5.33398 9.33325 8.00065 4.33325ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"
+                      ></path>
+                    </svg>
+                    Generate
+                  </button>
+                </div></div>
+                <div id="ai_suggestions" class="ai-suggestions"></div>
               </div>
 
               <div class="form-group">
@@ -249,46 +308,6 @@
                 {% endif %}
               </div>
 
-              <div class="form-group prompt-group">
-                <label class="form-label">Generate with AI</label>
-                <input
-                  type="text"
-                  id="ai_prompt"
-                  class="form-input"
-                  placeholder="Optional prompt to guide AI (e.g., style, theme)"
-                />
-                <button onclick="getPrompt()" class="mic">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M11.9998 1C14.7612 1 16.9998 3.23858 16.9998 6V10C16.9998 12.7614 14.7612 15 11.9998 15C9.23833 15 6.99976 12.7614 6.99976 10V6C6.99976 3.23858 9.23833 1 11.9998 1ZM3.05469 11H5.07065C5.55588 14.3923 8.47329 17 11.9998 17C15.5262 17 18.4436 14.3923 18.9289 11H20.9448C20.4837 15.1716 17.1714 18.4839 12.9998 18.9451V23H10.9998V18.9451C6.82814 18.4839 3.51584 15.1716 3.05469 11Z"
-                    ></path>
-                  </svg>
-                </button>
-                <div class="form-actions form-actions-ai">
-                  <button
-                    type="button"
-                    id="generate_ai"
-                    class="btn btn-secondary"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M17.0007 1.20825 18.3195 3.68108 20.7923 4.99992 18.3195 6.31876 17.0007 8.79159 15.6818 6.31876 13.209 4.99992 15.6818 3.68108 17.0007 1.20825ZM8.00065 4.33325 10.6673 9.33325 15.6673 11.9999 10.6673 14.6666 8.00065 19.6666 5.33398 14.6666.333984 11.9999 5.33398 9.33325 8.00065 4.33325ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"
-                      ></path>
-                    </svg>
-                    Generate Suggestions
-                  </button>
-                </div>
-                <div id="ai_suggestions" class="ai-suggestions"></div>
-              </div>
-
               <div class="form-actions">
                 <a
                   href="{{ url_for('home') }}"
@@ -305,8 +324,14 @@
                   </svg>
                   Cancel
                 </a>
-                <button type="submit" class="btn btn-primary">
-                  {{ 'Update Post' if post else 'Post Artwork' }}
+                <button type="submit" class="btn btn-primary"><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path>
+                  </svg>
+                  {{ 'Update Post' if post else 'Post' }}
                 </button>
               </div>
             </form>
@@ -513,8 +538,8 @@
                     suggestionsDiv.innerHTML = items
                       .map(
                         (s, idx) => `
-                    <div style="border: 1px solid light-dark(#ddd, #222); background: var(--bg); border-radius: 2px; padding:12px; margin-bottom:8px;">
-                      <div style="font-weight:300;color: #8e8e8e">Suggestion ${
+                    <div style="border: 1px solid light-dark(#ddd, #222); background: var(--bg); border-radius: 16px; padding:12px; margin-bottom:8px;">
+                      <div style="font-weight:300;color: #8e8e8e; margin-bottom: 4px;">Suggestion ${
                         idx + 1
                       }</div>
                       <div style="font-weight:600; text-transform:uppercase;">${
@@ -549,38 +574,6 @@
                 });
 
               // --- Translation UI (lightweight) ---
-              const trWrap = document.createElement("div");
-              trWrap.style.marginTop = "16px";
-              trWrap.innerHTML = `
-                  <div class="form-group">
-                    <label class="form-label">Translate title & description</label>
-                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                      <select id="tr_lang" class="form-input" style="max-width:200px;">
-                        <option value="">Select language</option>
-                        <option value="en">English (en)</option>
-                        <option value="hi">Hindi (hi)</option>
-                        <option value="bn">Bengali (bn)</option>
-                        <option value="ta">Tamil (ta)</option>
-                        <option value="te">Telugu (te)</option>
-                        <option value="mr">Marathi (mr)</option>
-                        <option value="gu">Gujarati (gu)</option>
-                        <option value="kn">Kannada (kn)</option>
-                        <option value="ml">Malayalam (ml)</option>
-                        <option value="pa">Punjabi (pa)</option>
-                        <option value="ur">Urdu (ur)</option>
-                        <option value="es">Spanish (es)</option>
-                        <option value="fr">French (fr)</option>
-                        <option value="de">German (de)</option>
-                        <option value="zh">Chinese (zh)</option>
-                        <option value="ja">Japanese (ja)</option>
-                      </select>
-                      <button type="button" id="do_translate" class="btn btn-secondary">Translate</button>
-                    </div>
-                    <div id="tr_result" class="ai-suggestions"></div>
-                  </div>
-                `;
-              document.querySelector(".form-card").appendChild(trWrap);
-
               document
                 .getElementById("do_translate")
                 .addEventListener("click", async function () {

@@ -18,16 +18,13 @@
     <link rel="stylesheet" href="../static/css/index.css" />
     <link rel="stylesheet" href="../static/css/products.css" />
     <style>
-      .hashtag-header {
-        background: var(--card);
-        border: 1px solid light-dark(#d4d4d4, #222);
-        border-radius: 0.2em;
-        padding: 30px;
-        margin-bottom: 30px;
+      .header {
+        width: 100%;
         text-align: center;
       }
 
       .hashtag-title {
+        max-width: none;
         font-size: 36px;
         font-weight: 700;
         color: var(--text);
@@ -43,7 +40,7 @@
       .section-title {
         font-size: 24px;
         font-weight: 600;
-        margin: 30px 0 20px;
+        margin: 0 0 16px 0;
         color: var(--text);
       }
 
@@ -62,6 +59,42 @@
 
       .hashtag-link:hover {
         text-decoration: underline;
+      }
+      .product-rating-small {
+        padding: 0;
+        margin: 0;
+      }
+      .post{
+        flex-direction: column;
+        padding: 0;
+        gap: 0px;
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 0 0 16px 0;
+      }
+      .post-user-info {
+          flex: 1;
+          align-items: flex-start;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+      }
+      .post a{
+        width: 100%;
+        padding: 8px 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .post-author{
+        display: flex;
+      }
+      .post-image{
+        width: 100%;
+      }
+      .feed{
+        width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    gap: 24px;
       }
     </style>
   </head>
@@ -90,7 +123,6 @@
           <a href="{{ url_for('home') }}">Community Feed</a>
           <a href="{{ url_for('products_page') }}">Marketplace</a>
           {% if current_user.is_authenticated %}
-          <a href="{{ url_for('profile') }}">Profile</a>
           <a href="{{ url_for('logout') }}">Logout</a>
           {% else %}
           <a href="{{ url_for('login') }}">Login</a>
@@ -98,14 +130,44 @@
           {% endif %}
         </div>
 
-        <div></div>
+        
+        <div class="nav-actions">
+          {% if current_user.is_authenticated %}
+          <a
+            href="{{ url_for('view_cart') }}"
+            class="cart-btn"
+            title="Shopping Cart"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"
+              ></path>
+            </svg>
+            <span class="cart-count" id="cartCount">0</span>
+          </a>
+          <a
+            href="{{ url_for('profile') }}"
+            class="profile-btn"
+            title="Profile"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+              />
+            </svg>
+          </a>
+          {% endif %}
+          </div>
       </div>
 
       <div class="mobile-menu" id="mobileMenu">
         <a href="{{ url_for('home') }}">Community Feed</a>
         <a href="{{ url_for('products_page') }}">Marketplace</a>
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('profile') }}">Profile</a>
         <a href="{{ url_for('logout') }}">Logout</a>
         {% else %}
         <a href="{{ url_for('login') }}">Login</a>
@@ -117,7 +179,7 @@
     <div class="container">
       <div class="main-content">
         <!-- Hashtag Header -->
-        <div class="hashtag-header">
+        <div class="header">
           <h1 class="hashtag-title">#{{ hashtag }}</h1>
           <p class="hashtag-count">
             {{ posts|length }} post{{ 's' if posts|length != 1 else '' }} · {{
@@ -136,23 +198,15 @@
               style="text-decoration: none; color: inherit"
             >
               <div class="post-author">
-                <div class="author-avatar">
+                <div class="post-avatar">
                   {{ post.artist.name[0].upper() }}
                 </div>
-                <div class="author-info">
+                <div class="post-user-info">
                   <span class="author-name">{{ post.artist.name }}</span>
-                  <span class="post-date">{{ post.created_at }}</span>
+                  <span class="post-time">{{ post.created_at }}</span>
                 </div>
               </div>
             </a>
-
-            {% if post.media_url %}
-            <img
-              src="{{ post.media_url }}"
-              class="post-image"
-              alt="Post Image"
-            />
-            {% endif %}
 
             <div class="post-content">
               <h2 class="post-title">
@@ -162,6 +216,14 @@
               </h2>
               <p class="post-description">{{ post.description|safe }}</p>
             </div>
+
+            {% if post.media_url %}
+            <img
+              src="{{ post.media_url }}"
+              class="post-image"
+              alt="Post Image"
+            />
+            {% endif %}
           </div>
           {% endfor %}
         </div>
@@ -187,6 +249,9 @@
               <div class="product-info">
                 <div class="product-header">
                   <h3 class="product-title">{{ product.title }}</h3>
+                <p class="product-price">₹{{ "%.2f"|format(product.price) }}</p>
+                </div>
+                <p class="product-artist">by {{ product.artist.name }}</p>
                   {% if product.reviews_count > 0 %}
                   <div class="product-rating-small">
                     <div class="rating-stars">
@@ -214,14 +279,11 @@
                       {% endif %} {% endfor %}
                     </div>
                     <span class="rating-text-small"
-                      >{{ product.avg_rating }} ({{ product.reviews_count
-                      }})</span
+                      >{{ product.avg_rating }} &#0149; {{ product.reviews_count
+                      }}</span
                     >
                   </div>
                   {% endif %}
-                </div>
-                <p class="product-price">₹{{ "%.2f"|format(product.price) }}</p>
-                <p class="product-artist">by {{ product.artist.name }}</p>
               </div>
             </a>
           </div>
