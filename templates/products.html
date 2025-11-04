@@ -112,16 +112,6 @@
     <div class="container">
       <div class="header">
         <h1>Marketplace</h1>
-        <!-- ===== SORT OPTIONS ===== -->
-        <div class="sort-wrapper">
-          <label for="sort-select">Sort:</label>
-          <select id="sort-select" onchange="handleSortChange(this.value)">
-            <option value="newest" {{ 'selected' if sort_by == 'newest' else '' }}>Newest</option>
-            <option value="popular" {{ 'selected' if sort_by == 'popular' else '' }}>Popular</option>
-            <option value="price_low" {{ 'selected' if sort_by == 'price_low' else '' }}>Price: Low to High</option>
-            <option value="price_high" {{ 'selected' if sort_by == 'price_high' else '' }}>Price: High to Low</option>
-          </select>
-        </div>
       </div>
       <!-- ===== SEARCH BELOW NAV ===== -->
       <div id="searchBelow" class="search-below">
@@ -145,55 +135,22 @@
           </div>
         </div>
       </div>
+        <!-- ===== SORT OPTIONS ===== -->
+        <div class="sort-wrapper">
+          <label for="sort-select">Sort by</label></br>
+          <select id="sort-select" onchange="handleSortChange(this.value)">
+            <option value="newest" {{ 'selected' if sort_by == 'newest' else '' }}>Newest</option>
+            <option value="popular" {{ 'selected' if sort_by == 'popular' else '' }}>Popular</option>
+            <option value="price_low" {{ 'selected' if sort_by == 'price_low' else '' }}>Price: Low to High</option>
+            <option value="price_high" {{ 'selected' if sort_by == 'price_high' else '' }}>Price: High to Low</option>
+          </select>
+        </div>
       
       <div class="main-content">
         {% if products %}
         <div class="products-grid">
           {% for product in products %}
-          <div class="product-card">
-            <button
-              class="btn say-aloud-btn"
-              data-title="{{ product.title }}"
-              data-artist="{{ product.artist.name }}"
-              data-price="{{ product.price }}"
-              data-description="{{ product.description | default('No description available') | striptags | replace('"', '&quot;') }}"
-              onclick="sayAloudFromData(this)"
-              title="Say Aloud"
-              type="button"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="32"
-                height="32"
-                fill="inherit"
-                viewBox="0 0 256 256"
-              >
-                <path
-                  d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
-                ></path>
-              </svg>
-            </button>
-            <button
-              class="share-btn"
-              data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
-              data-share-title="{{ product.title }}"
-              data-share-text="By {{ product.artist.name }}"
-              onclick="openShareFromEl(this)"
-              title="Share Product"
-              type="button"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="24"
-                height="24"
-                fill="currentColor"
-              >
-                <path
-                  d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
-                ></path>
-              </svg>
-            </button>
+          <div class="product-card" onclick='location.href = "{{ url_for('product_buy', product_id=product.product_id) }}";'>
             {% if product.img_url %}
             <img
               src="{{ product.img_url }}"
@@ -205,10 +162,18 @@
               <i class="fas fa-image"></i>
             </div>
             {% endif %}
-
+            <div class="product-info">
             <div class="product-header">
               <div>
                 <h3 class="product-title">{{ product.title }}</h3>
+                <div class="product-artist">By {{ product.artist.name }}</div>
+              </div>
+              <div class="product-price">Rs.{{ product.price }}</div>
+            </div>
+
+            {% if product.description %}
+            <p class="product-description">{{ product.description|safe }}</p>
+            {% endif %}
                 <div class="product-rating-small" title="Average rating">
                   {% set avg = (product.avg_rating or 0) %} {% for i in
                   range(1,6) %} {% if i <= avg|round(0, 'floor') %}
@@ -237,34 +202,18 @@
                     product.reviews_count or 0 }})</span
                   >
                 </div>
-                <div class="product-artist">By {{ product.artist.name }}</div>
-              </div>
-              <div class="product-price">Rs.{{ product.price }}</div>
-            </div>
-
-            {% if product.description %}
-            <p class="product-description">{{ product.description|safe }}</p>
-            {% endif %}
 
             <div class="product-actions">
+              <div class="prod-btns">
               {% if current_user.is_authenticated and current_user.id !=
               product.artist_id %}
               <button
-                class="add-to-cart-btn"
+                class="btn btn-primary"
                 onclick="addToCart({{ product.product_id }})"
                 data-product-id="{{ product.product_id }}"
                 title="Add to Cart"
                 type="button"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M6.00488 9H19.9433L20.4433 7H8.00488V5H21.7241C22.2764 5 22.7241 5.44772 22.7241 6C22.7241 6.08176 22.7141 6.16322 22.6942 6.24254L20.1942 16.2425C20.083 16.6877 19.683 17 19.2241 17H5.00488C4.4526 17 4.00488 16.5523 4.00488 16V4H2.00488V2H5.00488C5.55717 2 6.00488 2.44772 6.00488 3V9ZM6.00488 23C4.90031 23 4.00488 22.1046 4.00488 21C4.00488 19.8954 4.90031 19 6.00488 19C7.10945 19 8.00488 19.8954 8.00488 21C8.00488 22.1046 7.10945 23 6.00488 23ZM18.0049 23C16.9003 23 16.0049 22.1046 16.0049 21C16.0049 19.8954 16.9003 19 18.0049 19C19.1095 19 20.0049 19.8954 20.0049 21C20.0049 22.1046 19.1095 23 18.0049 23Z"
-                  ></path>
-                </svg>
                 Add to Cart
               </button>
               {% elif not current_user.is_authenticated %}
@@ -287,38 +236,34 @@
               </button>
               {% endif %}
               <a
-                href="{{ url_for('product_buy', product_id=product.product_id) }}"
-                class="btn btn-primary"
-              >
-                View
-              </a>
-              <a
                 href="{{ url_for('view_profile', user_id=product.artist_id) }}"
                 class="btn btn-secondary"
               >
                 View Artist
-              </a>
-              {% if current_user.is_authenticated and current_user.id ==
-              product.artist_id %}
-              <button
-                class="delete-btn"
-                onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_products', product_id=product.product_id) }}'"
-                title="Delete Product"
-                type="button"
+              </a></div>
+            <button
+              class="btn say-aloud-btn"
+              data-title="{{ product.title }}"
+              data-artist="{{ product.artist.name }}"
+              data-price="{{ product.price }}"
+              data-description="{{ product.description | default('No description available') | striptags | replace('"', '&quot;') }}"
+              onclick="sayAloudFromData(this)"
+              title="Say Aloud"
+              type="button"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                fill="inherit"
+                viewBox="0 0 256 256"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
-                  ></path>
-                </svg>
-              </button>
-              {% endif %}
+                <path
+                  d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                ></path>
+              </svg>
+            </button>
+            </div>
             </div>
           </div>
           {% endfor %}
@@ -347,8 +292,7 @@
         viewBox="0 0 24 24"
         fill="currentColor"
       >
-        <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path></svg
-    ></a>
+        <path d="M11 11V5H13V11H19V13H13V19H11V13H5V11H11Z"></path></svg></a>
     {% endif %}
 
     <div id="google_translate_element" class="translate-element"></div>

@@ -6,11 +6,9 @@
     <title>Clyst - Community Feed</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      rel="stylesheet"
-    />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" charset="UTF-8" href="https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.pgV-E-68K-A.L.W.O/am=gMA/d=0/rs=AN8SPfpszKJssl6IA0boGClFdsaAZGtXEQ/m=el_main_css"><script type="text/javascript" charset="UTF-8" src="https://translate.googleapis.com/_/translate_http/_/js/k=translate_http.tr.en_GB.m9XUR-6KYdw.O/am=AAAE/d=1/exm=el_conf/ed=1/rs=AN8SPfpiUZ3tTuF6ph1C-fs0MeesXfP2TQ/m=el_main"></script></head>
+  
     <link rel="stylesheet" href="../static/css/styles.css" />
     <link rel="stylesheet" href="../static/css/index.css" />
     <style>
@@ -71,8 +69,13 @@ fill="currentColor" viewBox="0 0 24 24" >
             class="cart-btn"
             title="Shopping Cart"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.00436 6.41686L0.761719 3.17422L2.17593 1.76001L5.41857 5.00265H20.6603C21.2126 5.00265 21.6603 5.45037 21.6603 6.00265C21.6603 6.09997 21.6461 6.19678 21.6182 6.29L19.2182 14.29C19.0913 14.713 18.7019 15.0027 18.2603 15.0027H6.00436V17.0027H17.0044V19.0027H5.00436C4.45207 19.0027 4.00436 18.5549 4.00436 18.0027V6.41686ZM5.50436 23.0027C4.67593 23.0027 4.00436 22.3311 4.00436 21.5027C4.00436 20.6742 4.67593 20.0027 5.50436 20.0027C6.33279 20.0027 7.00436 20.6742 7.00436 21.5027C7.00436 22.3311 6.33279 23.0027 5.50436 23.0027ZM17.5044 23.0027C16.6759 23.0027 16.0044 22.3311 16.0044 21.5027C16.0044 20.6742 16.6759 20.0027 17.5044 20.0027C18.3328 20.0027 19.0044 20.6742 19.0044 21.5027C19.0044 22.3311 18.3328 23.0027 17.5044 23.0027Z"></path></svg>
-            <span class="cart-count" id="cartCount">0</span>
+            <?xml version="1.0" encoding="UTF-8"?>
+            <svg width="24px" height="24px" stroke-width="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="inherit">
+              <path d="M19.5 22C20.3284 22 21 21.3284 21 20.5C21 19.6716 20.3284 19 19.5 19C18.6716 19 18 19.6716 18 20.5C18 21.3284 18.6716 22 19.5 22Z" fill="inherit" stroke="inherit" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M9.5 22C10.3284 22 11 21.3284 11 20.5C11 19.6716 10.3284 19 9.5 19C8.67157 19 8 19.6716 8 20.5C8 21.3284 8.67157 22 9.5 22Z" fill="inherit" stroke="inherit" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M5 4H22L20 15H7L5 4ZM5 4C4.83333 3.33333 4 2 2 2" stroke="inherit" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M20 15H7H5.23077C3.44646 15 2.5 15.7812 2.5 17C2.5 18.2188 3.44646 19 5.23077 19H19.5" stroke="var(--text)" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg><span class="cart-count" id="cartCount">0</span>
           </a>
           <a
             href="{{ url_for('profile') }}"
@@ -137,27 +140,22 @@ fill="currentColor" viewBox="0 0 24 24" >
               >
                 {{ post.artist.name }}
                 {% if post.artist.is_verified %}
-                &nbsp;<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 2H20C20.5523 2 21 2.44772 21 3V22.2763C21 22.5525 20.7761 22.7764 20.5 22.7764C20.4298 22.7764 20.3604 22.7615 20.2963 22.7329L12 19.0313L3.70373 22.7329C3.45155 22.8455 3.15591 22.7322 3.04339 22.4801C3.01478 22.4159 3 22.3465 3 22.2763V3C3 2.44772 3.44772 2 4 2ZM12 13.5L14.9389 15.0451L14.3776 11.7725L16.7553 9.45492L13.4695 8.97746L12 6L10.5305 8.97746L7.24472 9.45492L9.62236 11.7725L9.06107 15.0451L12 13.5Z"></path></svg>
+                &nbsp;<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" fill="inherit" viewBox="0 0 256 256"><path d="M225.86,102.82c-3.77-3.94-7.67-8-9.14-11.57-1.36-3.27-1.44-8.69-1.52-13.94-.15-9.76-.31-20.82-8-28.51s-18.75-7.85-28.51-8c-5.25-.08-10.67-.16-13.94-1.52-3.56-1.47-7.63-5.37-11.57-9.14C146.28,23.51,138.44,16,128,16s-18.27,7.51-25.18,14.14c-3.94,3.77-8,7.67-11.57,9.14C88,40.64,82.56,40.72,77.31,40.8c-9.76.15-20.82.31-28.51,8S41,67.55,40.8,77.31c-.08,5.25-.16,10.67-1.52,13.94-1.47,3.56-5.37,7.63-9.14,11.57C23.51,109.72,16,117.56,16,128s7.51,18.27,14.14,25.18c3.77,3.94,7.67,8,9.14,11.57,1.36,3.27,1.44,8.69,1.52,13.94.15,9.76.31,20.82,8,28.51s18.75,7.85,28.51,8c5.25.08,10.67.16,13.94,1.52,3.56,1.47,7.63,5.37,11.57,9.14C109.72,232.49,117.56,240,128,240s18.27-7.51,25.18-14.14c3.94-3.77,8-7.67,11.57-9.14,3.27-1.36,8.69-1.44,13.94-1.52,9.76-.15,20.82-.31,28.51-8s7.85-18.75,8-28.51c.08-5.25.16-10.67,1.52-13.94,1.47-3.56,5.37-7.63,9.14-11.57C232.49,146.28,240,138.44,240,128S232.49,109.73,225.86,102.82Zm-52.2,6.84-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
                 {% endif %}
               </a>
               
               <div class="post-time">{{ post.created_at }} &#0149; {{ comment_count }} comment{{ 's' if comment_count != 1 else '' }}</div>
               
              
-            </div>
-            <div class="post-actions">
+            </div> 
+          </div>
               {% if current_user.is_authenticated and current_user.id == post.artist_id %}
               <div class="post-actions">
-                <button type="button" class="action-btn edit-btn" onclick="openEditPostModal('{{ post.post_id }}', '{{ post.post_title | replace("'", "\\'") }}', '{{ post.description | replace("'", "\\'") }}', '{{ post.media_url }}', {{ post.is_promoted | lower }})">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"></path></svg>
-                </button>
                 <a class="action-btn delete-btn" href="{{ url_for('delete_posts', post_id=post.post_id) }}" onclick="return confirm('Delete this post?')">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"></path></svg>
                 </a>
               </div>
               {% endif %}
-            </div>
-            </div>
             
           </div>
 
@@ -170,6 +168,11 @@ fill="currentColor" viewBox="0 0 24 24" >
             {% endif %}
             <div class="title">
               <h3 class="post-title">{{ post.post_title }}</h3>
+            {% if current_user.is_authenticated and current_user.id == post.artist_id %}
+                <button type="button" class="action-btn edit-btn" onclick="openEditPostModal('{{ post.post_id }}', '{{ post.post_title | replace("'", "\\'") }}', '{{ post.description | replace("'", "\\'") }}', '{{ post.media_url }}', {{ post.is_promoted | lower }})">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"></path></svg>
+                </button>
+              {% endif %}
             </div>
             <p class="post-description">{{ post.description|safe }}</p>
           </div>
@@ -183,7 +186,30 @@ fill="currentColor" viewBox="0 0 24 24" >
           {% endif %}
 
           <div class="post-footer">
-              {% set comment_count = post.comments|length if post.comments else 0 %} <button
+              {% set comment_count = post.comments|length if post.comments else 0 %} 
+          <div class="icon-set">
+            <button class="icons LikeBtn" data-post-id="{{ post.post_id }}" onclick="toggleLike(this)">
+              <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="currentColor" viewBox="0 0 24 24" >
+<!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M4 21h1V8H4c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2M20 8h-6.61l1.12-3.37c.2-.61.1-1.28-.27-1.8-.38-.52-.98-.83-1.62-.83h-.61c-.3 0-.58.13-.77.36L7.01 7.44V21h10.31a2 2 0 0 0 1.87-1.3l2.76-7.35c.04-.11.06-.23.06-.35v-2c0-1.1-.9-2-2-2Z"></path>
+</svg>
+<span class="like-text">Like</span>
+              <span class="like-count">0</span>
+            </button>
+            <button class="icons CommentBtn" data-post-id="{{ post.post_id }}" onclick="toggleComments(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6.45455 19L2 22.5V4C2 3.44772 2.44772 3 3 3H21C21.5523 3 22 3.44772 22 4V18C22 18.5523 21.5523 19 21 19H6.45455Z"></path></svg>
+              &nbsp;Comment
+            </button>
+            <button class="icons ShareBtn"
+                data-url="{{ url_for('home') }}"
+                data-title="{{ post.post_title|e }}"
+                data-artist="{{ post.artist.name|e }}"
+                onclick="sharePost(this)">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5759 17.2714L8.46576 14.484C7.83312 15.112 6.96187 15.5 6 15.5C4.067 15.5 2.5 13.933 2.5 12C2.5 10.067 4.067 8.5 6 8.5C6.96181 8.5 7.83301 8.88796 8.46564 9.51593L13.5759 6.72855C13.5262 6.49354 13.5 6.24983 13.5 6C13.5 4.067 15.067 2.5 17 2.5C18.933 2.5 20.5 4.067 20.5 6C20.5 7.933 18.933 9.5 17 9.5C16.0381 9.5 15.1669 9.11201 14.5343 8.48399L9.42404 11.2713C9.47382 11.5064 9.5 11.7501 9.5 12C9.5 12.2498 9.47383 12.4935 9.42408 12.7285L14.5343 15.516C15.167 14.888 16.0382 14.5 17 14.5C18.933 14.5 20.5 16.067 20.5 18C20.5 19.933 18.933 21.5 17 21.5C15.067 21.5 13.5 19.933 13.5 18C13.5 17.7502 13.5262 17.5064 13.5759 17.2714Z"></path></svg>&nbsp;Share
+            </button>
+          </div>
+              <button
                 class="say-aloud-btn"
                 title="Say Aloud"
                 data-title="{{ post.post_title|e }}"
@@ -194,39 +220,12 @@ fill="currentColor" viewBox="0 0 24 24" >
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"></path></svg>
               </button>
           </div>
-          <div class="icon-set">
-            <button class="icons LikeBtn" data-post-id="{{ post.post_id }}" onclick="toggleLike(this)">
-              <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
-fill="currentColor" viewBox="0 0 24 24" >
-<!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
-<path d="M4 21h1V8H4c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2M20 8h-6.61l1.12-3.37c.2-.61.1-1.28-.27-1.8-.38-.52-.98-.83-1.62-.83h-.61c-.3 0-.58.13-.77.36L7.01 7.44V21h10.31a2 2 0 0 0 1.87-1.3l2.76-7.35c.04-.11.06-.23.06-.35v-2c0-1.1-.9-2-2-2Z"></path>
-</svg>&nbsp;
-              <span class="like-text">Like</span>
-              <span class="like-count">0</span>
-            </button>
-            <button class="icons CommentBtn" data-post-id="{{ post.post_id }}" onclick="toggleComments(this)">
-              <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
-fill="currentColor" viewBox="0 0 24 24" >
-<!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
-<path d="M4 19h3v2c0 .36.19.69.51.87.15.09.32.13.49.13s.36-.05.51-.14L13.27 19h6.72c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2M7 8h10v2H7zm0 4h7v2H7z"></path>
-</svg>
-              &nbsp;Comment
-            </button>
-            <button class="icons ShareBtn share-btn"
-                data-url="{{ url_for('home') }}"
-                data-title="{{ post.post_title|e }}"
-                data-artist="{{ post.artist.name|e }}"
-                onclick="sharePost(this)">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"></path></svg>
-              &nbsp;Share
-            </button>
-          </div>
           {% if current_user.is_authenticated %}
           <form class="comment-section" action="{{ url_for('add_comments', post_id=post.post_id) }}" method="POST">
             <input type="hidden" name="anchor" value="post-{{ post.post_id }}" />
             <div class="post-avatar">{{ current_user.name[0].upper() }}</div>
             <input type="text" placeholder="Share your thoughts" name="comment" id="comment-{{ post.post_id }}" required />
-            <button class="btn btn-primary">
+            <button class="send-btn">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12.9999H9V10.9999H3V1.84558C3 1.56944 3.22386 1.34558 3.5 1.34558C3.58425 1.34558 3.66714 1.36687 3.74096 1.40747L22.2034 11.5618C22.4454 11.6949 22.5337 11.9989 22.4006 12.2409C22.3549 12.324 22.2865 12.3924 22.2034 12.4381L3.74096 22.5924C3.499 22.7255 3.19497 22.6372 3.06189 22.3953C3.02129 22.3214 3 22.2386 3 22.1543V12.9999Z"></path></svg>
           </button>
           </form>
@@ -268,8 +267,7 @@ fill="currentColor" viewBox="0 0 24 24" >
 fill="currentColor" viewBox="0 0 24 24" >
 <!--Boxicons v3.0 https://boxicons.com | License  https://docs.boxicons.com/free-->
 <path d="M4 21h1V8H4c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2M20 8h-6.61l1.12-3.37c.2-.61.1-1.28-.27-1.8-.38-.52-.98-.83-1.62-.83h-.61c-.3 0-.58.13-.77.36L7.01 7.44V21h10.31a2 2 0 0 0 1.87-1.3l2.76-7.35c.04-.11.06-.23.06-.35v-2c0-1.1-.9-2-2-2Z"></path>
-</svg>&nbsp;
-              <span class="like-text">Like</span>
+</svg><span class="like-text">Like</span>
               <span class="like-count">0</span>
             </button>
                   <button class="say-aloud-btn" title="Say Aloud"
