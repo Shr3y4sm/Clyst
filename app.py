@@ -656,6 +656,337 @@ def analytics_dashboard():
     )
 
 
+@app.route('/analytics/insights')
+@login_required
+def analytics_insights():
+    """Generate AI-powered insights for the logged-in artisan."""
+    try:
+        artist_id = current_user.id
+        
+        # Fetch artisan's products with reviews and ratings
+        products = db.session.execute(
+            db.select(Product).where(Product.artist_id == artist_id)
+        ).scalars().all()
+        
+        products_data = []
+        for p in products:
+            # Count views for this product
+            views_count = db.session.execute(
+                db.select(db.func.count(ProductView.id))
+                .where(ProductView.product_id == p.product_id)
+            ).scalar() or 0
+            
+            # Count reviews
+            reviews_count = db.session.execute(
+                db.select(db.func.count(ProductReview.review_id))
+                .where(ProductReview.product_id == p.product_id)
+            ).scalar() or 0
+            
+            # Calculate average rating
+            avg_rating = db.session.execute(
+                db.select(db.func.avg(ProductReview.rating))
+                .where(ProductReview.product_id == p.product_id)
+            ).scalar() or 0.0
+            
+            products_data.append({
+                'title': p.title or 'Untitled',
+                'description': p.description or '',
+                'price': float(p.price or 0),
+                'views': views_count,
+                'reviews': reviews_count,
+                'avg_rating': float(avg_rating)
+            })
+        
+        # Fetch artisan's posts with engagement
+        posts = db.session.execute(
+            db.select(Posts).where(Posts.artist_id == artist_id)
+        ).scalars().all()
+        
+        posts_data = []
+        for p in posts:
+            likes_count = db.session.execute(
+                db.select(db.func.count(PostLike.id))
+                .where(PostLike.post_id == p.post_id)
+            ).scalar() or 0
+            
+            comments_count = db.session.execute(
+                db.select(db.func.count(Comments.comment_id))
+                .where(Comments.post_id == p.post_id)
+            ).scalar() or 0
+            
+            posts_data.append({
+                'title': p.post_title or 'Untitled',
+                'likes': likes_count,
+                'comments': comments_count
+            })
+        
+        # Calculate revenue and sales
+        product_ids = [p.product_id for p in products]
+        total_orders = 0
+        items_sold = 0
+        total_revenue = 0.0
+        paid_revenue = 0.0
+        
+        if product_ids:
+            join_stmt = (
+                db.select(OrderItem, Order)
+                .join(Product, OrderItem.product_id == Product.product_id)
+                .join(Order, OrderItem.order_id == Order.order_id)
+                .where(Product.artist_id == artist_id)
+            )
+            result = db.session.execute(join_stmt).all()
+            
+            orders_seen = set()
+            for oi, order in result:
+                total_revenue += float(oi.total_price or 0)
+                items_sold += int(oi.quantity or 0)
+                
+                if order.order_id not in orders_seen:
+                    orders_seen.add(order.order_id)
+                
+                if (order.payment_status or '').lower() == 'paid' or (order.status or '').lower() in {'paid', 'shipped', 'delivered'}:
+                    paid_revenue += float(oi.total_price or 0)
+            
+            total_orders = len(orders_seen)
+        
+        # Calculate total engagement
+        total_likes = sum(p['likes'] for p in posts_data)
+        total_comments = sum(p['comments'] for p in posts_data)
+        total_reviews = sum(p['reviews'] for p in products_data)
+        
+        # Get top performing products
+        top_products = sorted(products_data, key=lambda x: x['views'], reverse=True)[:3]
+        top_products_formatted = [
+            {'title': p['title'], 'metric': f"{p['views']} views"}
+            for p in top_products
+        ]
+        
+        # Check if there's enough data to generate insights
+        if len(products_data) == 0 and len(posts_data) == 0:
+            return jsonify({
+                'success': False,
+                'error': 'Not enough data to generate insights. Create some products or posts first!'
+            }), 400
+        
+        # Prepare data for AI
+        artisan_data = {
+            'products': products_data,
+            'posts': posts_data,
+            'revenue': {
+                'total_orders': total_orders,
+                'items_sold': items_sold,
+                'total': total_revenue,
+                'paid': paid_revenue
+            },
+            'engagement': {
+                'total_likes': total_likes,
+                'total_comments': total_comments,
+                'total_reviews': total_reviews
+            },
+            'top_products': top_products_formatted
+        }
+        
+        # Get Groq API key from environment
+        groq_api_key = os.environ.get('GROQ_API_KEY', 'your_groq_api_key_here')
+        
+        # Log for debugging
+        print(f"Generating insights for artist {artist_id}")
+        print(f"Data: {len(products_data)} products, {len(posts_data)} posts")
+        
+        # Generate insights
+        result = ai.generate_artisan_insights(artisan_data, groq_api_key)
+        
+        if not result.get('ok'):
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Failed to generate insights')
+            }), 500
+        
+        return jsonify({
+            'success': True,
+            'insights': result.get('insights', {})
+        })
+        
+    except Exception as e:
+        # Log the full error for debugging
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error in analytics_insights: {error_details}")
+        
+        return jsonify({
+            'success': False,
+            'error': f'Error generating insights: {str(e)}'
+        }), 500
+
+
+@app.route('/analytics/competitive-pricing')
+@login_required
+def competitive_pricing_analysis():
+    """AI-powered competitive pricing analysis based on product similarity."""
+    try:
+        artist_id = current_user.id
+        include_external = request.args.get('external', 'false').lower() == 'true'
+        
+        # Get artisan's products
+        artist_products = db.session.execute(
+            db.select(Product).where(Product.artist_id == artist_id)
+        ).scalars().all()
+        
+        if not artist_products:
+            return jsonify({
+                'success': False,
+                'error': 'You need to create some products first to see competitive pricing analysis.'
+            }), 400
+        
+        # Use the first product or most expensive product for analysis
+        product_to_analyze = max(artist_products, key=lambda p: float(p.price or 0))
+        
+        # Calculate artist's average price
+        artist_prices = [float(p.price or 0) for p in artist_products if p.price]
+        artist_avg_price = sum(artist_prices) / len(artist_prices) if artist_prices else 0
+        artist_min_price = min(artist_prices) if artist_prices else 0
+        artist_max_price = max(artist_prices) if artist_prices else 0
+        
+        # Get all other products from marketplace (competitors)
+        competitors_products = db.session.execute(
+            db.select(Product)
+            .where(Product.artist_id != artist_id)
+            .where(Product.price.isnot(None))
+            .order_by(Product.created_at.desc())
+            .limit(50)  # Get recent products for AI analysis
+        ).scalars().all()
+        
+        if not competitors_products:
+            return jsonify({
+                'success': False,
+                'error': 'Not enough marketplace data yet for comparison.'
+            }), 400
+        
+        # Prepare data for AI analysis
+        product_data = {
+            'title': product_to_analyze.title or 'Unknown',
+            'description': product_to_analyze.description or '',
+            'price': float(product_to_analyze.price or 0)
+        }
+        
+        marketplace_data = []
+        for p in competitors_products:
+            artist = db.session.get(User, p.artist_id)
+            marketplace_data.append({
+                'title': p.title or 'Unknown',
+                'description': p.description or '',
+                'price': float(p.price or 0),
+                'artist_name': artist.name if artist else 'Unknown',
+                'product_id': p.product_id,
+                'img_url': p.img_url
+            })
+        
+        # Get Groq API key
+        groq_api_key = os.environ.get('GROQ_API_KEY', 'your_groq_api_key_here')
+        
+        # Use AI to find similar products
+        print(f"Analyzing product: {product_to_analyze.title}")
+        print(f"Against {len(marketplace_data)} marketplace products")
+        print(f"Include external sources: {include_external}")
+        
+        ai_result = ai.find_similar_products_and_pricing(
+            product_data,
+            marketplace_data,
+            groq_api_key,
+            include_external
+        )
+        
+        if not ai_result.get('ok'):
+            return jsonify({
+                'success': False,
+                'error': ai_result.get('error', 'Failed to analyze products')
+            }), 500
+        
+        ai_analysis = ai_result.get('analysis', {})
+        
+        # Build similar products list with full details
+        similar_products = []
+        similar_indices = [item.get('index', 0) - 1 for item in ai_analysis.get('similar_products', [])]
+        
+        for idx, item in enumerate(ai_analysis.get('similar_products', [])):
+            product_idx = item.get('index', 1) - 1
+            if 0 <= product_idx < len(marketplace_data):
+                p_data = marketplace_data[product_idx]
+                p = competitors_products[product_idx]
+                
+                # Get review stats
+                reviews = db.session.execute(
+                    db.select(ProductReview).where(ProductReview.product_id == p.product_id)
+                ).scalars().all()
+                
+                avg_rating = sum(r.rating for r in reviews) / len(reviews) if reviews else 0
+                
+                similar_products.append({
+                    'product_id': p_data['product_id'],
+                    'title': p_data['title'],
+                    'price': p_data['price'],
+                    'img_url': p_data['img_url'],
+                    'artist_name': p_data['artist_name'],
+                    'reviews_count': len(reviews),
+                    'avg_rating': round(avg_rating, 1),
+                    'price_difference': round(((p_data['price'] - product_data['price']) / product_data['price']) * 100, 1) if product_data['price'] > 0 else 0,
+                    'similarity_score': item.get('similarity_score', 0),
+                    'similarity_reason': item.get('reason', 'AI-matched similarity')
+                })
+        
+        # Calculate market statistics
+        market_prices = [float(p.price) for p in competitors_products if p.price]
+        market_avg_price = sum(market_prices) / len(market_prices) if market_prices else 0
+        market_median_price = sorted(market_prices)[len(market_prices)//2] if market_prices else 0
+        
+        # Get similar products' average price
+        similar_prices = [p['price'] for p in similar_products]
+        similar_avg_price = ai_analysis.get('pricing_analysis', {}).get('similar_avg_price', 
+                                            sum(similar_prices) / len(similar_prices) if similar_prices else 0)
+        
+        # Build response
+        response_data = {
+            'your_products': {
+                'count': len(artist_products),
+                'avg_price': round(artist_avg_price, 2),
+                'min_price': round(artist_min_price, 2),
+                'max_price': round(artist_max_price, 2),
+                'analyzed_product': product_to_analyze.title
+            },
+            'market': {
+                'avg_price': round(market_avg_price, 2),
+                'median_price': round(market_median_price, 2),
+                'total_products': len(competitors_products)
+            },
+            'positioning': {
+                'difference_percent': round(((product_data['price'] - similar_avg_price) / similar_avg_price * 100), 1) if similar_avg_price > 0 else 0,
+                'label': ai_analysis.get('pricing_analysis', {}).get('your_position', 'competitive').title() + ' Pricing',
+                'advice': ai_analysis.get('pricing_analysis', {}).get('recommendation', 'Your pricing is competitive.')
+            },
+            'similar_products': similar_products
+        }
+        
+        # Add external market data if requested
+        if include_external and 'external_market' in ai_analysis:
+            response_data['external_market'] = ai_analysis['external_market']
+        
+        return jsonify({
+            'success': True,
+            'analysis': response_data,
+            'ai_powered': True
+        })
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error in competitive_pricing_analysis: {error_details}")
+        
+        return jsonify({
+            'success': False,
+            'error': f'Error analyzing competitive pricing: {str(e)}'
+        }), 500
+
+
 # ========= Messaging routes =========
 @app.route('/messages/start', methods=['POST'])
 @login_required

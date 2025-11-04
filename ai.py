@@ -605,3 +605,372 @@ Provide a helpful answer based on the product information. If the answer isn't c
         ]
     }
 
+
+def generate_artisan_insights(artisan_data: Dict[str, Any], api_key: str = None) -> Dict[str, Any]:
+    """
+    Generate AI-powered insights for artisans to improve their art and marketing.
+    
+    Args:
+        artisan_data: Dictionary containing:
+            - products: list of dicts with title, description, price, views, reviews, avg_rating
+            - posts: list of dicts with title, likes, comments
+            - revenue: dict with total, paid, items_sold, total_orders
+            - top_products: list of top performing products
+            - engagement: dict with total_likes, total_comments, total_reviews
+        api_key: Groq API key
+    
+    Returns:
+        Dict with 'ok' status and either 'insights' or 'error'
+    """
+    try:
+        if not api_key or api_key == "your_groq_api_key_here":
+            return {
+                'ok': False,
+                'error': 'Groq API key not configured. Please add GROQ_API_KEY to your environment variables.'
+            }
+
+        # Prepare context from artisan data
+        products = artisan_data.get('products', [])
+        posts = artisan_data.get('posts', [])
+        revenue = artisan_data.get('revenue', {})
+        top_products = artisan_data.get('top_products', [])
+        engagement = artisan_data.get('engagement', {})
+
+        # Build prompt for Groq
+        prompt = f"""You are an expert business advisor for artisan marketplaces. Analyze the following data and provide actionable insights.
+
+ARTIST PERFORMANCE DATA:
+
+Products ({len(products)} total):
+"""
+        # Add product details
+        for i, p in enumerate(products[:10], 1):  # Limit to top 10 for token efficiency
+            prompt += f"{i}. {p.get('title', 'Untitled')} - ₹{p.get('price', 0)} | Views: {p.get('views', 0)} | Reviews: {p.get('reviews', 0)} | Avg Rating: {p.get('avg_rating', 0):.1f}/5\n"
+        
+        if len(products) > 10:
+            prompt += f"... and {len(products) - 10} more products\n"
+
+        prompt += f"\nPosts ({len(posts)} total):\n"
+        for i, p in enumerate(posts[:5], 1):  # Top 5 posts
+            prompt += f"{i}. {p.get('title', 'Untitled')} | Likes: {p.get('likes', 0)} | Comments: {p.get('comments', 0)}\n"
+
+        prompt += f"""
+Revenue & Sales:
+- Total Orders: {revenue.get('total_orders', 0)}
+- Items Sold: {revenue.get('items_sold', 0)}
+- Total Revenue: ₹{revenue.get('total', 0):.2f}
+- Paid Revenue: ₹{revenue.get('paid', 0):.2f}
+
+Engagement:
+- Total Likes: {engagement.get('total_likes', 0)}
+- Total Comments: {engagement.get('total_comments', 0)}
+- Total Reviews: {engagement.get('total_reviews', 0)}
+
+Top Performing Products:
+"""
+        for i, tp in enumerate(top_products[:3], 1):
+            prompt += f"{i}. {tp.get('title', 'Untitled')} - {tp.get('metric', 'N/A')}\n"
+
+        prompt += """
+TASK: Provide specific, actionable insights in these 4 categories:
+
+1. Product Optimization: How to improve product listings (titles, descriptions, pricing, photography)
+2. Marketing Strategy: Content ideas, social media tactics, audience engagement
+3. Pricing Strategy: Pricing analysis and recommendations
+4. Growth Opportunities: New product ideas, expansion strategies
+
+Return ONLY a valid JSON object with this exact structure:
+{
+  "product_optimization": ["insight 1", "insight 2", "insight 3"],
+  "marketing_strategy": ["insight 1", "insight 2", "insight 3"],
+  "pricing_strategy": ["insight 1", "insight 2", "insight 3"],
+  "growth_opportunities": ["insight 1", "insight 2", "insight 3"]
+}
+
+Each insight should be 1-2 sentences, specific, and actionable. Base recommendations on the actual data provided.
+"""
+
+        # Call Groq API
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        payload = {
+            'model': 'llama-3.3-70b-versatile',  # Fast, high-quality model (updated Nov 2024)
+            'messages': [
+                {
+                    'role': 'system',
+                    'content': 'You are an expert business advisor for artisan marketplaces. Provide actionable, data-driven insights in valid JSON format only.'
+                },
+                {
+                    'role': 'user',
+                    'content': prompt
+                }
+            ],
+            'temperature': 0.7,
+            'max_tokens': 1500,
+            'response_format': {'type': 'json_object'}
+        }
+
+        try:
+            response = requests.post(
+                'https://api.groq.com/openai/v1/chat/completions',
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+        except requests.exceptions.Timeout:
+            return {
+                'ok': False,
+                'error': 'Request to Groq API timed out after 30 seconds. Please try again.'
+            }
+        except requests.exceptions.ConnectionError:
+            return {
+                'ok': False,
+                'error': 'Could not connect to Groq API. Please check your internet connection.'
+            }
+        
+        if response.status_code != 200:
+            error_msg = f'Groq API error: {response.status_code}'
+            try:
+                error_data = response.json()
+                if 'error' in error_data:
+                    error_msg += f' - {error_data["error"].get("message", response.text)}'
+            except:
+                error_msg += f' - {response.text[:200]}'
+            
+            return {
+                'ok': False,
+                'error': error_msg
+            }
+
+        result = response.json()
+        content = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+        
+        if not content:
+            return {
+                'ok': False,
+                'error': 'Empty response from Groq API'
+            }
+
+        # Parse JSON response
+        try:
+            insights_data = json.loads(content)
+            
+            # Validate structure
+            required_keys = ['product_optimization', 'marketing_strategy', 'pricing_strategy', 'growth_opportunities']
+            for key in required_keys:
+                if key not in insights_data:
+                    insights_data[key] = []
+            
+            return {
+                'ok': True,
+                'insights': insights_data
+            }
+        except json.JSONDecodeError as e:
+            return {
+                'ok': False,
+                'error': f'Failed to parse AI response as JSON: {str(e)}'
+            }
+
+    except requests.exceptions.RequestException as e:
+        return {
+            'ok': False,
+            'error': f'Network error calling Groq API: {str(e)}'
+        }
+    except Exception as e:
+        return {
+            'ok': False,
+            'error': f'Unexpected error generating insights: {str(e)}'
+        }
+
+
+def find_similar_products_and_pricing(product_data: Dict[str, Any], marketplace_products: List[Dict[str, Any]], 
+                                     api_key: str = None, include_external: bool = False) -> Dict[str, Any]:
+    """
+    Use AI to find similar products based on product characteristics (not just price).
+    Optionally includes external market research.
+    
+    Args:
+        product_data: Dict with title, description, price, category info
+        marketplace_products: List of other products in local marketplace
+        api_key: Groq API key
+        include_external: Whether to search external sources (Amazon, eBay, etc.)
+    
+    Returns:
+        Dict with 'ok' status and either 'analysis' or 'error'
+    """
+    try:
+        if not api_key or api_key == "your_groq_api_key_here":
+            return {
+                'ok': False,
+                'error': 'Groq API key not configured.'
+            }
+
+        # Build prompt for AI to analyze similarity and pricing
+        prompt = f"""You are an expert in handcrafted products and competitive pricing analysis.
+
+PRODUCT TO ANALYZE:
+Title: {product_data.get('title', 'Unknown')}
+Description: {product_data.get('description', 'No description')}
+Price: ₹{product_data.get('price', 0)}
+
+MARKETPLACE PRODUCTS:
+"""
+        # Add marketplace products
+        for i, p in enumerate(marketplace_products[:20], 1):  # Limit to 20 for token efficiency
+            prompt += f"{i}. {p.get('title', 'Unknown')} - ₹{p.get('price', 0)} | {p.get('artist_name', 'Unknown')}\n"
+            if p.get('description'):
+                prompt += f"   Description: {p.get('description')[:100]}...\n"
+
+        if include_external:
+            prompt += f"""
+
+EXTERNAL MARKET RESEARCH TASK:
+Based on the product title "{product_data.get('title', '')}" and description, suggest typical pricing for similar handcrafted products on:
+- Amazon India (handmade/artisan sections)
+- Etsy India
+- Flipkart Handpicked
+- Indian art marketplaces
+
+Provide realistic price estimates based on your knowledge of these platforms.
+"""
+
+        prompt += """
+
+ANALYSIS TASKS:
+1. Identify the 5 most similar products from the marketplace based on:
+   - Product type/category
+   - Materials/craftsmanship
+   - Target audience
+   - Artistic style
+   (NOT just price similarity - focus on actual product similarity)
+
+2. Compare pricing of similar products
+
+3. Provide competitive pricing recommendations"""
+
+        if include_external:
+            prompt += """
+
+4. Research external market pricing for similar products"""
+
+        prompt += """
+
+Return ONLY a valid JSON object with this structure:
+{
+  "similar_products": [
+    {
+      "index": 1,
+      "similarity_score": 95,
+      "reason": "why this product is similar",
+      "price_comparison": "higher/lower/similar"
+    }
+  ],
+  "pricing_analysis": {
+    "your_position": "premium/competitive/budget",
+    "similar_avg_price": 1500.00,
+    "recommendation": "specific pricing advice"
+  }"""
+
+        if include_external:
+            prompt += """,
+  "external_market": {
+    "amazon_range": "₹1200-2000",
+    "etsy_range": "₹1500-2500",
+    "flipkart_range": "₹1000-1800",
+    "recommendation": "how you compare to external markets"
+  }"""
+
+        prompt += """
+}
+
+Provide specific, actionable insights based on product characteristics and actual similarity.
+"""
+
+        # Call Groq API
+        headers = {
+            'Authorization': f'Bearer {api_key}',
+            'Content-Type': 'application/json'
+        }
+        
+        payload = {
+            'model': 'llama-3.3-70b-versatile',
+            'messages': [
+                {
+                    'role': 'system',
+                    'content': 'You are an expert in handcrafted products, artisan markets, and competitive pricing analysis. Provide detailed, accurate analysis in valid JSON format.'
+                },
+                {
+                    'role': 'user',
+                    'content': prompt
+                }
+            ],
+            'temperature': 0.5,  # Lower temperature for more consistent analysis
+            'max_tokens': 2000,
+            'response_format': {'type': 'json_object'}
+        }
+
+        try:
+            response = requests.post(
+                'https://api.groq.com/openai/v1/chat/completions',
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+        except requests.exceptions.Timeout:
+            return {
+                'ok': False,
+                'error': 'Request timed out. Please try again.'
+            }
+        except requests.exceptions.ConnectionError:
+            return {
+                'ok': False,
+                'error': 'Could not connect to AI service. Check internet connection.'
+            }
+        
+        if response.status_code != 200:
+            error_msg = f'AI API error: {response.status_code}'
+            try:
+                error_data = response.json()
+                if 'error' in error_data:
+                    error_msg += f' - {error_data["error"].get("message", response.text)}'
+            except:
+                error_msg += f' - {response.text[:200]}'
+            
+            return {
+                'ok': False,
+                'error': error_msg
+            }
+
+        result = response.json()
+        content = result.get('choices', [{}])[0].get('message', {}).get('content', '')
+        
+        if not content:
+            return {
+                'ok': False,
+                'error': 'Empty response from AI'
+            }
+
+        # Parse JSON response
+        try:
+            analysis_data = json.loads(content)
+            
+            return {
+                'ok': True,
+                'analysis': analysis_data
+            }
+        except json.JSONDecodeError as e:
+            return {
+                'ok': False,
+                'error': f'Failed to parse AI response: {str(e)}'
+            }
+
+    except Exception as e:
+        return {
+            'ok': False,
+            'error': f'Error analyzing products: {str(e)}'
+        }
+
+
