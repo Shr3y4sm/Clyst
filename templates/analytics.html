@@ -107,12 +107,74 @@
         margin-top: -4px;
       }
 
+      /* Tab styles */
+      .tab-nav {
+        display: flex;
+        gap: 0;
+      }
+      .tab-btn {
+        background: transparent;
+        border: none;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--muted);
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: all 0.2s;
+      }
+      .tab-btn:hover {
+        color: var(--text);
+      }
+      .tab-btn.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+      .tab-content {
+        margin-top: 16px;
+      }
+
+      /* Insights styles */
+      .insight-list {
+        list-style: none;
+        padding: 0;
+        margin: 12px 0 0 0;
+      }
+      .insight-list li {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        line-height: 1.5;
+        color: var(--text);
+      }
+      .insight-list li:last-child {
+        border-bottom: 0;
+      }
+      .insight-list li:before {
+        content: "•";
+        color: var(--accent);
+        font-weight: bold;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
+        margin-right: 0.5em;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
       @media (max-width: 900px) {
         .kpi-grid {
           grid-template-columns: repeat(2, 1fr);
         }
         .grid-2 {
           grid-template-columns: 1fr;
+        }
+        .tab-btn {
+          font-size: 13px;
+          padding: 10px 14px;
         }
       }
     </style>
@@ -142,78 +204,469 @@
         <div class="muted">Private dashboard only visible to you.</div>
       </div>
 
-      <div class="kpi-grid">
-        <div class="card kpi">
-          <div class="label">Views</div>
-          <div class="value">{{ kpis.views }}</div>
-        </div>
-        <div class="card kpi">
-          <div class="label">Engagement</div>
-          <div class="value">{{ kpis.engagement }}</div>
-        </div>
-        <div class="card kpi">
-          <div class="label">Items Sold</div>
-          <div class="value">{{ kpis.sales }}</div>
-        </div>
-        <div class="card kpi">
-          <div class="label">Revenue</div>
-          <div class="value">₹ {{ '%.2f'|format(kpis.revenue) }}</div>
-        </div>
+      <!-- Tab Navigation -->
+      <div
+        class="tab-nav"
+        style="margin-top: 20px; border-bottom: 1px solid var(--border)"
+      >
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="insights">AI Insights</button>
       </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">Views (last 30 days)</div>
-          <canvas id="viewsChart" class="chart"></canvas>
-          <div class="legend">
-            <span><i class="pv"></i>Product views</span>
-            <span><i class="pr"></i>Profile views</span>
+      <!-- Overview Tab Content -->
+      <div id="overview-tab" class="tab-content active">
+        <div class="kpi-grid">
+          <div class="card kpi">
+            <div class="label">Views</div>
+            <div class="value">{{ kpis.views }}</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Engagement</div>
+            <div class="value">{{ kpis.engagement }}</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Items Sold</div>
+            <div class="value">{{ kpis.sales }}</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Revenue</div>
+            <div class="value">₹ {{ '%.2f'|format(kpis.revenue) }}</div>
           </div>
         </div>
-        <div class="card">
-          <div class="section-title">Revenue (last 30 days)</div>
-          <canvas id="revenueChart" class="chart"></canvas>
-          <div class="sub">
-            Orders: {{ total_orders }} • Gross: ₹ {{
-            '%.2f'|format(total_revenue) }} • Paid: ₹ {{
-            '%.2f'|format(paid_revenue) }}
-          </div>
-        </div>
-      </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">Top Products by Views</div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-title">Views (last 30 days)</div>
+            <canvas id="viewsChart" class="chart"></canvas>
+            <div class="legend">
+              <span><i class="pv"></i>Product views</span>
+              <span><i class="pr"></i>Profile views</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">Revenue (last 30 days)</div>
+            <canvas id="revenueChart" class="chart"></canvas>
+            <div class="sub">
+              Orders: {{ total_orders }} • Gross: ₹ {{
+              '%.2f'|format(total_revenue) }} • Paid: ₹ {{
+              '%.2f'|format(paid_revenue) }}
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="section-title">Top Products by Views</div>
+            <ul class="list">
+              {% for p in top_products_by_views %}
+              <li><span>{{ p.title }}</span><span>{{ p.count }}</span></li>
+              {% else %}
+              <li class="muted">No data yet.</li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="card">
+            <div class="section-title">Top Products by Sales</div>
+            <ul class="list">
+              {% for p in top_products_by_sales %}
+              <li><span>{{ p.title }}</span><span>{{ p.count }}</span></li>
+              {% else %}
+              <li class="muted">No data yet.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 12px">
+          <div class="section-title">Top Posts by Engagement</div>
           <ul class="list">
-            {% for p in top_products_by_views %}
-            <li><span>{{ p.title }}</span><span>{{ p.count }}</span></li>
+            {% for p in top_posts_by_engagement %}
+            <li><span>{{ p.title }}</span><span>{{ p.score }}</span></li>
             {% else %}
-            <li class="muted">No data yet.</li>
+            <li class="muted">No posts yet.</li>
             {% endfor %}
           </ul>
         </div>
-        <div class="card">
-          <div class="section-title">Top Products by Sales</div>
-          <ul class="list">
-            {% for p in top_products_by_sales %}
-            <li><span>{{ p.title }}</span><span>{{ p.count }}</span></li>
-            {% else %}
-            <li class="muted">No data yet.</li>
-            {% endfor %}
-          </ul>
+      </div>
+      <!-- End Overview Tab -->
+
+      <!-- Insights Tab Content -->
+      <div id="insights-tab" class="tab-content" style="display: none">
+        <div class="insights-loading" style="text-align: center; padding: 40px">
+          <div
+            class="spinner"
+            style="
+              border: 4px solid var(--border);
+              border-top-color: var(--accent);
+              border-radius: 50%;
+              width: 40px;
+              height: 40px;
+              animation: spin 1s linear infinite;
+              margin: 0 auto 16px;
+            "
+          ></div>
+          <div class="muted">Generating AI insights for your business...</div>
+        </div>
+
+        <div class="insights-content" style="display: none">
+          <div
+            class="insights-intro card"
+            style="
+              margin-bottom: 16px;
+              background: linear-gradient(
+                135deg,
+                var(--accent) 0%,
+                #7e57c2 100%
+              );
+              color: white;
+              border: none;
+            "
+          >
+            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px">
+              🤖 AI-Powered Insights
+            </div>
+            <div style="opacity: 0.95">
+              Personalized recommendations based on your products, posts, and
+              customer engagement.
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card insight-card">
+              <div class="section-title" style="color: var(--accent)">
+                📦 Product Optimization
+              </div>
+              <ul class="insight-list" id="product-insights"></ul>
+            </div>
+            <div class="card insight-card">
+              <div class="section-title" style="color: #4db6ac">
+                📈 Marketing Strategy
+              </div>
+              <ul class="insight-list" id="marketing-insights"></ul>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top: 12px">
+            <div class="card insight-card">
+              <div class="section-title" style="color: #7e57c2">
+                💰 Pricing Strategy
+              </div>
+              <ul class="insight-list" id="pricing-insights"></ul>
+            </div>
+            <div class="card insight-card">
+              <div class="section-title" style="color: #ff9800">
+                🚀 Growth Opportunities
+              </div>
+              <ul class="insight-list" id="growth-insights"></ul>
+            </div>
+          </div>
+
+          <!-- Competitive Pricing Analysis Section -->
+          <div
+            class="card"
+            style="margin-top: 20px; border: 2px solid var(--accent)"
+          >
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+                gap: 12px;
+              "
+            >
+              <div style="flex: 1; min-width: 250px">
+                <div
+                  class="section-title"
+                  style="color: var(--accent); font-size: 18px"
+                >
+                  💎 AI-Powered Competitive Pricing
+                </div>
+                <div class="muted" style="font-size: 13px; margin-top: 4px">
+                  AI finds truly similar products (not just similar prices)
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 8px;
+                  align-items: center;
+                  flex-wrap: wrap;
+                "
+              >
+                <label
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 13px;
+                    cursor: pointer;
+                    padding: 6px 12px;
+                    background: #f5f5f5;
+                    border-radius: 4px;
+                    border: 1px solid var(--border);
+                  "
+                >
+                  <input
+                    type="checkbox"
+                    id="include-external"
+                    style="
+                      cursor: pointer;
+                      width: 16px;
+                      height: 16px;
+                      accent-color: var(--accent);
+                    "
+                  />
+                  <span style="color: var(--text)"
+                    >🌐 Include Amazon, Etsy, Flipkart</span
+                  >
+                </label>
+                <button
+                  id="load-pricing-btn"
+                  onclick="loadCompetitivePricing()"
+                  style="
+                    padding: 8px 16px;
+                    background: var(--accent);
+                    color: white;
+                    border: none;
+                    border-radius: 2px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 13px;
+                  "
+                >
+                  🤖 Analyze with AI
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="pricing-loading"
+              style="display: none; text-align: center; padding: 30px"
+            >
+              <div
+                class="spinner"
+                style="
+                  border: 4px solid var(--border);
+                  border-top-color: var(--accent);
+                  border-radius: 50%;
+                  width: 30px;
+                  height: 30px;
+                  animation: spin 1s linear infinite;
+                  margin: 0 auto 12px;
+                "
+              ></div>
+              <div class="muted">Analyzing market pricing...</div>
+            </div>
+
+            <div id="pricing-content" style="display: none">
+              <!-- Pricing Stats -->
+              <div class="grid-2" style="gap: 12px; margin-bottom: 16px">
+                <div
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--accent) 0%,
+                      #7e57c2 100%
+                    );
+                    padding: 16px;
+                    border-radius: 2px;
+                    color: white;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 12px;
+                      opacity: 0.9;
+                      text-transform: uppercase;
+                      letter-spacing: 0.04em;
+                    "
+                  >
+                    Your Average Price
+                  </div>
+                  <div
+                    style="font-size: 28px; font-weight: 700; margin-top: 4px"
+                  >
+                    ₹<span id="your-avg-price">0</span>
+                  </div>
+                  <div style="font-size: 12px; opacity: 0.85; margin-top: 4px">
+                    Range: ₹<span id="your-min-price">0</span> - ₹<span
+                      id="your-max-price"
+                      >0</span
+                    >
+                  </div>
+                </div>
+                <div
+                  style="
+                    background: #f5f5f5;
+                    padding: 16px;
+                    border-radius: 2px;
+                    border: 1px solid var(--border);
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--muted);
+                      text-transform: uppercase;
+                      letter-spacing: 0.04em;
+                    "
+                  >
+                    Market Average Price
+                  </div>
+                  <div
+                    style="
+                      font-size: 28px;
+                      font-weight: 700;
+                      margin-top: 4px;
+                      color: var(--text);
+                    "
+                  >
+                    ₹<span id="market-avg-price">0</span>
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--muted);
+                      margin-top: 4px;
+                    "
+                  >
+                    Median: ₹<span id="market-median-price">0</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Price Positioning -->
+              <div
+                class="card"
+                style="background: #f9f9f9; margin-bottom: 16px"
+              >
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <div style="font-size: 32px">📊</div>
+                  <div style="flex: 1">
+                    <div
+                      style="
+                        font-weight: 600;
+                        font-size: 16px;
+                        color: var(--text);
+                      "
+                      id="position-label"
+                    >
+                      Analyzing...
+                    </div>
+                    <div
+                      style="
+                        font-size: 13px;
+                        color: var(--muted);
+                        margin-top: 4px;
+                        line-height: 1.5;
+                      "
+                      id="position-advice"
+                    >
+                      Please wait...
+                    </div>
+                  </div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 24px;
+                        font-weight: 700;
+                        color: var(--accent);
+                      "
+                      id="price-diff"
+                    >
+                      0%
+                    </div>
+                    <div style="font-size: 11px; color: var(--muted)">
+                      vs Market
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Similar Products -->
+              <div>
+                <div class="section-title" style="margin-bottom: 12px">
+                  Similar Products in Marketplace
+                </div>
+                <div
+                  id="similar-products-grid"
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(
+                      auto-fill,
+                      minmax(200px, 1fr)
+                    );
+                    gap: 12px;
+                  "
+                >
+                  <!-- Products will be inserted here -->
+                </div>
+                <div
+                  id="no-similar-products"
+                  style="
+                    display: none;
+                    text-align: center;
+                    padding: 30px;
+                    color: var(--muted);
+                  "
+                >
+                  No similar products found in the marketplace.
+                </div>
+              </div>
+            </div>
+
+            <div
+              id="pricing-error"
+              style="display: none; text-align: center; padding: 30px"
+            >
+              <div style="font-size: 32px; margin-bottom: 12px">⚠️</div>
+              <div class="muted" id="pricing-error-message"></div>
+              <button
+                onclick="loadCompetitivePricing()"
+                style="
+                  margin-top: 12px;
+                  padding: 8px 16px;
+                  background: var(--accent);
+                  color: white;
+                  border: none;
+                  border-radius: 2px;
+                  cursor: pointer;
+                  font-weight: 600;
+                "
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="insights-error card"
+          style="display: none; text-align: center; padding: 40px"
+        >
+          <div style="font-size: 48px; margin-bottom: 16px">⚠️</div>
+          <div class="section-title">Failed to Generate Insights</div>
+          <div class="muted" id="error-message" style="margin-top: 8px"></div>
+          <button
+            onclick="loadInsights()"
+            style="
+              margin-top: 16px;
+              padding: 10px 20px;
+              background: var(--accent);
+              color: white;
+              border: none;
+              border-radius: 2px;
+              cursor: pointer;
+              font-weight: 600;
+            "
+          >
+            Try Again
+          </button>
         </div>
       </div>
-
-      <div class="card" style="margin-top: 12px">
-        <div class="section-title">Top Posts by Engagement</div>
-        <ul class="list">
-          {% for p in top_posts_by_engagement %}
-          <li><span>{{ p.title }}</span><span>{{ p.score }}</span></li>
-          {% else %}
-          <li class="muted">No posts yet.</li>
-          {% endfor %}
-        </ul>
-      </div>
+      <!-- End Insights Tab -->
     </div>
 
     <!-- lightweight charts without external libs -->
@@ -259,6 +712,214 @@
       const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#ff6b6b';
       miniLineChart(document.getElementById('viewsChart'), days, [pv, pr], [accent, '#4db6ac']);
       miniLineChart(document.getElementById('revenueChart'), days, [rev], ['#7e57c2']);
+
+      // Tab switching
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+      let insightsLoaded = false;
+
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+
+          // Update active states
+          tabBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Show selected tab
+          tabContents.forEach(content => {
+            if (content.id === tab + '-tab') {
+              content.style.display = 'block';
+              // Load insights when tab is opened for the first time
+              if (tab === 'insights' && !insightsLoaded) {
+                loadInsights();
+              }
+            } else {
+              content.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Load AI insights
+      function loadInsights() {
+        const loading = document.querySelector('.insights-loading');
+        const content = document.querySelector('.insights-content');
+        const error = document.querySelector('.insights-error');
+
+        // Show loading state
+        loading.style.display = 'block';
+        content.style.display = 'none';
+        error.style.display = 'none';
+
+        fetch('/analytics/insights')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              insightsLoaded = true;
+              displayInsights(data.insights);
+              loading.style.display = 'none';
+              content.style.display = 'block';
+            } else {
+              throw new Error(data.error || 'Failed to load insights');
+            }
+          })
+          .catch(err => {
+            loading.style.display = 'none';
+            error.style.display = 'block';
+            document.getElementById('error-message').textContent = err.message;
+          });
+      }
+
+      // Display insights in the UI
+      function displayInsights(insights) {
+        const categories = [
+          { key: 'product_optimization', elementId: 'product-insights' },
+          { key: 'marketing_strategy', elementId: 'marketing-insights' },
+          { key: 'pricing_strategy', elementId: 'pricing-insights' },
+          { key: 'growth_opportunities', elementId: 'growth-insights' }
+        ];
+
+        categories.forEach(cat => {
+          const list = document.getElementById(cat.elementId);
+          const items = insights[cat.key] || [];
+
+          if (items.length === 0) {
+            list.innerHTML = '<li class="muted">No insights available for this category.</li>';
+          } else {
+            list.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+          }
+        });
+      }
+
+      // Load competitive pricing analysis
+      function loadCompetitivePricing() {
+        const loading = document.getElementById('pricing-loading');
+        const content = document.getElementById('pricing-content');
+        const error = document.getElementById('pricing-error');
+        const button = document.getElementById('load-pricing-btn');
+        const includeExternal = document.getElementById('include-external').checked;
+
+        // Show loading state
+        loading.style.display = 'block';
+        content.style.display = 'none';
+        error.style.display = 'none';
+        button.disabled = true;
+        button.textContent = includeExternal ? 'AI Analyzing (with external sources)...' : 'AI Analyzing...';
+
+        const url = '/analytics/competitive-pricing' + (includeExternal ? '?external=true' : '');
+
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              displayPricingAnalysis(data.analysis, data.ai_powered);
+              loading.style.display = 'none';
+              content.style.display = 'block';
+              button.style.display = 'none';
+            } else {
+              throw new Error(data.error || 'Failed to load pricing analysis');
+            }
+          })
+          .catch(err => {
+            loading.style.display = 'none';
+            error.style.display = 'block';
+            document.getElementById('pricing-error-message').textContent = err.message;
+            button.disabled = false;
+            button.textContent = '🤖 Analyze with AI';
+          });
+      }
+
+      // Display competitive pricing analysis
+      function displayPricingAnalysis(analysis, aiPowered) {
+        // Your products stats
+        document.getElementById('your-avg-price').textContent = analysis.your_products.avg_price.toFixed(2);
+        document.getElementById('your-min-price').textContent = analysis.your_products.min_price.toFixed(2);
+        document.getElementById('your-max-price').textContent = analysis.your_products.max_price.toFixed(2);
+
+        // Market stats
+        document.getElementById('market-avg-price').textContent = analysis.market.avg_price.toFixed(2);
+        document.getElementById('market-median-price').textContent = analysis.market.median_price.toFixed(2);
+
+        // Positioning
+        document.getElementById('position-label').textContent = analysis.positioning.label;
+        document.getElementById('position-advice').textContent = analysis.positioning.advice;
+
+        const diff = analysis.positioning.difference_percent;
+        const diffElement = document.getElementById('price-diff');
+        diffElement.textContent = (diff > 0 ? '+' : '') + diff.toFixed(1) + '%';
+        diffElement.style.color = diff > 20 ? '#ff9800' : diff < -20 ? '#4db6ac' : 'var(--accent)';
+
+        // Show external market data if available
+        if (analysis.external_market) {
+          const externalDiv = document.createElement('div');
+          externalDiv.className = 'card';
+          externalDiv.style.cssText = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 16px; padding: 16px;';
+          externalDiv.innerHTML = `
+            <div style="font-weight: 600; font-size: 16px; margin-bottom: 12px;">🌐 External Market Pricing</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; font-size: 13px;">
+              <div><strong>Amazon India:</strong><br>${analysis.external_market.amazon_range || 'N/A'}</div>
+              <div><strong>Etsy India:</strong><br>${analysis.external_market.etsy_range || 'N/A'}</div>
+              <div><strong>Flipkart:</strong><br>${analysis.external_market.flipkart_range || 'N/A'}</div>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 13px; line-height: 1.5;">
+              ${analysis.external_market.recommendation || 'Your pricing is competitive with external markets.'}
+            </div>
+          `;
+          document.getElementById('pricing-content').insertBefore(externalDiv, document.querySelector('#similar-products-grid').parentElement);
+        }
+
+        // Similar products
+        const grid = document.getElementById('similar-products-grid');
+        const noProducts = document.getElementById('no-similar-products');
+
+        if (analysis.similar_products.length === 0) {
+          grid.style.display = 'none';
+          noProducts.style.display = 'block';
+        } else {
+          grid.style.display = 'grid';
+          noProducts.style.display = 'none';
+
+          grid.innerHTML = analysis.similar_products.map(product => `
+            <div class="product-card" style="background: white; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
+              ${product.similarity_score ? `<div style="position: absolute; top: 8px; right: 8px; z-index: 1; background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🤖 ${product.similarity_score}% match</div>` : ''}
+              <div style="position: relative; padding-top: 100%; background: #f5f5f5;">
+                ${product.img_url ? `<img src="${product.img_url}" alt="${product.title}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">` : '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; opacity: 0.3;">🎨</div>'}
+              </div>
+              <div style="padding: 12px;">
+                <div style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${product.title}">${product.title}</div>
+                ${product.similarity_reason ? `<div style="font-size: 11px; color: #666; margin-bottom: 6px; line-height: 1.3;">${product.similarity_reason}</div>` : ''}
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                  <div style="font-size: 18px; font-weight: 700; color: var(--accent);">₹${product.price.toFixed(2)}</div>
+                  <div style="font-size: 11px; padding: 2px 6px; border-radius: 2px; ${product.price_difference > 0 ? 'background: #ffe0b2; color: #f57c00;' : 'background: #b2dfdb; color: #00796b;'}">
+                    ${product.price_difference > 0 ? '+' : ''}${product.price_difference.toFixed(1)}%
+                  </div>
+                </div>
+                <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">by ${product.artist_name}</div>
+                <div style="display: flex; align-items: center; gap: 4px; font-size: 11px;">
+                  ${product.reviews_count > 0 ? `
+                    <span style="color: #ffa726;">⭐</span>
+                    <span style="color: var(--text);">${product.avg_rating}</span>
+                    <span style="color: var(--muted);">(${product.reviews_count})</span>
+                  ` : '<span style="color: var(--muted);">No reviews yet</span>'}
+                </div>
+              </div>
+            </div>
+          `).join('');
+
+          // Add hover effect via CSS
+          document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+              card.style.transform = 'translateY(-4px)';
+              card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+            });
+            card.addEventListener('mouseleave', () => {
+              card.style.transform = 'translateY(0)';
+              card.style.boxShadow = 'none';
+            });
+          });
+        }
+      }
     </script>
   </body>
 </html>
