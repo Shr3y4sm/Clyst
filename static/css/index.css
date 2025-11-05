@@ -214,7 +214,7 @@ h1 {
 }
 .icon-set {
 	display: flex;
-	gap: 12px;
+	gap: 20px;
 	align-items: center;
 }
 .comment-icons {

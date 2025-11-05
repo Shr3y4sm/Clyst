@@ -366,7 +366,7 @@ fill="currentColor" viewBox="0 0 24 24" >
             fetch(`/api/post/${postId}/likes`).then(r => r.json()).then(data => {
               const countEl = btn.querySelector('.like-count');
               if (data.count && data.count > 0) {
-                countEl.textContent = ` (${data.count})`;
+                countEl.textContent = `${data.count}`;
                 btn.querySelector('.like-text').textContent = '';
               } else {
                 countEl.textContent = '';
@@ -807,36 +807,6 @@ fill="currentColor" viewBox="0 0 24 24" >
         display: flex;
         justify-content: flex-end;
         gap: 10px;
-      }
-
-      .btn {
-        padding: 10px 20px;
-        border-radius: 2px;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-family: inherit;
-      }
-
-      .btn-primary {
-        background: var(--accent);
-        color: white;
-        border: none;
-      }
-
-      .btn-primary:hover {
-        background: #ff5252;
-      }
-
-      .btn-secondary {
-        background: var(--bg);
-        color: var(--text);
-        border: 1px solid var(--border);
-      }
-
-      .btn-secondary:hover {
-        background: var(--card);
       }
     </style>
     <script src="../static/js/app.js"></script>

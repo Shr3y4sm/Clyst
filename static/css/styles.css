@@ -723,7 +723,7 @@ svg {
 
 @media (max-width: 768px) {
 	.sort-wrapper {
-		margin-left: 0;
+		margin-left: 20px;
 		width: 100%;
 	}
 

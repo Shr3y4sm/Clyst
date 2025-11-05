@@ -253,4 +253,9 @@
 	.products-grid {
 		grid-template-columns: 1fr;
 	}
+	.product-card {
+		border-radius: 0;
+		border-left: none;
+		border-right: none;
+	}
 }

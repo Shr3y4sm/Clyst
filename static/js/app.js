@@ -40,20 +40,125 @@ function googleTranslateElementInit() {
           const style = document.createElement('style');
           style.id = 'share-modal-styles';
           style.textContent = `
-            .share-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1100;opacity:0;transition:opacity .2s ease}
-            .share-overlay.open{opacity:1}
-            .share-modal{background:var(--card);color:var(--text);border-radius:8px;max-width:560px;width:92vw;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden}
-            .share-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
-            .share-title{font-weight:700;font-size:16px}
-            .share-close{background:none;border:none;cursor:pointer;color:var(--text);padding:4px}
-            .share-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;padding:16px}
-            .share-item{display:flex;flex-direction:column;align-items:center;text-decoration:none;color:inherit}
-            .share-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
-            .share-item span{margin-top:8px;font-size:12px;color:var(--muted)}
-            .share-copy{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center}
-            .share-copy input{flex:1;border:1px solid var(--border);background:var(--bg);color:var(--text);padding:8px;border-radius:6px}
-            .share-copy .btn{height:36px}
-            @media (max-width: 560px){.share-grid{grid-template-columns:repeat(3,1fr)}}
+            .share-overlay{
+              position:fixed;
+              inset:0;
+              background:rgba(0,0,0,.5);
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              z-index:1100;
+              opacity:0;
+              transition:opacity .2s ease
+            }
+            .share-overlay.open{
+              opacity:1
+            }
+            .share-modal{
+              background:var(--card);
+              color:var(--text);
+              border-radius:16px;
+              max-width:560px;
+              width:92vw;
+              box-shadow:0 10px 30px rgba(0,0,0,.25);
+              overflow:hidden
+            }
+            .share-header{
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+              padding:14px 16px;
+              border-bottom:1px solid var(--border)
+            }
+            .share-title{
+              font-weight:600;
+              font-size:20px;
+              }
+            .share-close{
+              width:28px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              background:none;
+              border:none;
+              cursor:pointer;
+              color:var(--text);
+            }
+            .share-grid{
+              display:grid;
+              grid-template-columns:repeat(4,1fr);
+              gap:14px;
+              padding:16px
+            }
+            .share-item{
+              display:flex;
+              flex-direction:column;
+              align-items:center;
+              text-decoration:none;
+              color:inherit
+            }
+            .share-icon{
+              width:46px;
+              height:46px;
+              border-radius:50%;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              color:#fff
+            }
+            .share-item span{
+              margin-top:8px;
+              font-size:12px;
+              color:var(--muted)
+            }
+            .share-copy{
+              padding:12px 16px;
+              border-top:1px solid var(--border);
+              display:flex;
+              align-items:center
+            }
+            .share-copy input{
+              flex:1;
+              border:1px solid var(--border);
+              background:var(--bg);
+              color:var(--text);
+              padding:8px 12px;
+	            border-radius: 12px 0 0 12px;
+            }
+            .share-copy .btn{
+	            border-radius: 0 12px 12px 0;
+              height:36px
+            }
+            .share-icon{
+              display:flex;
+              align-items:center;
+              justify-content:center;
+            }
+            .share-icon svg{
+              width:28px;
+              height:28px;
+            }
+            .share-item:hover{
+              filter: opacity(0.7);
+            }
+            .whatsapp-svg{
+              padding: 0 0 1px 2px;
+            }
+            .facebook-svg svg,
+            .whatsapp-svg svg{
+              width:32px;
+              height:32px;
+            }
+            .reddit-svg svg{
+              max-width:56px;
+              width:56px;
+              height:56px;
+            }
+            @media (max-width: 560px){
+              .share-grid{
+                grid-template-columns:repeat(2,1fr)
+              }
+            }
           `;
           document.head.appendChild(style);
         }
@@ -96,23 +201,25 @@ function googleTranslateElementInit() {
               <div class="share-modal" role="dialog" aria-modal="true">
                 <div class="share-header">
                   <div class="share-title">Share</div>
-                  <button class="share-close" aria-label="Close" onclick="this.closest('.share-overlay').remove()">✕</button>
+                  <button class="share-close" aria-label="Close" onclick="this.closest('.share-overlay').remove()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg>
+                  </button>
                 </div>
                 <div class="share-grid">
                   <a class="share-item" target="_blank" rel="noopener" href="${links.whatsapp}">
-                    <div class="share-icon" style="background:#25D366">${iconHTML('whatsapp')}</div>
+                    <div class="share-icon whatsapp-svg" style="background:#25D366">${iconHTML('whatsapp')}</div>
                     <span>WhatsApp</span>
                   </a>
                   <a class="share-item" target="_blank" rel="noopener" href="${links.facebook}">
-                    <div class="share-icon" style="background:#1877F2">${iconHTML('facebook')}</div>
+                    <div class="share-icon facebook-svg" style="background:#1877F2">${iconHTML('facebook')}</div>
                     <span>Facebook</span>
                   </a>
                   <a class="share-item" target="_blank" rel="noopener" href="${links.x}">
-                    <div class="share-icon" style="background:#000">${iconHTML('x')}</div>
+                    <div class="share-icon x-svg" style="background:#000">${iconHTML('x')}</div>
                     <span>X</span>
                   </a>
                   <a class="share-item" target="_blank" rel="noopener" href="${links.reddit}">
-                    <div class="share-icon" style="background:#FF4500">${iconHTML('reddit')}</div>
+                    <div class="share-icon reddit-svg" style="background:#FF4500">${iconHTML('reddit')}</div>
                     <span>Reddit</span>
                   </a>
                 </div>
