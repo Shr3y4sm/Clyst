@@ -338,7 +338,7 @@
 	padding: 48px 24px;
 	margin: 12px 0 0 0;
 	background: var(--bg);
-	border: 2px dashed black;
+	border: 2px dashed var(--muted);
 	border-radius: 20px;
 	cursor: pointer;
 	transition: all 0.3s;

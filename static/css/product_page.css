@@ -227,6 +227,11 @@ h1 {
 	color: var(--text);
 }
 
+.artist-info h3:hover {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
 .artist-info p {
 	font-size: 14px;
 	line-height: 1;
@@ -273,7 +278,7 @@ h1 {
 	display: flex;
 	justify-content: space-between;
 	flex-wrap: wrap;
-	margin: 0 0 60px 0;
+	margin: 0 0 24px 0;
 }
 
 .btn-danger {
@@ -306,6 +311,7 @@ h1 {
 	width: 100%;
 	align-items: center;
 	justify-content: flex-start;
+	margin: 0;
 }
 
 .comments-list {
@@ -354,7 +360,8 @@ h1 {
 }
 
 .comment-head {
-	margin: 0 0 10px 0;
+	width: 100%;
+	margin: 0 0 14px 0;
 	font-weight: 400;
 }
 
@@ -369,7 +376,7 @@ h1 {
 	height: fit-content;
 	min-height: 36px;
 	padding: 0;
-	margin: 0 0 4px 0;
+	margin: 0;
 	border: 1px solid light-dark(#d4d4d4, #404040);
 	border-radius: 20em;
 	background: none;
@@ -400,6 +407,12 @@ input {
 	font-size: 16px;
 	transition: all 0.2s;
 	background: none;
+}
+
+.comment-section input {
+	padding: 4px 0px 4px 4px;
+	border: none;
+	height: 36px;
 }
 
 input:focus-visible {
@@ -450,8 +463,10 @@ input:focus-visible {
 	padding: 4px 8px;
 	text-align: justify;
 	border-radius: 4px;
-	border: 1px solid var(--border);
+	border: 1px solid var(--muted);
+	background: none;
 	font-size: 14px;
+	margin: 0;
 }
 
 .comments-list .btn-delete {
@@ -490,6 +505,17 @@ input:focus-visible {
 	vertical-align: middle;
 }
 
+.rating-input {
+	font-size: 14px;
+	display: flex;
+	margin: 12px 0;
+	width: 100%;
+	align-items: flex-start;
+	justify-content: flex-start;
+	gap: 4px;
+	flex-direction: column;
+}
+
 .avg-rating-text {
 	font-size: 16px;
 	margin: 0 0 0 4px;
@@ -501,7 +527,17 @@ input:focus-visible {
 	font-size: 12px;
 }
 
+.star-btn {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	margin: 0;
+	fill: var(--muted);
+}
+
 .star-icon {
+	width: 20px;
 	vertical-align: middle;
 }
 
@@ -511,6 +547,259 @@ input:focus-visible {
 
 .star--empty {
 	fill: #ddd;
+}
+
+.active {
+	fill: #f4b400;
+}
+
+.product-chat-modal {
+	display: none;
+}
+
+.product-chatbot-section {
+	margin: 0 0 60px 0;
+	width: 100%;
+}
+
+.product-chatbot-section .ask-abt-prod {
+	width: 100%;
+}
+
+.product-chatbot-section .ask-abt-prod svg {
+	width: 20px;
+}
+
+.chat-suggestions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px;
+	margin-bottom: 12px;
+}
+
+.suggestion-btn {
+	background: var(--border);
+	border: none;
+	padding: 6px 12px;
+	font-size: 12px;
+}
+
+.product-chat-modal .show {
+	display: block;
+}
+
+.chat-input {
+	flex: 1;
+	height: 40px;
+	padding: 8px 16px;
+	border: 1px solid var(--border);
+	border-radius: 20em;
+	font-size: 16px;
+	outline: none;
+}
+
+.chat-input-container {
+	display: flex;
+	gap: 8px;
+	margin: 0 0 20px 0;
+}
+
+.chat-messages {
+	display: flex;
+	margin: 0 0 12px 0;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 8px;
+}
+
+.chat-message {
+	width: 100%;
+}
+
+.bot-message {
+	background: var(--border);
+	padding: 12px;
+	border-radius: 16px 16px 16px 2px;
+}
+
+.user-message {
+	border-radius: 16px 2px 16px 16px;
+	color: var(--bg);
+	background: var(--muted);
+	padding: 12px;
+}
+
+.close-chat {
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	margin: 0;
+	fill: var(--muted);
+}
+
+.chat-modal-header {
+	margin: 12px 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.chat-modal-header h3 {
+	font-weight: 500;
+}
+
+.close-chat svg {
+	width: 28px;
+	vertical-align: middle;
+}
+/* File Upload Styling */
+.file-upload-wrapper {
+	position: relative;
+}
+
+.file-input {
+	display: none;
+}
+
+.file-upload-label {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 40px 24px;
+	margin: 12px 0 0 0;
+	background: var(--bg);
+	border: 2px dashed var(--muted);
+	border-radius: 8px;
+	cursor: pointer;
+	transition: all 0.3s;
+	text-align: center;
+}
+
+.file-upload-label:hover {
+	border-color: var(--accent);
+	background: var(--card);
+}
+
+.file-upload-label svg {
+	color: var(--muted);
+	transition: color 0.3s;
+}
+
+.file-upload-label:hover svg {
+	color: var(--accent);
+}
+
+.file-upload-text {
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--text);
+	margin-bottom: 8px;
+}
+
+.file-upload-subtext {
+	font-size: 13px;
+	color: var(--muted);
+}
+
+/* Image Preview */
+.image-preview {
+	margin-top: 20px;
+}
+
+.preview-wrapper {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px;
+	background: var(--bg);
+	border: 1px solid black;
+	border-radius: 8px;
+}
+
+.preview-wrapper img {
+	width: 100%;
+	max-height: 300px;
+	object-fit: contain;
+	border-radius: 4px;
+}
+
+.preview-wrapper.loading img {
+	opacity: 0.5;
+}
+
+.remove-preview {
+	width: 24px;
+	height: 24px;
+	position: absolute;
+	top: 10px;
+	right: 14px;
+	background: rgba(0, 0, 0, 0.7);
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s;
+	z-index: 10;
+}
+
+.remove-preview:hover {
+	background: rgba(239, 35, 60, 0.9);
+	transform: scale(1.1);
+}
+
+.remove-preview svg {
+	width: 24px;
+	height: 24px;
+	fill: white;
+}
+
+.preview-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 13px;
+	color: var(--muted);
+	padding-top: 8px;
+	border-top: 1px solid var(--border);
+}
+
+.preview-error {
+	padding: 32px;
+	text-align: center;
+	color: var(--muted);
+	font-size: 14px;
+}
+
+/* Current Image Badge */
+.current-image-badge {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-top: 12px;
+	padding: 4px;
+	background: light-dark(#e8f5e9, #1b3a1e);
+	border: 1px solid light-dark(#81c784, #2e7d32);
+	border-radius: 20em;
+	font-size: 16px;
+	color: light-dark(#2e7d32, #81c784);
+}
+
+.current-image-badge svg {
+	width: 24px;
+	height: 24px;
+	fill: currentColor;
+	flex-shrink: 0;
+}
+
+.comments .star-icon {
+	width: 12px;
+	height: 12px;
 }
 
 /* ================================

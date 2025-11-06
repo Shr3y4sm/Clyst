@@ -146,6 +146,27 @@
             </div>
           </div>
 
+          <!-- Artist Information -->
+          <div class="product-artist">
+            <div class="artist">
+              <div class="artist-avatar">
+                {{ product.artist.name[0].upper() }}
+              </div>
+              <div class="artist-info">
+                <h3 onclick="location.href='{{ url_for('view_profile', user_id=product.artist.id) }}'">{{ product.artist.name }}</h3>
+                <p>Artisan</p>
+              </div>
+            </div>
+          <button
+            class="btn btn-primary"
+            type="button"
+            onclick="openContactModal()"
+            title="Contact Seller"
+          >
+            Contact Seller
+          </button>
+          </div>
+
           <!-- Product Meta -->
           <div class="product-meta">
             <div class="meta-item">
@@ -157,38 +178,16 @@
               <div class="meta-value">Artwork</div>
             </div>
           </div>
-
-          <!-- Artist Information -->
-          <div class="product-artist">
-            <div class="artist">
-              <div class="artist-avatar">
-                {{ product.artist.name[0].upper() }}
-              </div>
-              <div class="artist-info">
-                <h3>{{ product.artist.name }}</h3>
-                <p>Artisan</p>
-              </div>
-            </div>
-              <a
-                href="{{url_for('view_profile', user_id=product.artist.id)}}"
-                class="btn btn-secondary"
-                >View Artisan</a
-              >
-          </div>
           <div class="buttons">
 
           {% if current_user.is_authenticated and current_user.id ==
           product.artist_id %}
           <button
-            class="btn btn-primary"
-            onclick="openEditModal()"
-            title="Edit Product"
-            type="button"
+            class="btn btn-secondary"
+            onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_posts', product_id=product.product_id) }}'"
+            title="Delete Post"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M15.7279 9.57629L14.3137 8.16207L5 17.4758V18.89H6.41421L15.7279 9.57629ZM17.1421 8.16207L18.5563 6.74786L17.1421 5.33365L15.7279 6.74786L17.1421 8.16207ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.8218 17.4587 2.8218 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"></path>
-            </svg>
-            Edit Product
+            Delete
           </button>
           {% elif current_user.is_authenticated and current_user.id !=
           product.artist_id %}
@@ -199,14 +198,6 @@
             title="Add to Cart"
             type="button"
           >Add to Cart
-          </button>
-          <button
-            class="btn btn-primary"
-            type="button"
-            onclick="openContactModal()"
-            title="Contact Seller"
-          >
-            Contact Seller
           </button>
           {% elif not current_user.is_authenticated %}
           <button
@@ -227,18 +218,19 @@
           >
           {% else %}
           <button
-            class="btn btn-secondary btn-danger"
-            onclick="if(confirm('Delete this product?')) window.location.href='{{ url_for('delete_posts', product_id=product.product_id) }}'"
-            title="Delete Post"
+            class="btn btn-primary"
+            onclick="openEditModal()"
+            title="Edit Product"
+            type="button"
           >
-            Delete Product
+            Edit
           </button>
           {% endif %}
         </div>
 
           <!-- Product Chatbot -->
           <div class="product-chatbot-section">
-            <button class="btn-chat-product" onclick="toggleProductChat()" type="button">
+            <button class="btn btn-primary ask-abt-prod" onclick="toggleProductChat()" type="button">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M6.45455 19L2 22.5V4C2 3.44772 2.44772 3 3 3H21C21.5523 3 22 3.44772 22 4V18C22 18.5523 21.5523 19 21 19H6.45455ZM5.76282 17H20V5H4V18.3851L5.76282 17ZM11 10H13V12H11V10ZM7 10H9V12H7V10ZM15 10H17V12H15V10Z"></path>
               </svg>
@@ -249,7 +241,7 @@
             <div class="product-chat-modal" id="productChatModal">
               <div class="chat-modal-header">
                 <h3>Product Assistant</h3>
-                <button class="chat-close-btn" onclick="toggleProductChat()" type="button" aria-label="Close chat">
+                <button class="btn btn-secondary close-chat" onclick="toggleProductChat()" type="button" aria-label="Close chat">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 10.586L16.95 5.63599L18.364 7.04999L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.04999 18.364L5.63599 16.95L10.586 12L5.63599 7.04999L7.04999 5.63599L12 10.586Z"></path>
                   </svg>
@@ -257,11 +249,11 @@
               </div>
 
               <div class="chat-suggestions" id="chatSuggestions">
-                <p class="suggestions-label">Quick questions:</p>
-                <button class="suggestion-btn" onclick="askQuestion('What materials is this made from?')" type="button">What materials is this made from?</button>
-                <button class="suggestion-btn" onclick="askQuestion('How long will delivery take?')" type="button">How long will delivery take?</button>
-                <button class="suggestion-btn" onclick="askQuestion('Can I customize this?')" type="button">Can I customize this?</button>
-                <button class="suggestion-btn" onclick="askQuestion('Is this handmade?')" type="button">Is this handmade?</button>
+                <!-- <p class="suggestions-label">Quick questions:</p> -->
+                <button class="btn btn-secondary suggestion-btn" onclick="askQuestion('What materials is this made from?')" type="button">What materials is this made from?</button>
+                <button class="btn btn-secondary suggestion-btn" onclick="askQuestion('How long will delivery take?')" type="button">How long will delivery take?</button>
+                <button class="btn btn-secondary suggestion-btn" onclick="askQuestion('Can I customize this?')" type="button">Can I customize this?</button>
+                <button class="btn btn-secondary suggestion-btn" onclick="askQuestion('Is this handmade?')" type="button">Is this handmade?</button>
               </div>
 
               <div class="chat-messages" id="chatMessages"></div>
@@ -274,10 +266,8 @@
                   class="chat-input"
                   onkeypress="if(event.key==='Enter') sendChatMessage()"
                 />
-                <button class="chat-send-btn" onclick="sendChatMessage()" type="button" aria-label="Send message">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 12.9999H9V10.9999H3V1.84558C3 1.56944 3.22386 1.34558 3.5 1.34558C3.58425 1.34558 3.66714 1.36687 3.74096 1.40747L22.2034 11.5618C22.4454 11.6949 22.5337 11.9989 22.4006 12.2409C22.3549 12.324 22.2865 12.3924 22.2034 12.4381L3.74096 22.5924C3.499 22.7255 3.19497 22.6372 3.06189 22.3953C3.02129 22.3214 3 22.2386 3 22.1543V12.9999Z"></path>
-                  </svg>
+                <button class="btn btn-primary" onclick="sendChatMessage()" type="button" aria-label="Send message">
+                  ASK
                 </button>
               </div>
             </div>
@@ -285,18 +275,7 @@
 
           
         {% if current_user.is_authenticated %}
-        <h3 class="reviews-heading">Reviews</h3>
-          <div class="rating-input" id="comment-rating" data-current-rating="{{ product.current_user_rating or 0 }}" aria-label="Rate this product">
-            <span class="rating-label">Rating</span>
-            <div class="rating-stars" role="radiogroup" aria-label="Stars">
-              {% for i in range(1,6) %}
-              <button type="button" class="star-btn" data-value="{{ i }}" aria-label="{{ i }} star{% if i>1 %}s{% endif %}">
-                <svg class="star-icon icon-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
-              </button>
-              {% endfor %}
-            </div>
-            <input type="hidden" name="rating" id="rating-hidden" value="0" />
-          </div>
+        <h3 class="comment-head">Reviews</h3>
         <form
           action="{{ url_for('add_product_comment', product_id=product.product_id) }}"
           method="POST"
@@ -319,8 +298,17 @@
             <span class="sr-only">Submit comment</span>
           </button>
         </form>
-        {% else %}
-        <p class="comment-login"><a href="{{ url_for('login') }}">Login</a> to leave a review.</p>
+          <div class="rating-input" id="comment-rating" data-current-rating="{{ product.current_user_rating or 0 }}" aria-label="Rate this product">
+            <span class="rating-label">Rate</span>
+            <div class="rating-stars" role="radiogroup" aria-label="Stars">
+              {% for i in range(1,6) %}
+              <button type="button" class="star-btn" data-value="{{ i }}" aria-label="{{ i }} star{% if i>1 %}s{% endif %}">
+                <svg class="star-icon icon-20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+              </button>
+              {% endfor %}
+            </div>
+            <input type="hidden" name="rating" id="rating-hidden" value="0" />
+          </div>
         {% endif %}
         
 
@@ -372,12 +360,12 @@
 
             {% set ur = product.ratings_map.get(comment.artist.id) if product.ratings_map else 0 %}
             {% if ur %}
-            <div class="rating-display">
+            <div class="products-rating">
               {% for i in range(1,6) %}
                 {% if i <= ur %}
-                <svg class="star-icon icon-16 star--filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+                <svg class="star-icon icon-20 star--filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
                 {% else %}
-                <svg class="star-icon icon-16 star--empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
+                <svg class="star-icon icon-20 star--empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.402 8.172L12 18.896l-7.336 3.872 1.402-8.172L.132 9.21l8.2-1.192z"/></svg>
                 {% endif %}
               {% endfor %}
             </div>
@@ -681,13 +669,37 @@
 
             <div class="form-group">
               <label for="edit_product_image" class="form-label">New Image (Optional)</label>
-              <input
-                type="file"
-                id="edit_product_image"
-                name="product_image_file"
-                class="form-input"
-                accept="image/*"
-              />
+              
+                  <div class="file-upload-wrapper">
+                    <input
+                      type="file"
+                      id="product_image_file"
+                      name="product_image_file"
+                      class="file-input"
+                      accept="image/*"
+                      onchange="previewImage(this, 'product-preview')"
+                    />
+                    <label for="product_image_file" class="file-upload-label">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        width="48"
+                        height="48"
+                      >
+                        <path
+                          d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm.008-12c.548 0 .992.445.992.993v13.014a1 1 0 0 1-.992.993H13v-2h7V4H4v14h7v2H2.992A.993.993 0 0 1 2 19.007V2.993A1 1 0 0 1 2.992 2h18.016zM8 7a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"
+                        />
+                      </svg>
+                      <span class="file-upload-text"
+                        >Click to browse or drag & drop</span
+                      >
+                      <span class="file-upload-subtext"
+                        >JPG, PNG, GIF, WebP up to 10MB</span
+                      >
+                    </label>
+                    <div id="product-preview" class="image-preview"></div>
+                  </div>
               {% if product.img_url %}
               <div class="current-image">
                 <img src="{{ product.img_url }}" alt="Current product image" class="current-image-preview">
@@ -752,7 +764,7 @@
       }
 
       .modal-header {
-        padding: 24px 28px;
+        padding: 10px 20px;
         border-bottom: 1px solid light-dark(#e5e5e5, #333);
         display: flex;
         justify-content: space-between;
@@ -762,13 +774,12 @@
 
       .modal-header h2 {
         margin: 0;
-        font-size: 22px;
-        font-weight: 600;
+        font-size: 20px;
+        font-weight: 500;
         color: var(--text);
       }
 
       .modal-body {
-        padding: 28px;
         overflow-y: auto;
         max-height: calc(100vh - 240px);
       }
@@ -789,6 +800,11 @@
         border: none;
       }
 
+      .close-modal svg {
+        width: 28px;
+        height: 28px;
+      }
+
       .close-modal:hover {
         background: light-dark(#f5f5f5, #2a2a2a);
         color: var(--text);
@@ -796,7 +812,16 @@
 
       /* Form styles */
       .modal .form-group {
+        padding: 0 20px;
         margin-bottom: 20px;
+      }
+
+      .modal .form-group:first-child {
+        margin-top: 20px;
+      }
+
+      #contactSellerForm .form-label{
+        margin: 20px 0 8px 0;
       }
 
       .modal .form-label {
@@ -810,7 +835,7 @@
       .modal .form-input,
       .modal .form-textarea {
         width: 100%;
-        padding: 12px 16px;
+        padding: 12px;
         border: 1px solid light-dark(#d4d4d4, #404040);
         border-radius: 8px;
         font-size: 15px;
@@ -830,7 +855,7 @@
       .modal .form-textarea {
         resize: vertical;
         min-height: 120px;
-        line-height: 1.6;
+        line-height: 1.15;
       }
 
       .modal .form-input[type="file"] {
@@ -840,7 +865,7 @@
 
       .modal .form-actions {
         margin-top: 28px;
-        padding-top: 20px;
+        padding: 20px;
         border-top: 1px solid light-dark(#e5e5e5, #333);
         display: flex;
         gap: 12px;
@@ -1094,7 +1119,11 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2>Contact Seller</h2>
-          <span class="close-modal" onclick="closeContactModal()">&times;</span>
+          <span class="close-modal" onclick="closeContactModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M12 10.586L16.95 5.63599L18.364 7.04999L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.04999 18.364L5.63599 16.95L10.586 12L5.63599 7.04999L7.04999 5.63599L12 10.586Z"></path>
+            </svg>
+          </span>
         </div>
         <div class="modal-body">
           <form id="contactSellerForm" action="{{ url_for('start_conversation') }}" enctype="multipart/form-data" method="post">
@@ -1105,7 +1134,37 @@
             </div>
             <div class="form-group">
               <label for="contact_attachment" class="form-label">Attachment (optional)</label>
-              <input type="file" id="contact_attachment" name="attachment" accept="image/*" />
+              
+                  <div class="file-upload-wrapper">
+                    <input
+                      type="file"
+                      id="product_image_file"
+                      name="product_image_file"
+                      class="file-input"
+                      accept="image/*"
+                      onchange="previewImage(this, 'product-preview')"
+                    />
+                    <label for="product_image_file" class="file-upload-label">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        width="48"
+                        height="48"
+                      >
+                        <path
+                          d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm.008-12c.548 0 .992.445.992.993v13.014a1 1 0 0 1-.992.993H13v-2h7V4H4v14h7v2H2.992A.993.993 0 0 1 2 19.007V2.993A1 1 0 0 1 2.992 2h18.016zM8 7a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"
+                        />
+                      </svg>
+                      <span class="file-upload-text"
+                        >Click to browse or drag & drop</span
+                      >
+                      <span class="file-upload-subtext"
+                        >JPG, PNG, GIF, WebP up to 10MB</span
+                      >
+                    </label>
+                    <div id="product-preview" class="image-preview"></div>
+                  </div>
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" onclick="closeContactModal()">Cancel</button>
@@ -1162,6 +1221,7 @@
   function toggleProductChat() {
     const modal = document.getElementById('productChatModal');
     modal.classList.toggle('show');
+    modal.style.display = modal.classList.contains('show') ? 'block' : 'none';
     if (modal.classList.contains('show')) {
       document.getElementById('chatInput').focus();
     }
@@ -1193,10 +1253,10 @@
 
   function updateSuggestions(suggestions) {
     const suggestionsContainer = document.getElementById('chatSuggestions');
-    suggestionsContainer.innerHTML = '<p class="suggestions-label">You might also ask:</p>';
+    suggestionsContainer.innerHTML = '';
     suggestions.forEach(suggestion => {
       const btn = document.createElement('button');
-      btn.className = 'suggestion-btn';
+      btn.className = 'btn btn-suggestion suggestion-btn';
       btn.textContent = suggestion;
       btn.type = 'button';
       btn.onclick = () => askQuestion(suggestion);
@@ -1246,4 +1306,41 @@
       addMessage('Sorry, I encountered an error. Please try contacting the seller directly.', false);
     }
   }
+
+  
+      // Preview uploaded image
+      function previewImage(input, previewId) {
+        const preview = document.getElementById(previewId);
+        const file = input.files[0];
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.innerHTML = `
+                      <div class="preview-wrapper">
+                        <img src="${e.target.result}" alt="Preview">
+                        <button type="button" class="remove-preview" onclick="clearFileInput('${
+                          input.id
+                        }', '${previewId}')">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                            <path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm0-11.414L9.172 7.757 7.757 9.172 10.586 12l-2.829 2.828 1.415 1.415L12 13.414l2.828 2.829 1.415-1.415L13.414 12l2.829-2.828-1.415-1.415L12 10.586z"/>
+                          </svg>
+                        </button>
+                        <div class="preview-info">
+                          <span>${file.name}</span>
+                          <span>${(file.size / 1024).toFixed(1)} KB</span>
+                        </div>
+                      </div>
+                    `;
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+      
+      // Clear file input
+      function clearFileInput(inputId, previewId) {
+        document.getElementById(inputId).value = "";
+        document.getElementById(previewId).innerHTML = "";
+      }
+
 </script>
