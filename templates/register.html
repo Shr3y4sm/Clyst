@@ -36,7 +36,7 @@
       </div>
     </nav>
 
-    <div class="auth-container">
+    <div class="container">
       <div class="auth-card">
         <div class="auth-header">
           <h1>Create Account</h1>
@@ -48,12 +48,7 @@
         <div class="flash-message" style="display: block">{{ message }}</div>
         {% endfor %} {% endif %} {% endwith %}
 
-        <!-- Firebase Auth UI Container -->
-        <div id="firebaseui-auth-container"></div>
 
-        <div class="divider">
-          <span>or register with email</span>
-        </div>
 
         <!-- Legacy Registration Form (fallback) -->
         <form
@@ -125,6 +120,15 @@
             </button>
           </div>
         </form>
+
+        
+        <div class="divider">
+          <span>or register with email</span>
+        </div>
+
+        
+        <!-- Firebase Auth UI Container -->
+        <div id="firebaseui-auth-container"></div>
 
         <div class="not-registered">
           <p>

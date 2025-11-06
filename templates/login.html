@@ -35,7 +35,7 @@
       </div>
     </nav>
 
-    <div class="auth-container">
+    <div class="container">
       <div class="auth-card">
         <div class="auth-header">
           <h1>Login</h1>
@@ -49,12 +49,6 @@
         </div>
         {% endfor %} {% endif %} {% endwith %}
 
-        <!-- Firebase Auth UI Container -->
-        <div id="firebaseui-auth-container"></div>
-
-        <div class="divider">
-          <span>or continue with email</span>
-        </div>
 
         <!-- Legacy Email/Password Form (fallback) -->
         <form
@@ -89,6 +83,12 @@
             <button type="submit" class="btn btn-primary">Login</button>
           </div>
         </form>
+
+        <div class="divider">
+          <span>or continue with email</span>
+        </div>
+        <!-- Firebase Auth UI Container -->
+        <div id="firebaseui-auth-container"></div>
 
         <div class="not-registered">
           <p>
