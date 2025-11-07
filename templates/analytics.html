@@ -685,8 +685,8 @@
         ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border');
         ctx.beginPath(); ctx.moveTo(pad, h-pad); ctx.lineTo(w-pad, h-pad); ctx.moveTo(pad, pad); ctx.lineTo(pad, h-pad); ctx.stroke();
         // y ticks
-        ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
-        ctx.font = '12px Inter';
+        ctx.fillStyle = '#eeeeee';
+        ctx.font = '12px Poppins,sans-serif';
         const steps = 3;
         for (let i=0;i<=steps;i++) { const y = h-pad - (i/steps)*(h-2*pad); const val = Math.round((i/steps)*max); ctx.fillText(val, 4, y+4); ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w-pad, y); ctx.stroke(); }
         // series
@@ -709,7 +709,7 @@
         });
       }
 
-      const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#ff6b6b';
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('accent') || '#ff6b6b';
       miniLineChart(document.getElementById('viewsChart'), days, [pv, pr], [accent, '#4db6ac']);
       miniLineChart(document.getElementById('revenueChart'), days, [rev], ['#7e57c2']);
 
