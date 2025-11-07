@@ -75,6 +75,11 @@
                 {% if profile_user %} {{ profile_user.name[0].upper() }} {% else
                 %} {{ current_user.name[0].upper() }} {% endif %}
               </div>
+              <h1 class="profile-name">
+                {% if profile_user %} {{ profile_user.name }} {% else %} {{
+                current_user.name }} {% endif %}
+              </h1>
+
               <!-- Verification status or prompt -->
               {% if profile_user and profile_user.is_verified or (not
               profile_user and current_user.is_verified) %}
@@ -97,61 +102,11 @@
               <div class="btn promote-btn profile-verify">
                 <span
                   ><a href="{{ url_for('verify_otp') }}"
-                    >BECOME VERIFIED ARTISAN</a
+                    >Become Verified Artisan</a
                   ></span
                 >
               </div>
-              {% endif %} {% if current_user.is_authenticated and (not
-              profile_user or current_user.id == profile_user.id) %}
-              <div
-                class="btn promote-btn profile-verify"
-                style="margin-left: 8px"
-              >
-                <span
-                  ><a href="{{ url_for('orders_list') }}">MY ORDERS</a></span
-                >
-              </div>
-              <div
-                class="btn promote-btn profile-verify"
-                style="margin-left: 8px"
-              >
-                <span>
-                  <a href="{{ url_for('analytics_dashboard') }}">YOUR ANALYTICS</a>
-                </span>
-              </div>
-              <div
-                class="btn promote-btn"
-                style="margin-left: 8px; background: #dc3545; border-color: #dc3545;"
-              >
-                <span>
-                  <a href="#" onclick="confirmDeleteAccount(event)" style="color: white;">DELETE ACCOUNT</a>
-                </span>
-              </div>
               {% endif %}
-
-              <!-- Follow/Unfollow Button (only on other users' profiles) -->
-              {% if current_user.is_authenticated and profile_user and
-              current_user.id != profile_user.id %}
-              <div
-                class="btn promote-btn profile-verify"
-                style="margin-left: 8px"
-              >
-                <span>
-                  <a
-                    href="#"
-                    id="follow-btn"
-                    onclick="toggleFollow(event, {{ profile_user.id }})"
-                  >
-                    {% if is_following %}UNFOLLOW{% else %}FOLLOW{% endif %}
-                  </a>
-                </span>
-              </div>
-              {% endif %}
-
-              <h1 class="profile-name">
-                {% if profile_user %} {{ profile_user.name }} {% else %} {{
-                current_user.name }} {% endif %}
-              </h1>
 
               <!-- Artisan Rating -->
               {% if artisan_rating and artisan_rating.total_reviews > 0 %}
@@ -189,33 +144,8 @@
               {% endif %}
 
               <div class="profile-bio">
-                {% if profile_user %} {% if profile_user.email %}
-                <p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z"
-                    ></path>
-                  </svg>
-                  {{ profile_user.email }}
-                </p>
-                {% endif %} {% if profile_user.phone %}
-                <p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z"
-                    ></path>
-                  </svg>
-                  {{ profile_user.phone }}
-                </p>
-                {% endif %} {% if profile_user.location %}
+                <button class="btn contact-btn" onclick="openContactModal()">Contact Info</button>
+                {% if profile_user %} {% if profile_user.location %}
                 <p>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -229,33 +159,7 @@
                     ></path></svg
                   >{{ profile_user.location }}
                 </p>
-                {% endif %} {% else %} {% if current_user.email %}
-                <p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z"
-                    ></path>
-                  </svg>
-                  {{ current_user.email }}
-                </p>
-                {% endif %} {% if current_user.phone %}
-                <p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z"
-                    ></path>
-                  </svg>
-                  {{ current_user.phone }}
-                </p>
-                {% endif %} {% if current_user.location %}
+                {% endif %} {% else %} {% if current_user.location %}
                 <p>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -275,14 +179,6 @@
             </div>
 
             <div class="profile-info">
-              <div class="info-item">
-                <div class="info-label">Posts</div>
-                <div class="info-value">{{ posts|length }}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Products</div>
-                <div class="info-value">{{ products|length }}</div>
-              </div>
               <div class="info-item">
                 <div class="info-label">Followers</div>
                 <div class="info-value" id="followers-count">
@@ -309,24 +205,24 @@
               <h3>
                 About {{ profile_user.name if profile_user else
                 current_user.name }}
-              </h3>
-              <button
-                id="speakNarrative"
-                class="say-aloud-btn"
-                title="Listen to Artist Story"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  fill="#000000"
-                  viewBox="0 0 256 256"
+                <button
+                  id="speakNarrative"
+                  class="say-aloud-btn"
+                  title="Listen to Artist Story"
                 >
-                  <path
-                    d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
-                  ></path>
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    fill="#000000"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                    ></path>
+                  </svg>
+                </button>
+              </h3>
             </div>
             <p id="narrativeText">{{ portfolio_narrative }}</p>
 
@@ -351,7 +247,7 @@
                     fill="currentColor"
                   >
                     <path
-                      d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM4.5 7.65311V7.65788L12 12V20.689L19.5 16.3469V7.65311L12 3.311L4.5 7.65311Z"
+                      d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM4.5 7.65311V7.65788L12 12V20.689L19.5 16.3469V7.65311L12 3.311L4.5 7.65311ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"
                     ></path>
                   </svg>
                   <span>{{ products|length }} Products</span>
@@ -400,54 +296,37 @@
             </a>
             {% endif %}
           </div>
-        </div>
 
-        <!-- Content Tabs -->
-        <div class="content-tabs">
-          <div class="tab-nav">
-            <button class="tab-button active" onclick="showTab('posts')">
-              {{ posts|length }} Posts
+          <!-- Toggle Button for Posts/Products -->
+          <div class="content-toggle-wrapper">
+            <button id="content-toggle-btn" onclick="toggleProfileContent()">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 13.1714L16.9495 8.22168L18.3637 9.63589L11.9997 15.9999L5.63574 9.63589L7.04996 8.22168L11.9997 13.1714Z"></path></svg>
             </button>
-            <button class="tab-button" onclick="showTab('products')">
-              {{ products|length }} Products
-            </button>
-
           </div>
 
-          <div class="tab-content">
+          <!-- Content Tabs -->
+          <div class="content-tabs" id="profile-content-tabs" style="display: none;">
+            <div class="tab-nav">
+              <button class="tab-button active" onclick="showTab('posts')">
+                {{ posts|length }} Posts
+              </button>
+              <button class="tab-button" onclick="showTab('products')">
+                {{ products|length }} Products
+              </button>
+            </div>
+            <div class="tab-content">
               <!-- Posts Tab -->
               <div id="posts-tab" class="tab-panel">
                 {% if posts %}
                 <div class="posts-grid">
                   {% for post in posts %}
+                  <a href="{{ url_for('home', _anchor='post-' ~ post.post_id) }}" class="post-item-link">
                   <div class="post-item">
-                    <button
-                      class="btn say-aloud-btn"
-                      data-title="{{ post.post_title }}"
-                      data-artist="{{ post.artist.name }}"
-                      data-price="{{ post.price or '0' }}"
-                      data-description="{{ post.description | default('No description available') | striptags | replace('"', '&quot;') }}"
-                      onclick="sayAloudFromData(this)"
-                      title="Say Aloud"
-                      type="button"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        fill="#000000"
-                        viewBox="0 0 256 256"
-                      >
-                        <path
-                          d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
-                        ></path>
-                      </svg>
-                    </button>
                     {% if current_user.is_authenticated and current_user.id == post.artist_id %}
                     <div class="post-actions">
                       <button
                         class="action-btn edit-btn"
-                        onclick="openEditPostModal({{ post.post_id|tojson }}, {{ post.post_title|tojson }}, {{ post.description|tojson }}, {{ post.media_url|tojson }}, {{ post.is_promoted|tojson }})"
+                        onclick="openEditPostModal({{ post.post_id|tojson }}, {{ post.post_title|tojson }}, {{ post.description|tojson }}, {{ post.media_url|tojson }}, {{ post.is_promoted|tojson }}); event.preventDefault();"
                         title="Edit Post"
                       >
                         <svg
@@ -464,7 +343,7 @@
                       </button>
                       <button
                         class="action-btn delete-btn"
-                        onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'"
+                        onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'; event.preventDefault();"
                         title="Delete Post"
                       >
                         <svg
@@ -481,6 +360,25 @@
                       </button>
                     </div>
                     {% endif %}
+                    <button
+                      class="share-btn"
+                      data-share-url="{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}"
+                      data-share-title="{{ post.post_title }}"
+                      data-share-text="By {{ post.artist.name }}"
+                      onclick="openShareFromEl(this); event.preventDefault();"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                        ></path>
+                      </svg>
+                    </button>
                     {% if post.media_url %}
                     <img
                       src="{{ post.media_url }}"
@@ -500,27 +398,9 @@
                       <p class="item-description">
                         {{ post.description[:100] }}{% if post.description|length > 100 %}...{% endif %}
                       </p>
-                      <button
-                        class="share-btn"
-                        data-share-url="{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}"
-                        data-share-title="{{ post.post_title }}"
-                        data-share-text="By {{ post.artist.name }}"
-                        onclick="openShareFromEl(this)"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          width="24"
-                          height="24"
-                          fill="currentColor"
-                        >
-                          <path
-                            d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
-                          ></path>
-                        </svg>
-                      </button>
                     </div>
                   </div>
+                  </a>
                   {% endfor %}
                 </div>
                 {% else %}
@@ -553,48 +433,8 @@
                 {% if products %}
                 <div class="products-grid">
                   {% for product in products %}
+                  <a href="{{ url_for('product_buy', product_id=product.product_id) }}" class="product-item-link">
                   <div class="product-item">
-                    <button
-                      class="btn say-aloud-btn"
-                      data-title="{{ product.title }}"
-                      data-artist="{{ product.artist.name }}"
-                      data-price="{{ product.price }}"
-                      data-description="{{ product.description | default('No description available') | striptags | replace('"', '&quot;') }}"
-                      onclick="sayAloudFromData(this)"
-                      title="Say Aloud"
-                      type="button"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="32"
-                        height="32"
-                        fill="#000000"
-                        viewBox="0 0 256 256"
-                      >
-                        <path
-                          d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
-                        ></path>
-                      </svg>
-                    </button>
-                    <button
-                      class="share-btn"
-                      data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
-                      data-share-title="{{ product.title }}"
-                      data-share-text="By {{ product.artist.name }}"
-                      onclick="openShareFromEl(this)"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                      >
-                        <path
-                          d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
-                        ></path>
-                      </svg>
-                    </button>
                     {% if product.img_url %}
                     <img
                       src="{{ product.img_url }}"
@@ -612,6 +452,7 @@
                         method="post"
                         action="{{ url_for('promote_product', product_id=product.product_id) }}"
                         class="promote-form"
+                        onclick="event.preventDefault();"
                       >
                         <button
                           type="submit"
@@ -629,9 +470,29 @@
                       <p class="item-description">
                         {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
                       </p>
+                      <button
+                        class="share-btn"
+                        data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
+                        data-share-title="{{ product.title }}"
+                        data-share-text="By {{ product.artist.name }}"
+                        onclick="openShareFromEl(this); event.preventDefault();"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          width="24"
+                          height="24"
+                          fill="currentColor"
+                        >
+                          <path
+                            d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                          ></path>
+                        </svg>
+                      </button>
                       <span class="item-price">Rs.{{ product.price }}</span>
                     </div>
                   </div>
+                  </a>
                   {% endfor %}
                 </div>
                 {% else %}
@@ -658,7 +519,6 @@
                 </div>
                 {% endif %}
               </div>
-
             </div>
           </div>
         </div>
@@ -718,6 +578,27 @@
       </div>
     </div>
     {% endif %}
+
+    <!-- Contact Info Modal -->
+    <div class="modal" id="contactModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Contact Information</h2>
+          <button type="button" class="close-btn" onclick="closeContactModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          {% if profile_user %}
+            <p><strong>Email:</strong> {{ profile_user.email }}</p>
+            <p><strong>Phone:</strong> {{ profile_user.phone or 'Not provided' }}</p>
+          {% else %}
+            <p><strong>Email:</strong> {{ current_user.email }}</p>
+            <p><strong>Phone:</strong> {{ current_user.phone or 'Not provided' }}</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
 
     <script>
           function toggleMenu(e) {
@@ -790,13 +671,44 @@
             event.target.classList.add("active");
           }
 
-          function sayAloud(text) {
+          function sayAloud(text, button) {
+            // If speech is currently happening, stop it.
+            if (window.speechSynthesis.speaking) {
+              window.speechSynthesis.cancel();
+              // The 'onend' event will handle resetting the button style.
+              return;
+            }
+
             const message = new SpeechSynthesisUtterance();
             message.text = `The title of the artwork is ${text.title}. It is created by ${text.artist}. The price of the artwork is Rs.${text.price}. The description says it is ${text.description}.`;
-            window.speechSynthesis.speak(message); // Start speaking
+            
+            const originalIcon = button.innerHTML;
+
+            // When speech starts, change icon to pause and add 'playing' class.
+            message.onstart = function() {
+              button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 17H9V7H5V17ZM15 17H19V7H15V17Z"></path></svg>';
+              button.classList.add('playing');
+            };
+
+            // Function to reset the button to its original state.
+            const resetButtonStyle = () => {
+              button.innerHTML = originalIcon;
+              button.classList.remove('playing');
+            };
+
+            // onend is called for both natural completion and cancellation.
+            message.onend = resetButtonStyle;
+            
+            // Also reset on error.
+            message.onerror = function(event) {
+              console.error('Speech synthesis error:', event.error);
+              resetButtonStyle();
+            };
+
+            window.speechSynthesis.speak(message);
           }
 
-          // Helper function to read data from button attributes
+          // Helper function to read data from button attributes and pass the button itself.
           function sayAloudFromData(button) {
             const text = {
               title: button.dataset.title || '',
@@ -804,7 +716,7 @@
               price: button.dataset.price || '',
               description: button.dataset.description || 'No description available'
             };
-            sayAloud(text);
+            sayAloud(text, button);
           }
 
           async function copyToClipboard(textToCopy) {
@@ -1020,7 +932,7 @@
              currentUtterance.onstart = function() {
                isPlaying = true;
                speakBtn.classList.add('playing');
-               speakBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+               speakBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.0007 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg>';
              };
 
              currentUtterance.onend = function() {
@@ -1046,7 +958,19 @@
 
              if (speakBtn) {
                speakBtn.classList.remove('playing');
-               speakBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+               speakBtn.innerHTML = `
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    fill="#000000"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M168,32V224a8,8,0,0,1-12.91,6.31L85.25,176H40a16,16,0,0,1-16-16V96A16,16,0,0,1,40,80H85.25l69.84-54.31A8,8,0,0,1,168,32Zm32,64a8,8,0,0,0-8,8v48a8,8,0,0,0,16,0V104A8,8,0,0,0,200,96Zm32-16a8,8,0,0,0-8,8v80a8,8,0,0,0,16,0V88A8,8,0,0,0,232,80Z"
+                    ></path>
+                  </svg>
+               `;
              }
            }
 
@@ -1108,6 +1032,36 @@
            }
          });
        });
+
+      function openContactModal() {
+        const modal = document.getElementById("contactModal");
+        modal.classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeContactModal() {
+        const modal = document.getElementById("contactModal");
+        modal.classList.remove("open");
+        document.body.style.overflow = "";
+      }
+
+      function toggleProfileContent() {
+        const content = document.getElementById("profile-content-tabs");
+        const btn = document.getElementById("content-toggle-btn");
+        const isHidden = content.style.display === "none";
+
+        if (isHidden) {
+          content.style.display = "block";
+          btn.classList.add("open");
+          setTimeout(() => {
+            content.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 100);
+        } else {
+          content.style.display = "none";
+          btn.classList.remove("open");
+          document.querySelector('.profile-header').scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
     </script>
     <script
       type="text/javascript"
@@ -1242,7 +1196,7 @@
         background: var(--card);
         border: 1px solid var(--border);
         padding: 20px;
-        border-radius: 2px;
+        border-radius: 24px;
         width: 90%;
         max-width: 500px;
         max-height: 90vh;
