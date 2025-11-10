@@ -309,15 +309,17 @@
           <div class="content-tabs" id="profile-content-tabs">
             <div class="tab-nav">
               <button class="tab-button active" onclick="showTab('posts')">
-                {{ posts|length }} Posts
+                Posts &#0149; {{ posts|length }}
               </button>
               <button class="tab-button" onclick="showTab('products')">
-                {{ products|length }} Products
+                Products &#0149; {{ products|length }}
               </button>
-    <button class="tab-button" onclick="toggleInboxModal()" title="Inbox" aria-label="Open Inbox">
+              {% if current_user.is_authenticated and (not profile_user or current_user.id == profile_user.id) %}
+    <button class="tab-button" onclick="showTab('inbox')" title="Inbox" aria-label="Open Inbox">
       Mail {% if unread_count and unread_count > 0 %} {{ unread_count }}
       {% endif %}
     </button>
+    {% endif %}
             </div>
             <div class="tab-content">
               <!-- Posts Tab -->
@@ -487,65 +489,45 @@
                 </div>
                 {% endif %}
               </div>
+
+              {% if current_user.is_authenticated and (not profile_user or current_user.id == profile_user.id) %}
+              <div id="inbox-tab" class="inbox-modal-body tab-panel" style="display: none">
+                {% if conversations %}
+                  <ul class="inbox-list">
+                    {% for convo in conversations %}
+                    <li class="inbox-item">
+                      <a href="{{ url_for('view_conversation', conversation_id=convo.id) }}">
+                        <div>
+                          <strong>{{ convo.product.title }}</strong>
+                          {% if convo.unread_count > 0 %}
+                            <span class="badge">{{ convo.unread_count }} new</span>
+                          {% endif %}
+                        </div>
+                        <div style="font-size: 13px; color: var(--muted);">
+                          {{ convo.other_user.name }}
+                        </div>
+                        <span class="inbox-date">{{ convo.last_message_at }}</span>
+                      </a>
+                    </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="empty-state" style="padding: 40px 20px; text-align: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3;">
+                      <path d="M21 4H3C2.44772 4 2 4.44772 2 5V19C2 19.5523 2.44772 20 3 20H21C21.5523 20 22 19.5523 22 19V5C22 4.44772 21.5523 4 21 4ZM20 18H4V6H20V18ZM6 8H18V10H6V8ZM6 12H18V14H6V12ZM6 16H14V18H6V16Z"></path>
+                    </svg>
+                    <h3 style="margin: 0 0 8px; font-size: 16px;">No conversations yet</h3>
+                    <p style="margin: 0; font-size: 14px; color: var(--muted);">Your messages with buyers and sellers will appear here.</p>
+                  </div>
+                {% endif %}
+              </div>
+              {% endif %}
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Floating Inbox Button -->
-    {% if current_user.is_authenticated and (not profile_user or current_user.id == profile_user.id) %}
-    <button class="inbox-icon-btn" onclick="toggleInboxModal()" title="Inbox" aria-label="Open Inbox">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM20 7.23792L12.0718 14.338L4 7.21594V19H20V7.23792ZM4.51146 5L12.0619 11.662L19.501 5H4.51146Z"></path>
-      </svg>
-      {% if unread_count and unread_count > 0 %}
-        <span class="inbox-badge">{{ unread_count }}</span>
-      {% endif %}
-    </button>
-
-    <!-- Inbox Modal -->
-    <div class="inbox-modal" id="inboxModal">
-      <div class="inbox-modal-header">
-        <h3>Inbox</h3>
-        <button class="inbox-modal-close" onclick="toggleInboxModal()" aria-label="Close Inbox">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 10.586L16.95 5.63599L18.364 7.04999L13.414 12L18.364 16.95L16.95 18.364L12 13.414L7.04999 18.364L5.63599 16.95L10.586 12L5.63599 7.04999L7.04999 5.63599L12 10.586Z"></path>
-          </svg>
-        </button>
-      </div>
-      <div class="inbox-modal-body">
-        {% if conversations %}
-          <ul class="inbox-list">
-            {% for convo in conversations %}
-            <li class="inbox-item">
-              <a href="{{ url_for('view_conversation', conversation_id=convo.id) }}">
-                <div>
-                  <strong>{{ convo.product.title }}</strong>
-                  {% if convo.unread_count > 0 %}
-                    <span class="badge">{{ convo.unread_count }} new</span>
-                  {% endif %}
-                </div>
-                <div style="font-size: 13px; color: var(--muted);">
-                  with {{ convo.other_user.name }}
-                </div>
-                <span class="inbox-date">{{ convo.last_message_at }}</span>
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <div class="empty-state" style="padding: 40px 20px; text-align: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3;">
-              <path d="M21 4H3C2.44772 4 2 4.44772 2 5V19C2 19.5523 2.44772 20 3 20H21C21.5523 20 22 19.5523 22 19V5C22 4.44772 21.5523 4 21 4ZM20 18H4V6H20V18ZM6 8H18V10H6V8ZM6 12H18V14H6V12ZM6 16H14V18H6V16Z"></path>
-            </svg>
-            <h3 style="margin: 0 0 8px; font-size: 16px;">No conversations yet</h3>
-            <p style="margin: 0; font-size: 14px; color: var(--muted);">Your messages with buyers and sellers will appear here.</p>
-          </div>
-        {% endif %}
-      </div>
-    </div>
-    {% endif %}
 
     <!-- Contact Info Modal -->
     <div class="modal" id="contactModal">

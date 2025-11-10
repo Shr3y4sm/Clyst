@@ -392,17 +392,13 @@ h1 {
 	color: var(--text);
 	border-bottom: 1px solid var(--muted);
 }
-
-.tab-content {
-	padding: 20px 0 0 0;
-}
-
 /* Grid Layouts */
 .posts-grid,
 .products-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
 	gap: 16px;
+	padding: 20px 0 0 0;
 }
 
 .post-item,
@@ -940,9 +936,6 @@ button {
 }
 
 .inbox-modal-body {
-	padding: 12px;
-	overflow-y: auto;
-	max-height: 400px;
 }
 
 .inbox-list {
@@ -953,9 +946,8 @@ button {
 
 .inbox-item {
 	padding: 12px;
-	border-radius: 8px;
-	margin-bottom: 8px;
-	transition: background 0.2s;
+	border-radius: 4px;
+	transition: all 0.2s ease;
 	cursor: pointer;
 }
 
@@ -967,11 +959,14 @@ button {
 	text-decoration: none;
 	color: var(--text);
 	display: flex;
-	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
 	gap: 4px;
 }
 
 .inbox-item strong {
+	display: flex;
+	width: 150px;
 	font-weight: 600;
 	font-size: 14px;
 }
