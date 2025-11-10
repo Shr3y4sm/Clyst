@@ -156,8 +156,7 @@
                   >
                     <path
                       d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
-                    ></path></svg
-                  >{{ profile_user.location }}
+                    ></path></svg>{{ profile_user.location }}
                 </p>
                 {% endif %} {% else %} {% if current_user.location %}
                 <p>
@@ -322,63 +321,6 @@
                   {% for post in posts %}
                   <a href="{{ url_for('home', _anchor='post-' ~ post.post_id) }}" class="post-item-link">
                   <div class="post-item">
-                    {% if current_user.is_authenticated and current_user.id == post.artist_id %}
-                    <div class="post-actions">
-                      <button
-                        class="action-btn edit-btn"
-                        onclick="openEditPostModal({{ post.post_id|tojson }}, {{ post.post_title|tojson }}, {{ post.description|tojson }}, {{ post.media_url|tojson }}, {{ post.is_promoted|tojson }}); event.preventDefault();"
-                        title="Edit Post"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          width="24"
-                          height="24"
-                          fill="currentColor"
-                        >
-                          <path
-                            d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"
-                          ></path>
-                        </svg>
-                      </button>
-                      <button
-                        class="action-btn delete-btn"
-                        onclick="if(confirm('Delete this post?')) window.location.href='{{ url_for('delete_posts', post_id=post.post_id) }}'; event.preventDefault();"
-                        title="Delete Post"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          width="24"
-                          height="24"
-                          fill="currentColor"
-                        >
-                          <path
-                            d="M17 6H22V8H20V21C20 21.5523 19.5523 22 19 22H5C4.44772 22 4 21.5523 4 21V8H2V6H7V3C7 2.44772 7.44772 2 8 2H16C16.5523 2 17 2.44772 17 3V6ZM9 11V17H11V11H9ZM13 11V17H15V11H13ZM9 4V6H15V4H9Z"
-                          ></path>
-                        </svg>
-                      </button>
-                    </div>
-                    {% endif %}
-                    <button
-                      class="share-btn"
-                      data-share-url="{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}"
-                      data-share-title="{{ post.post_title }}"
-                      data-share-text="By {{ post.artist.name }}"
-                      onclick="openShareFromEl(this); event.preventDefault();"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                      >
-                        <path
-                          d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
-                        ></path>
-                      </svg>
-                    </button>
                     {% if post.media_url %}
                     <img
                       src="{{ post.media_url }}"
@@ -398,6 +340,26 @@
                       <p class="item-description">
                         {{ post.description[:100] }}{% if post.description|length > 100 %}...{% endif %}
                       </p>
+                      
+                    <button
+                      class="share-btn"
+                      data-share-url="{{ url_for('home') }}?q={{ post.post_title }}+{{ post.artist.name }}"
+                      data-share-title="{{ post.post_title }}"
+                      data-share-text="By {{ post.artist.name }}"
+                      onclick="openShareFromEl(this); event.preventDefault();"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M13 14H11C7.54202 14 4.53953 15.9502 3.03239 18.8107C3.01093 18.5433 3 18.2729 3 18C3 12.4772 7.47715 8 13 8V3L23 11L13 19V14Z"
+                        ></path>
+                      </svg>
+                    </button>
                     </div>
                   </div>
                   </a>
@@ -470,6 +432,7 @@
                       <p class="item-description">
                         {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
                       </p>
+                      <span class="item-price">Rs.{{ product.price }}</span>
                       <button
                         class="share-btn"
                         data-share-url="{{ url_for('product_buy', product_id=product.product_id) }}"
@@ -489,7 +452,6 @@
                           ></path>
                         </svg>
                       </button>
-                      <span class="item-price">Rs.{{ product.price }}</span>
                     </div>
                   </div>
                   </a>
@@ -1297,7 +1259,6 @@
 
       .btn {
         padding: 10px 20px;
-        border-radius: 2px;
         font-size: 14px;
         font-weight: 500;
         cursor: pointer;
