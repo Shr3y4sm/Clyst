@@ -17,6 +17,13 @@ Clyst is a comprehensive web application that serves as both a social platform f
 - **Promote Product to Post**: Turn a marketplace product into a community post with one click and a Promoted badge
 - **Verification (Get Verified)**: Dedicated camera page to complete simple verification from profile
 - **Likes & Comments**: Like posts and participate in discussions via comments (login required to like or comment; buttons visible to guests)
+- **Artist Analytics Dashboard**: Comprehensive business intelligence dashboard for artists
+  - Real-time KPI tracking (Views, Engagement, Sales, Revenue)
+  - 30-day trend visualization with interactive charts
+  - Sales analysis by product category
+  - Top products and posts performance metrics
+  - AI-powered business insights and recommendations
+  - Competitive pricing analysis with market benchmarking
 
 ### AI-Powered Features
 - **Content Generation**: AI-powered title and description suggestions for posts and products using Google Gemini
@@ -24,6 +31,9 @@ Clyst is a comprehensive web application that serves as both a social platform f
 - **SEO Optimization**: AI-generated SEO phrases for better discoverability
 - **Image Analysis**: AI analyzes uploaded images to generate contextual content
 - **Portfolio Narratives**: AI creates compelling stories connecting an artist's works
+- **AI Business Insights**: Intelligent analysis of artist performance across products, marketing, pricing, and growth opportunities
+- **Competitive Pricing Analysis**: AI-powered product similarity matching with market benchmarking and optional external market research (Amazon, Etsy, Flipkart)
+- **Smart Analytics Dashboard**: Comprehensive analytics with KPIs, trends, sales by category, and AI-driven recommendations
 
 ### Advanced Search
 - **Natural Language Processing**: Search using phrases like "minimalist monochrome abstracts under ₹5k"
@@ -50,6 +60,7 @@ Clyst is a comprehensive web application that serves as both a social platform f
 - **Flask-CKEditor 1.0.0**: Rich text editor
 - **Werkzeug 3.0.1**: WSGI toolkit with password hashing
 - **python-dotenv 1.0.1**: Environment variable management
+- **Groq API**: AI model integration for insights and competitive analysis (Llama 3.3 70B)
 
 ### Frontend
 - **HTML5/CSS3**: Modern web standards with CSS Grid and Flexbox
@@ -60,9 +71,11 @@ Clyst is a comprehensive web application that serves as both a social platform f
 
 ### AI Integration
 - **Google Gemini API**: AI content generation and translation
+- **Groq API (Llama 3.3 70B)**: Advanced AI for business insights and competitive analysis
 - **Natural Language Processing**: Custom search query parser
 - **Image Analysis**: AI-powered image understanding
 - **Multilingual Support**: 15+ languages including Indian languages
+- **Business Intelligence**: AI-driven insights for product optimization, marketing strategy, pricing, and growth
 
 ### Database
 - **SQLite**: Lightweight database for development
@@ -87,6 +100,7 @@ ClystProto/
 │   ├── add_posts.html   # Create post form with AI suggestions
 │   ├── add_products.html # Add product form with AI suggestions
 │   ├── profile.html     # User profile with portfolio narrative
+│   ├── analytics.html   # Analytics dashboard with AI insights
 │   ├── login.html       # Login page
 │   ├── register.html    # Registration page
 │   └── product_buy.html # Product purchase page
@@ -189,7 +203,24 @@ ClystProto/
    - Use AI suggestions for better product listings
    - Manage your product inventory
 
-   4. **Get Verified**
+4. **Analytics Dashboard**
+   - Access comprehensive analytics for your business
+   - View key metrics: Views, Engagement, Items Sold, Revenue
+   - Track performance with 30-day trend charts
+   - Analyze sales by product category with visual bar charts
+   - Get AI-powered business insights across 4 categories:
+     - Product Optimization: Improve titles, descriptions, and images
+     - Marketing Strategy: Enhance visibility and engagement
+     - Pricing Strategy: Optimize pricing based on market analysis
+     - Growth Opportunities: Discover new markets and trends
+   - Competitive Pricing Analysis:
+     - AI matches your products with similar items in the marketplace
+     - Compare pricing against competitors based on product characteristics
+     - Optional external market research (Amazon, Etsy, Flipkart)
+     - Get similarity scores and reasons for product matching
+     - Receive pricing recommendations and positioning advice
+
+5. **Get Verified**
    - From your profile, click "Get verified now" to open the Camera page (`/camera`) and complete a simple verification step.
 
 ### Interacting with Posts (All Users)
@@ -202,6 +233,33 @@ Developer endpoints
 - Toggle like: `POST /api/post/<post_id>/like`
 - Add comment to post: `POST /comment/<post_id>` (form field: `comment`)
 - Delete a post comment: `POST /comment/<comment_id>/delete`
+
+### Analytics & AI Features
+
+1. **Analytics Dashboard** (`/analytics`)
+   - View comprehensive business metrics and insights
+   - Access key performance indicators (KPIs)
+   - Analyze trends with interactive charts
+   - Review top-performing products and posts
+   - Visualize sales by product category
+
+2. **AI Business Insights** (`/analytics/insights`)
+   - Automated analysis of your business performance
+   - Four categories of actionable insights:
+     - Product Optimization recommendations
+     - Marketing strategy improvements
+     - Pricing optimization suggestions
+     - Growth opportunity identification
+   - Real-time insights generated based on current data
+   - Powered by Groq's Llama 3.3 70B model
+
+3. **Competitive Pricing Analysis** (`/analytics/competitive-pricing`)
+   - AI-powered similarity matching of products
+   - Market price comparison and benchmarking
+   - Optional external market research (`?external=true` query parameter)
+   - Similarity scores with detailed reasoning
+   - Pricing position analysis and recommendations
+   - External pricing data from Amazon, Etsy, and Flipkart (when enabled)
 
 ### For Buyers
 
@@ -292,6 +350,28 @@ The application features an advanced natural language search system that underst
 - **Style Adaptation**: Different suggestions for posts vs. products
 - **Image Analysis**: AI analyzes uploaded images to understand content and context
 - **Portfolio Narratives**: AI creates compelling stories connecting an artist's works
+
+### Business Intelligence & Analytics
+- **AI Insights Dashboard**: Comprehensive analytics powered by Groq's Llama 3.3 70B model
+  - **Product Optimization**: Analysis of titles, descriptions, images, and hashtag usage
+  - **Marketing Strategy**: Recommendations for improving visibility and engagement
+  - **Pricing Strategy**: Data-driven pricing recommendations based on market analysis
+  - **Growth Opportunities**: Identification of new markets, trends, and expansion possibilities
+  
+- **Competitive Pricing Analysis**: AI-powered market intelligence
+  - **Smart Similarity Matching**: AI compares products based on characteristics, not just price
+  - **Market Benchmarking**: Compare your pricing against similar products in the marketplace
+  - **External Market Research**: Optional integration with Amazon, Etsy, and Flipkart pricing data
+  - **Similarity Scoring**: AI provides percentage match scores and detailed reasoning
+  - **Positioning Advice**: Get recommendations on whether your pricing is competitive, premium, or budget
+  - **Price Difference Analysis**: Visual indicators showing how your prices compare to competitors
+
+- **Analytics Dashboard Features**:
+  - **Key Performance Indicators**: Views, Engagement, Items Sold, Revenue
+  - **Trend Visualization**: 30-day charts for views and revenue
+  - **Top Products**: Rankings by views and sales performance
+  - **Category Analysis**: Sales breakdown by product category (hashtags)
+  - **Engagement Metrics**: Top posts by likes and comments
 
 ### Translation Support
 - **Multi-language**: Support for 15+ languages including Indian languages
@@ -408,6 +488,34 @@ The application features an advanced natural language search system that underst
 - `status`: Order status (String, 50 chars) - e.g., "pending", "completed", "cancelled"
 - `created_at`: Order creation date (String, 250 chars)
 
+### Hashtags Table
+- `id`: Primary key (auto-increment)
+- `name`: Hashtag name without # symbol (String, 100 chars, unique)
+- `created_at`: Hashtag creation date (String, 250 chars)
+
+### ProductHashtag Table
+- `id`: Primary key (auto-increment)
+- `product_id`: Foreign key to products.product_id (CASCADE on delete)
+- `hashtag_id`: Foreign key to hashtags.id (CASCADE on delete)
+- **Constraints**: Unique constraint on (product_id, hashtag_id)
+
+### PostHashtag Table
+- `id`: Primary key (auto-increment)
+- `post_id`: Foreign key to posts.post_id (CASCADE on delete)
+- `hashtag_id`: Foreign key to hashtags.id (CASCADE on delete)
+- **Constraints**: Unique constraint on (post_id, hashtag_id)
+
+### ProductView Table
+- `id`: Primary key (auto-increment)
+- `product_id`: Foreign key to products.product_id (CASCADE on delete)
+- `artist_id`: Foreign key to users.id
+- `created_at`: View timestamp (String, 250 chars)
+
+### ProfileView Table
+- `id`: Primary key (auto-increment)
+- `profile_user_id`: Foreign key to users.id (CASCADE on delete)
+- `created_at`: View timestamp (String, 250 chars)
+
 
 ### Environment Setup
 ```bash
@@ -433,12 +541,20 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🔮 Future Enhancements
 
 - **Advanced AI**: More sophisticated content generation, image analysis and smart price assist for artisans
-- **Social Features**: Enhanced sharing features and social media integration
 - **Advanced Search**: Recommendation system based on browsing history and preferences
 - **Payment Integration**: Secure payment gateway integration for online transactions
-- **Analytics Dashboard**: Comprehensive analytics for artists to track sales, reviews, and performance
-- **Half-Star Ratings**: Support for fractional ratings (e.g., 4.5 stars) for more precise averages
+- **Enhanced Analytics**: 
+  - Conversion rate tracking (view-to-purchase)
+  - Customer lifetime value analysis
+  - Geographic insights and heat maps
+  - Trend prediction and forecasting
+  - Automated alerts for business opportunities
 - **Review Moderation**: Tools for artists to respond to reviews and flag inappropriate content
+- **AI Model Improvements**:
+  - Fine-tuned models for better product similarity matching
+  - Seasonal trend analysis and predictions
+  - Automated inventory recommendations
+  - Dynamic pricing suggestions based on demand
 
 
 ---
