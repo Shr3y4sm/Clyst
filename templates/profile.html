@@ -299,14 +299,14 @@
           </div>
 
           <!-- Toggle Button for Posts/Products -->
-          <div class="content-toggle-wrapper">
+          <!-- <div class="content-toggle-wrapper">
             <button id="content-toggle-btn" onclick="toggleProfileContent()">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 13.1714L16.9495 8.22168L18.3637 9.63589L11.9997 15.9999L5.63574 9.63589L7.04996 8.22168L11.9997 13.1714Z"></path></svg>
             </button>
-          </div>
+          </div> -->
 
           <!-- Content Tabs -->
-          <div class="content-tabs" id="profile-content-tabs" style="display: none;">
+          <div class="content-tabs" id="profile-content-tabs">
             <div class="tab-nav">
               <button class="tab-button active" onclick="showTab('posts')">
                 {{ posts|length }} Posts
@@ -314,6 +314,10 @@
               <button class="tab-button" onclick="showTab('products')">
                 {{ products|length }} Products
               </button>
+    <button class="tab-button" onclick="toggleInboxModal()" title="Inbox" aria-label="Open Inbox">
+      Mail {% if unread_count and unread_count > 0 %} {{ unread_count }}
+      {% endif %}
+    </button>
             </div>
             <div class="tab-content">
               <!-- Posts Tab -->

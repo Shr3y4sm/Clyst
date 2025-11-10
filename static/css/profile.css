@@ -1,14 +1,15 @@
 body {
 	color: var(--text);
-	background: var(--bg);
+	background: var(--card);
 	margin: 0;
 }
 
 .container {
+	background: var(--card);
 	display: flex;
 	justify-content: center;
 	margin: 0 auto;
-	min-height: 100vh;
+	min-height: 90vh;
 	padding: 0;
 }
 
@@ -46,9 +47,6 @@ svg {
 .profile-header {
 	display: flex;
 	background: var(--card);
-	border-radius: 0.2em;
-	border: 1px solid light-dark(#d4d4d4, #222);
-	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 	padding: 20px;
 	text-align: center;
 	flex-direction: column;
@@ -336,6 +334,7 @@ h1 {
 /* Content Tabs */
 .content-tabs {
 	background: var(--card);
+	margin: 24px 0 0 0;
 }
 
 .content-toggle-wrapper {
