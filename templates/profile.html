@@ -70,11 +70,12 @@
         <!-- Profile Header -->
         <div class="profile-header">
           <div class="profile">
-            <div class="profile-details">
+              <div class="user-profile">
               <div class="profile-avatar">
                 {% if profile_user %} {{ profile_user.name[0].upper() }} {% else
                 %} {{ current_user.name[0].upper() }} {% endif %}
               </div>
+              <div class="user-info-section">
               <h1 class="profile-name">
                 {% if profile_user %} {{ profile_user.name }} {% else %} {{
                 current_user.name }} {% endif %}
@@ -136,15 +137,14 @@
                   {% endif %} {% endfor %}
                 </div>
                 <span class="rating-text"
-                  >{{ artisan_rating.avg_rating }} / 5.0 ({{
-                  artisan_rating.total_reviews }} reviews across {{
-                  artisan_rating.total_products }} products)</span
+                  >{{ artisan_rating.avg_rating }} &#0149; {{
+                  artisan_rating.total_reviews }}</span
                 >
               </div>
               {% endif %}
 
               <div class="profile-bio">
-                <button class="btn contact-btn" onclick="openContactModal()">Contact Info</button>
+                <button class="btn btn-primary contact-btn" onclick="openContactModal()">Contact Info</button>
                 {% if profile_user %} {% if profile_user.location %}
                 <p>
                   <svg
@@ -176,8 +176,9 @@
                 {% endif %} {% endif %}
               </div>
             </div>
-
+            </div>
             <div class="profile-info">
+              <div class="follow">
               <div class="info-item">
                 <div class="info-label">Followers</div>
                 <div class="info-value" id="followers-count">
@@ -188,6 +189,7 @@
                 <div class="info-label">Following</div>
                 <div class="info-value">{{ following_count }}</div>
               </div>
+            </div>
               <div class="info-item">
                 <div class="info-label">Joined on</div>
                 <div class="info-value">

@@ -57,7 +57,7 @@ svg {
 .profile-avatar {
 	width: 120px;
 	height: 120px;
-	border-radius: 50%;
+	border-radius: 16px;
 	background: var(--text);
 	display: flex;
 	align-items: center;
@@ -66,6 +66,12 @@ svg {
 	font-size: 48px;
 	font-weight: bold;
 	margin: 0;
+}
+
+.user-profile {
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
 
 .profile-name {
@@ -80,10 +86,9 @@ svg {
 .artisan-rating {
 	display: flex;
 	align-items: center;
-	justify-content: center;
-	gap: 10px;
-	margin-top: 12px;
-	margin-bottom: 8px;
+	justify-content: flex-start;
+	gap: 8px;
+	margin: 8px 0;
 }
 
 .artisan-rating .rating-stars {
@@ -118,7 +123,7 @@ svg {
 
 /* Verification prompt under profile name */
 .profile-verify {
-	margin-top: 6px;
+	margin-top: 2px;
 }
 .profile-verify a {
 	font-size: 12px;
@@ -156,16 +161,24 @@ h1 {
 
 .profile-info {
 	display: flex;
-	justify-content: space-around;
-	gap: 20px;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 8px;
 	margin: 20px 0;
-	width: 100%;
+}
+
+.follow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
 }
 
 .info-item {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items: flex-start;
 	text-align: center;
 }
 
@@ -178,6 +191,10 @@ h1 {
 	font-size: 18px;
 	font-weight: 500;
 	color: var(--text);
+}
+
+.follow .info-value {
+	font-size: 44px;
 }
 
 .item-actions .info-value {
@@ -645,19 +662,13 @@ button {
 
 /* Contact Button and Modal */
 .contact-btn {
-	background-color: var(--accent);
-	color: white;
-	padding: 8px 16px;
 	border-radius: 5px;
-	font-size: 0.9rem;
-	cursor: pointer;
-	transition: background-color 0.3s ease;
-	margin-bottom: 10px;
-	text-transform: none;
 }
 
 .contact-btn:hover {
 	background-color: #0056b3;
+	color: #fff;
+	opacity: 1;
 }
 
 #contactModal .modal-content {
