@@ -130,6 +130,7 @@ ClystProto/
    ```python
    GEMINI_API_KEY = "your_gemini_api_key_here"
    FLASK_SECRET_KEY = "your_secret_key_here"
+   GROQ_API_KEY = "your_groq_api_key_here"
    ```
 
 5. **Run the application**
@@ -146,11 +147,17 @@ ClystProto/
 1. **Google Gemini API**:
    - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
    - Create a new API key
-   - Add it to `config.py`
+   - Add it in `.env`
 
 2. **Flask Secret Key**:
    - Generate a secure secret key for session management
-   - Update `FLASK_SECRET_KEY` in `config.py`
+   - Update it in `.env`
+
+3. **GROQ API**:
+   - Visit [Groq Console](https://console.groq.com/home)
+   - Sign up and create a new API key
+   - update it in `.env`
+
 
 ### Database Configuration
 - The application uses SQLite by default
@@ -407,6 +414,7 @@ The application features an advanced natural language search system that underst
 export FLASK_ENV=production
 export GEMINI_API_KEY=your_production_key
 export FLASK_SECRET_KEY=your_production_secret
+export GROQ_API_KEY=your_production_key
 ```
 
 ## 🤝 Contributing
