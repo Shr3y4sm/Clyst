@@ -24,7 +24,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
 # Virtual Environment
 .venv/
 venv/
@@ -56,5 +55,4 @@ Thumbs.db
 tests
 # API Keys and Configuration
 config.py
-
 .gitignore
