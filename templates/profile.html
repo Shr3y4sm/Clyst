@@ -145,35 +145,7 @@
 
               <div class="profile-bio">
                 <button class="btn btn-primary contact-btn" onclick="openContactModal()">Contact Info</button>
-                {% if profile_user %} {% if profile_user.location %}
-                <p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
-                    ></path></svg>{{ profile_user.location }}
-                </p>
-                {% endif %} {% else %} {% if current_user.location %}
-                <p>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M12 2c-4.41 0-8 3.59-8 8-.03 6.44 7.12 11.6 7.42 11.82.17.12.38.19.58.19s.41-.06.58-.19c.3-.22 7.45-5.37 7.42-11.82 0-4.41-3.59-8-8-8m0 12c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4"
-                    ></path>
-                  </svg>
-                  {{ current_user.location }}
-                </p>
-                {% endif %} {% endif %}
+               
               </div>
             </div>
             </div>
@@ -545,7 +517,11 @@
           {% else %}
             <p><strong>Email:</strong> {{ current_user.email }}</p>
             <p><strong>Phone:</strong> {{ current_user.phone or 'Not provided' }}</p>
-          {% endif %}
+          {% endif %} {% if profile_user %} {% if profile_user.location %}
+                <p><strong>Location:</strong> {{ profile_user.location }}</p>
+                {% endif %} {% else %} {% if current_user.location %}
+                <p><strong>Location:</strong>{{ current_user.location }}</p>
+                {% endif %} {% endif %}
         </div>
       </div>
     </div>

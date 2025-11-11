@@ -162,7 +162,7 @@ body {
 	text-align: center;
 	padding: 12px;
 	background: light-dark(#ffd2d2, #dc3545);
-	border-radius: 8px;
+	border-radius: 20em;
 	font-size: 14px;
 	font-weight: 500;
 }

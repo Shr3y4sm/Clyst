@@ -16,6 +16,7 @@
     />
     <link rel="stylesheet" href="../static/css/styles.css" />
     <link rel="stylesheet" href="../static/css/cart.css" />
+    <link rel="stylesheet" href="../static/css/order_details.css" />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -43,7 +44,13 @@
           <a href="{{ url_for('login') }}">Login</a>
           <a href="{{ url_for('register') }}">Register</a>
           {% endif %}
-        </div>
+        </div><div class="nav-actions">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}" class="profile-btn" title="Profile">
+          <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28.8662 27.5C28.7784 27.652 28.6521 27.7783 28.5001 27.8661C28.348 27.9538 28.1755 28 28 28H3.99995C3.8245 27.9998 3.65219 27.9535 3.50031 27.8656C3.34843 27.7778 3.22234 27.6515 3.13469 27.4995C3.04705 27.3475 3.00093 27.1752 3.00098 26.9997C3.00102 26.8243 3.04723 26.6519 3.13495 26.5C5.0387 23.2087 7.97245 20.8487 11.3962 19.73C9.70266 18.7218 8.38688 17.1856 7.65094 15.3572C6.91499 13.5289 6.79956 11.5095 7.32238 9.60918C7.8452 7.70887 8.97735 6.03272 10.545 4.83814C12.1126 3.64355 14.029 2.99658 16 2.99658C17.9709 2.99658 19.8873 3.64355 21.4549 4.83814C23.0226 6.03272 24.1547 7.70887 24.6775 9.60918C25.2003 11.5095 25.0849 13.5289 24.349 15.3572C23.613 17.1856 22.2972 18.7218 20.6037 19.73C24.0275 20.8487 26.9612 23.2087 28.865 26.5C28.9529 26.6519 28.9993 26.8243 28.9996 26.9998C28.9998 27.1754 28.9538 27.3479 28.8662 27.5Z" fill="inherit"/></svg>
+        </a>
+        {% endif %}
+      </div>
       </div>
 
       <div class="mobile-menu" id="mobileMenu">
@@ -61,40 +68,46 @@
     <div class="container">
       <div class="header">
         <h1>Order #{{ order.order_id }}</h1>
-        <p style="color: #8e8e8e">
-          Placed on {{ order.created_at }} • Status:
-          <strong>{{ order.status|upper }}</strong>{% if order.payment_status %}
-          • Payment: {{ order.payment_status|upper }}{% endif %}
-        </p>
       </div>
 
       <div class="main-content">
         <div class="cart-summary" style="gap: 16px">
-          <div class="summary-card">
-            <h3>Shipping Details</h3>
-            <p><strong>Name:</strong> {{ order.shipping_name }}</p>
-            <p><strong>Phone:</strong> {{ order.shipping_phone }}</p>
-            <p><strong>Address:</strong><br />{{ order.shipping_address }}</p>
+          <div class="summary-card details-card">
+            <h3>Order Details</h3>
+            <div class="the-details">
+              <div class="ship-details">
+                <div class="text-info"><strong>Name</strong><p>{{ order.shipping_name }}</p></div>
+                <div class="text-info"><strong>Phone</strong><p>{{ order.shipping_phone }}</p></div>
+                <div class="text-info"><strong>Address</strong><p>{{ order.shipping_address }}</p></div>
+              </div>
+              <div class="ship-details status-details">
+                <div class="text-info"><strong>Placed on</strong><br/><p>{{ order.created_at }}</p></div>
+                <div class="the-status">
+                  <div class="text-info status {{ 'paid' if order.status == 'paid' or order.status == 'shipped' or order.status == 'delivered' else ('unpaid' if order.status == 'canceled' else '') }}"><p>{{ order.status|upper }}</p></div>
+                    {% if order.payment_status %}
+                      <div class="text-info status {{ 'paid' if order.payment_status == 'paid' else ('unpaid' if order.payment_status == 'unpaid' else '') }}"><p>{{ order.payment_status|upper }}</p></div>
+                    {% endif %}
+                  </div>
+              </div>
+            </div>
           </div>
 
-          <div class="summary-card">
+          <div class="summary-card items-card">
             <h3>Items</h3>
             {% for item in order.items %}
             <div
               class="cart-item"
-              style="padding: 8px 0; border-bottom: 1px solid #eee"
             >
               <div class="item-info">
                 <div class="item-details">
                   <div class="item-title" style="font-weight: 600">
                     {{ item.product_title }}
                   </div>
-                </div>
-                <div class="item-quantity" style="text-align: right">
                   <div>x {{ item.quantity }}</div>
                   <div style="font-weight: 600">
                     Rs. {{ '%.2f'|format(item.total_price or 0) }}
                   </div>
+                
                 </div>
               </div>
             </div>
