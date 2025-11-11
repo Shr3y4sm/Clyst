@@ -469,7 +469,7 @@
                     {% for convo in conversations %}
                     <li class="inbox-item">
                       <a href="{{ url_for('view_conversation', conversation_id=convo.id) }}">
-                        <div>
+                        <div class="title-span">
                           <strong>{{ convo.product.title }}</strong>
                           {% if convo.unread_count > 0 %}
                             <span class="badge">{{ convo.unread_count }} new</span>
