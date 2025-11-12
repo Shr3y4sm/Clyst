@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="../static/css/styles.css" />
     <link rel="stylesheet" href="../static/css/index.css" />
     <link rel="stylesheet" href="../static/css/product_page.css" />
+    <link rel="stylesheet" href="../static/css/conversation.css" />
   </head>
   <body>
     <nav id="topNav">
@@ -35,15 +36,15 @@
     </nav>
 
     <div class="container">
-      <div class="post" style="max-width: 900px; width: 100%">
+      <div class="post">
         <div class="post-info">
           <div class="product-header">
             <h1 class="product-title">
-              Conversation with {{ other_user.name }}
+              Chat with {{ other_user.name }}
             </h1>
             {% if product %}
             <div class="product-price" style="font-size: 14px">
-              About:
+              Product
               <a
                 href="{{ url_for('product_buy', product_id=product.product_id) }}"
                 >{{ product.title }}</a
@@ -54,9 +55,9 @@
 
           <div id="thread" class="comments-list">
             {% for m in messages %}
-            <div class="comments">
+            <div class="comments {{ 'sender' if m.sender == current_user else '' }}">
               <div class="user-id-info">
-                <div class="artist-avatar">
+                <!-- <div class="artist-avatar">
                   {{ (m.sender.name[0].upper() if m.sender and m.sender.name
                   else 'U') }}
                 </div>
@@ -64,8 +65,7 @@
                   <span class="post-username"
                     >{{ m.sender.name if m.sender else 'User' }}</span
                   >
-                  <p class="post-user-email">{{ m.created_at }}</p>
-                </div>
+                </div> -->
               </div>
               {% if m.body %}
               <p class="comment-p">{{ m.body }}</p>
@@ -78,6 +78,7 @@
                 />
               </div>
               {% endif %}
+                  <p class="post-user-email">{{ m.created_at }}</p>
             </div>
             {% endfor %}
           </div>
@@ -94,9 +95,13 @@
               type="text"
               name="message"
               placeholder="Write a message..."
+              required
             />
-            <input type="file" name="attachment" accept="image/*" />
-            <button class="btn btn-primary" type="submit">Send</button>
+            <label for="image" class="image-file"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 15V18H24V20H21V23H19V20H16V18H19V15H21ZM21.0082 3C21.556 3 22 3.44495 22 3.9934L22.0007 13.3417C21.3749 13.1204 20.7015 13 20 13V5H4L4.001 19L13.2929 9.70715C13.6528 9.34604 14.22 9.31823 14.6123 9.62322L14.7065 9.70772L18.2521 13.2586C15.791 14.0069 14 16.2943 14 19C14 19.7015 14.1204 20.3749 14.3417 21.0007L2.9918 21C2.44405 21 2 20.5551 2 20.0066V3.9934C2 3.44476 2.45531 3 2.9918 3H21.0082ZM8 7C9.10457 7 10 7.89543 10 9C10 10.1046 9.10457 11 8 11C6.89543 11 6 10.1046 6 9C6 7.89543 6.89543 7 8 7Z"></path></svg></label>
+            <input id="image" type="file" name="attachment" accept="image/*" style="display: none;"/>
+            <button class="btn btn-primary" type="submit">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12.9999H9V10.9999H3V1.84558C3 1.56944 3.22386 1.34558 3.5 1.34558C3.58425 1.34558 3.66714 1.36687 3.74096 1.40747L22.2034 11.5618C22.4454 11.6949 22.5337 11.9989 22.4006 12.2409C22.3549 12.324 22.2865 12.3924 22.2034 12.4381L3.74096 22.5924C3.499 22.7255 3.19497 22.6372 3.06189 22.3953C3.02129 22.3214 3 22.2386 3 22.1543V12.9999Z"></path></svg>
+            </button>
           </form>
         </div>
       </div>

@@ -1,0 +1,103 @@
+.post {
+	justify-content: center;
+	height: 91.5vh;
+}
+
+.post-info {
+	width: 100%;
+	max-width: 1000px;
+	padding: 0 20px;
+	overflow: hidden;
+}
+
+.product-title {
+	width: 100%;
+	margin: 8px 0;
+}
+
+.product-price {
+	display: flex;
+	align-items: flex-start;
+	justify-content: flex-start;
+	gap: 0px;
+	font-size: 32px;
+	font-weight: 600;
+	color: var(--muted);
+	line-height: 1;
+	margin: 0 0 12px 0;
+	flex-direction: column;
+}
+
+.product-price a {
+	font-size: 16px;
+	color: var(--text);
+}
+
+.comments-list {
+	overflow-y: scroll;
+	max-height: 75%;
+	padding: 0 8px;
+}
+
+.comments {
+	gap: 0;
+	padding: 8px 12px;
+	background: var(--border);
+	border-radius: 12px 12px 12px 2px;
+	border: 1px solid var(--muted);
+}
+
+.comments:first-child {
+	padding: 8px 12px;
+}
+
+.comments:last-child {
+	border: 1px solid var(--muted);
+}
+
+.sender {
+	border: none;
+	align-items: flex-end;
+	background-color: var(--muted);
+	border-radius: 12px 2px 12px 12px;
+}
+
+.sender .comment-p {
+	text-align: right;
+}
+
+.post-user-email {
+	color: rgb(120, 120, 120);
+}
+
+.sender .post-user-email {
+	color: rgb(80, 80, 80);
+}
+
+.comment-p {
+	font-size: 20px;
+	border: none;
+	padding: 0;
+	margin-bottom: 6px;
+}
+
+.sender .comment-p {
+	color: var(--bg);
+}
+
+.comment-section {
+	padding: 0 8px 0 0;
+}
+
+.image-file {
+	margin: 0 8px 0 0;
+}
+
+.image-file:hover {
+	cursor: pointer;
+	opacity: 0.5;
+}
+
+.comment-section .btn-primary {
+	padding: 0;
+}
