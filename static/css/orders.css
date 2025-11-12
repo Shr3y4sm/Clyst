@@ -1,0 +1,41 @@
+.main-content,
+.products-grid {
+	width: 100%;
+}
+
+.products-grid {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+}
+
+.product-card {
+	padding: 8px 0;
+	border-bottom: 1px solid var(--border);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.status {
+	padding: 4px 8px;
+	background: var(--muted);
+	color: var(--border);
+	border-radius: 20em;
+}
+
+.status p {
+	font-size: 16px;
+}
+
+.paid {
+	background: #02c39a;
+	color: black;
+}
+
+.unpaid {
+	background: #ef233c;
+	color: white;
+}

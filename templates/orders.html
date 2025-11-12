@@ -15,6 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../static/css/styles.css" />
+    <link rel="stylesheet" href="../static/css/orders.css" />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -67,38 +68,15 @@
         <div class="products-grid">
           {% for o in orders %}
           <div class="product-card">
-            <div
-              class="product-image"
-              style="
-                height: auto;
-                padding: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: #fafafa;
-              "
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="48"
-                height="48"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M21 16V21H3V16H1V21C1 22.1046 1.89543 23 3 23H21C22.1046 23 23 22.1046 23 21V16H21ZM7.58579 9.41421L11 6V16H13V6L16.4142 9.41421L17.8284 8L12 2.17157L6.17157 8L7.58579 9.41421Z"
-                ></path>
-              </svg>
-            </div>
-            <div class="product-info">
               <h3 class="product-title">Order #{{ o.order_id }}</h3>
               <p class="product-price">
                 Rs. {{ '%.2f'|format(o.total_price or 0) }}
               </p>
               <p class="product-meta">
-                {{ o.created_at }} • <strong>{{ o.status|upper }}</strong>{% if
-                o.payment_status %} • {{ o.payment_status|upper }}{% endif %}
+                {{ o.created_at }}
               </p>
+              <p class="text-info status {{ 'paid' if o.status == 'paid' or o.status == 'shipped' or o.status == 'delivered' else ('unpaid' if o.status == 'canceled' else '') }}">{{ o.status|upper }}</p>
+              <p class="text-info status {{ 'paid' if o.payment_status == 'paid' else ('unpaid' if o.payment_status == 'unpaid' else '') }}">{% if o.payment_status %}{{ o.payment_status|upper }}{% endif %}</p>
               <div class="product-actions">
                 <a
                   class="btn btn-primary"
@@ -106,7 +84,6 @@
                   >View Details</a
                 >
               </div>
-            </div>
           </div>
           {% endfor %}
         </div>
