@@ -839,6 +839,44 @@ button {
 	}
 }
 
+.orders-modal-body .products-grid {
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+}
+
+.orders-modal-body .product-card {
+	padding: 8px 0;
+	border-bottom: 1px solid var(--border);
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.orders-modal-body .status {
+	padding: 4px 8px;
+	background: var(--muted);
+	color: var(--border);
+	border-radius: 20em;
+}
+
+.orders-modal-body .status p {
+	font-size: 16px;
+}
+
+.orders-modal-body .paid {
+	background: #02c39a;
+	color: black;
+}
+
+.orders-modal-body .unpaid {
+	background: #ef233c;
+	color: white;
+}
+
 /* Inbox Icon Button */
 .inbox-icon-btn {
 	position: fixed;

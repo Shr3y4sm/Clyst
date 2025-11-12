@@ -287,8 +287,11 @@
                 Products &#0149; {{ products|length }}
               </button>
               {% if current_user.is_authenticated and (not profile_user or current_user.id == profile_user.id) %}
+    <button class="tab-button" onclick="showTab('orders')" title="Orders" aria-label="Open Orders">
+      Orders
+    </button>
     <button class="tab-button" onclick="showTab('inbox')" title="Inbox" aria-label="Open Inbox">
-      Mail {% if unread_count and unread_count > 0 %} {{ unread_count }}
+      Mail{% if unread_count and unread_count > 0 %} &#0149; {{ unread_count }}
       {% endif %}
     </button>
     {% endif %}
@@ -463,6 +466,41 @@
               </div>
 
               {% if current_user.is_authenticated and (not profile_user or current_user.id == profile_user.id) %}
+              <div id="orders-tab" class="orders-modal-body tab-panel" style="display: none;">
+                
+        {% if orders %}
+        <div class="products-grid">
+          {% for o in orders %}
+          <div class="product-card">
+              <h3 class="product-title">Order #{{ o.order_id }}</h3>
+              <p class="product-price">
+                Rs. {{ '%.2f'|format(o.total_price or 0) }}
+              </p>
+              <p class="product-meta">
+                {{ o.created_at }}
+              </p>
+              <p class="text-info status {{ 'paid' if o.status == 'paid' or o.status == 'shipped' or o.status == 'delivered' else ('unpaid' if o.status == 'canceled' else '') }}">{{ o.status|upper }}</p>
+              <p class="text-info status {{ 'paid' if o.payment_status == 'paid' else ('unpaid' if o.payment_status == 'unpaid' else '') }}">{% if o.payment_status %}{{ o.payment_status|upper }}{% endif %}</p>
+              <div class="product-actions">
+                <a
+                  class="btn btn-primary"
+                  href="{{ url_for('order_detail', order_id=o.order_id) }}"
+                  >View Details</a
+                >
+              </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-cart">
+          <h3>No orders yet</h3>
+          <p>Start by exploring unique artworks in the marketplace.</p>
+          <a href="{{ url_for('products_page') }}" class="btn btn-primary"
+            >Browse Marketplace</a
+          >
+        </div>
+        {% endif %}
+              </div>
               <div id="inbox-tab" class="inbox-modal-body tab-panel" style="display: none">
                 {% if conversations %}
                   <ul class="inbox-list">

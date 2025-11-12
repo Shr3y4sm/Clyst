@@ -1941,6 +1941,10 @@ def profile():
             'unread_count': unread or 0
         })
 
+        orders = db.session.execute(
+        db.select(Order).where(Order.user_id == current_user.id).order_by(db.desc(Order.order_id))
+    ).scalars().all()
+
     return render_template("profile.html",
                            current_user=current_user,
                            profile_user=current_user,
@@ -1953,6 +1957,7 @@ def profile():
                            artisan_rating=artisan_rating,
                            conversations=conversations,
                            unread_count=unread_count,
+                           orders=orders,
                            firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
 
