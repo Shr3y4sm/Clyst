@@ -1,0 +1,71 @@
+.orders-tab {
+	text-decoration: none;
+	text-transform: uppercase;
+	color: var(--muted);
+	font-size: 16px;
+	transition: color 0.2s;
+}
+
+.page {
+	max-width: fit-content;
+	margin: 120px auto;
+	padding: 0 16px;
+}
+.card {
+	background: var(--card);
+	border: 1px solid var(--border);
+	border-radius: 20px;
+	padding: 20px;
+}
+.title {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	font-size: 28px;
+	font-weight: 500;
+	color: var(--text);
+	margin-bottom: 12px;
+}
+.muted {
+	color: var(--muted);
+}
+.the-rows {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+.row {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	margin: 8px 0;
+}
+
+span {
+	color: var(--muted);
+}
+
+strong {
+	font-size: 24px;
+	font-weight: 600;
+}
+
+.actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 16px;
+	justify-content: space-between;
+}
+.btn-danger {
+	width: fit-content;
+	background: none;
+	border: 1px solid #b00020;
+	color: #b00020;
+}
+.note {
+	margin-top: 10px;
+	font-size: 13px;
+	color: var(--muted);
+}

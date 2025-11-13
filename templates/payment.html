@@ -5,61 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pay Order • Clyst</title>
     <link rel="stylesheet" href="../static/css/styles.css" />
-    <style>
-      .page {
-        max-width: 720px;
-        margin: 80px auto;
-        padding: 0 16px;
-      }
-      .card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 2px;
-        padding: 16px;
-      }
-      .title {
-        font-size: 22px;
-        font-weight: 700;
-        color: var(--text);
-        margin-bottom: 12px;
-      }
-      .muted {
-        color: var(--muted);
-      }
-      .row {
-        display: flex;
-        justify-content: space-between;
-        margin: 8px 0;
-      }
-      .actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 16px;
-      }
-      .btn {
-        padding: 10px 16px;
-        border-radius: 2px;
-        border: 1px solid var(--border);
-        background: var(--bg);
-        color: var(--text);
-        cursor: pointer;
-      }
-      .btn-primary {
-        background: var(--accent);
-        color: #fff;
-        border: none;
-      }
-      .btn-danger {
-        background: #b00020;
-        color: #fff;
-        border: none;
-      }
-      .note {
-        margin-top: 10px;
-        font-size: 13px;
-        color: var(--muted);
-      }
-    </style>
+    <link rel="stylesheet" href="../static/css/pay.css" />
   </head>
   <body>
     <nav id="topNav" style="position: sticky; top: 0">
@@ -72,14 +18,39 @@
           >
         </div>
         <div class="nav-center" id="navLinks">
-          <a href="{{ url_for('orders_list') }}">My Orders</a>
+          <a href="{{ url_for('home') }}">Community Feed</a>
+          <a href="{{ url_for('products_page') }}">Marketplace</a>
+          {% if current_user.is_authenticated %}
+          <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('register') }}">Register</a>
+          {% endif %}
         </div>
+        <div class="nav-actions">
+          <a href="{{ url_for('orders_list') }}" class="orders-tab">My Orders</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}" class="profile-btn" title="Profile">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path
+              d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"
+            />
+          </svg>
+        </a>
+        {% endif %}
+      </div>
       </div>
     </nav>
 
     <div class="page">
       <div class="card">
-        <div class="title">DummyPay Checkout</div>
+        <div class="title">DummyPay Checkout 
+          <a
+            class="btn btn-danger"
+            href="{{ url_for('simulate_payment', order_id=order.order_id, outcome='cancel') }}"
+            >Cancel</a
+          ></div>
+          <div class="the-rows">
         <div class="row">
           <span>Order ID</span><strong>#{{ order.order_id }}</strong>
         </div>
@@ -90,7 +61,7 @@
         <div class="row">
           <span>Status</span
           ><strong>{{ order.payment_status or 'unpaid' }}</strong>
-        </div>
+        </div></div>
 
         <form
           method="post"
@@ -98,19 +69,15 @@
           class="actions"
         >
           <input type="hidden" name="outcome" value="success" />
-          <button class="btn btn-primary" type="submit">
-            Pay with DummyPay
-          </button>
+          
           <a
-            class="btn"
+            class="btn btn-secondary"
             href="{{ url_for('simulate_payment', order_id=order.order_id, outcome='fail') }}"
             >Simulate Failure</a
           >
-          <a
-            class="btn btn-danger"
-            href="{{ url_for('simulate_payment', order_id=order.order_id, outcome='cancel') }}"
-            >Cancel</a
-          >
+          <button class="btn btn-primary" type="submit">
+            Pay with DummyPay
+          </button>
         </form>
 
         <div class="note">
