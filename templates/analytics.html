@@ -14,7 +14,7 @@
     <style>
       .page {
         max-width: 1100px;
-        margin: 80px auto 40px;
+        margin: 20px auto 40px;
         padding: 0 16px;
       }
       .title {
@@ -36,7 +36,7 @@
       .card {
         background: var(--card);
         border: 1px solid var(--border);
-        border-radius: 2px;
+        border-radius: 20px;
         padding: 16px;
       }
       .kpi .label {
@@ -96,10 +96,13 @@
       }
 
       .section-title {
-        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 20px;
         font-weight: 600;
         color: var(--text);
-        margin-bottom: 8px;
+        margin-bottom: 0;
       }
       .sub {
         font-size: 13px;
@@ -127,6 +130,8 @@
         color: var(--text);
       }
       .tab-btn.active {
+        border-radius: 12px 12px 0 0;
+        background-color: var(--border);
         color: var(--accent);
         border-bottom-color: var(--accent);
       }
@@ -138,19 +143,18 @@
       .insight-list {
         list-style: none;
         padding: 0;
-        margin: 12px 0 0 0;
       }
       .insight-list li {
+        font-size: 16px;
         padding: 12px 0;
         border-bottom: 1px solid var(--border);
-        line-height: 1.5;
+        line-height: 1.1;
         color: var(--text);
       }
       .insight-list li:last-child {
         border-bottom: 0;
       }
       .insight-list li:before {
-        content: "•";
         color: var(--accent);
         font-weight: bold;
         display: inline-block;
@@ -193,8 +197,21 @@
         <div class="nav-center" id="navLinks">
           <a href="{{ url_for('home') }}">Community Feed</a>
           <a href="{{ url_for('products_page') }}">Marketplace</a>
-          <a href="{{ url_for('profile') }}">Your Profile</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
         </div>
+        
+      <div class="nav-actions">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}" class="profile-btn" title="Profile">
+          <svg width="100%" height="100%" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28.8662 27.5C28.7784 27.652 28.6521 27.7783 28.5001 27.8661C28.348 27.9538 28.1755 28 28 28H3.99995C3.8245 27.9998 3.65219 27.9535 3.50031 27.8656C3.34843 27.7778 3.22234 27.6515 3.13469 27.4995C3.04705 27.3475 3.00093 27.1752 3.00098 26.9997C3.00102 26.8243 3.04723 26.6519 3.13495 26.5C5.0387 23.2087 7.97245 20.8487 11.3962 19.73C9.70266 18.7218 8.38688 17.1856 7.65094 15.3572C6.91499 13.5289 6.79956 11.5095 7.32238 9.60918C7.8452 7.70887 8.97735 6.03272 10.545 4.83814C12.1126 3.64355 14.029 2.99658 16 2.99658C17.9709 2.99658 19.8873 3.64355 21.4549 4.83814C23.0226 6.03272 24.1547 7.70887 24.6775 9.60918C25.2003 11.5095 25.0849 13.5289 24.349 15.3572C23.613 17.1856 22.2972 18.7218 20.6037 19.73C24.0275 20.8487 26.9612 23.2087 28.865 26.5C28.9529 26.6519 28.9993 26.8243 28.9996 26.9998C28.9998 27.1754 28.9538 27.3479 28.8662 27.5Z" fill="inherit"/></svg>
+        </a>
+        {% endif %}
+      </div>
       </div>
     </nav>
 
@@ -312,18 +329,15 @@
           <div
             class="insights-intro card"
             style="
-              margin-bottom: 16px;
-              background: linear-gradient(
-                135deg,
-                var(--accent) 0%,
-                #7e57c2 100%
-              );
+              margin-bottom: 12px;
+              background: none;
               color: white;
               border: none;
+              padding: 0;
             "
           >
-            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px">
-              🤖 AI-Powered Insights
+            <div style="font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0 0 4px 0;">
+              <svg style="width: 20px; fill: var(--text);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.0007 1.20825 18.3195 3.68108 20.7923 4.99992 18.3195 6.31876 17.0007 8.79159 15.6818 6.31876 13.209 4.99992 15.6818 3.68108 17.0007 1.20825ZM8.00065 4.33325 10.6673 9.33325 15.6673 11.9999 10.6673 14.6666 8.00065 19.6666 5.33398 14.6666.333984 11.9999 5.33398 9.33325 8.00065 4.33325ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"></path></svg> AI-Powered Insights
             </div>
             <div style="opacity: 0.95">
               Personalized recommendations based on your products, posts, and
@@ -334,13 +348,13 @@
           <div class="grid-2">
             <div class="card insight-card">
               <div class="section-title" style="color: var(--accent)">
-                📦 Product Optimization
+               <svg style="width: 20px; fill: var(--accent);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5021 5.92225 12 1 3.49793 5.92225 12 10.8445 20.5021 5.92225ZM2.5 7.6555V17.5L11 22.4211V12.5765L2.5 7.6555ZM13 22.4211 21.5 17.5V7.6555L13 12.5765V22.4211Z"></path></svg> Product Optimization
               </div>
               <ul class="insight-list" id="product-insights"></ul>
             </div>
             <div class="card insight-card">
               <div class="section-title" style="color: #4db6ac">
-                📈 Marketing Strategy
+                <svg style="width: 20px; fill: #4db6ac;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 13V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V13H2V11L3 6H21L22 11V13H21ZM5 13V19H19V13H5ZM6 14H14V17H6V14ZM3 3H21V5H3V3Z"></path></svg>Marketing Strategy
               </div>
               <ul class="insight-list" id="marketing-insights"></ul>
             </div>
@@ -349,13 +363,13 @@
           <div class="grid-2" style="margin-top: 12px">
             <div class="card insight-card">
               <div class="section-title" style="color: #7e57c2">
-                💰 Pricing Strategy
+                <svg style="width: 20px; fill: #7e57c2;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14.0049 2.00281C18.4232 2.00281 22.0049 5.58453 22.0049 10.0028C22.0049 13.2474 20.0733 16.0409 17.2973 17.296C16.0422 20.0718 13.249 22.0028 10.0049 22.0028C5.5866 22.0028 2.00488 18.4211 2.00488 14.0028C2.00488 10.7587 3.9359 7.96554 6.71122 6.71012C7.96681 3.93438 10.7603 2.00281 14.0049 2.00281ZM11.0049 9.00281H9.00488V10.0028C7.62417 10.0028 6.50488 11.1221 6.50488 12.5028C6.50488 13.8283 7.53642 14.9128 8.84051 14.9975L9.00488 15.0028H11.0049L11.0948 15.0109C11.328 15.0532 11.5049 15.2573 11.5049 15.5028C11.5049 15.7483 11.328 15.9524 11.0948 15.9948L11.0049 16.0028H7.00488V18.0028H9.00488V19.0028H11.0049V18.0028C12.3856 18.0028 13.5049 16.8835 13.5049 15.5028C13.5049 14.1773 12.4733 13.0928 11.1693 13.0081L11.0049 13.0028H9.00488L8.91501 12.9948C8.68176 12.9524 8.50488 12.7483 8.50488 12.5028C8.50488 12.2573 8.68176 12.0532 8.91501 12.0109L9.00488 12.0028H13.0049V10.0028H11.0049V9.00281ZM14.0049 4.00281C12.2214 4.00281 10.6196 4.78097 9.52064 6.01629C9.68133 6.00764 9.84254 6.00281 10.0049 6.00281C14.4232 6.00281 18.0049 9.58453 18.0049 14.0028C18.0049 14.1655 18 14.327 17.9905 14.4873C19.2265 13.3885 20.0049 11.7866 20.0049 10.0028C20.0049 6.6891 17.3186 4.00281 14.0049 4.00281Z"></path></svg> Pricing Strategy
               </div>
               <ul class="insight-list" id="pricing-insights"></ul>
             </div>
             <div class="card insight-card">
               <div class="section-title" style="color: #ff9800">
-                🚀 Growth Opportunities
+                <svg style="width: 20px; fill: #ff9800;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.49816 20.0048H15.5018C14.8432 21.5842 13.5794 22.848 12 23.5066C10.4206 22.848 9.15679 21.5842 8.49816 20.0048ZM18 14.8095L20 17.0778V19.0048H4V17.0778L6 14.8095V9.00481C6 5.52156 8.50442 2.55825 12 1.46002C15.4956 2.55825 18 5.52156 18 9.00481V14.8095ZM12 11.0048C13.1046 11.0048 14 10.1094 14 9.00481C14 7.90024 13.1046 7.00481 12 7.00481C10.8954 7.00481 10 7.90024 10 9.00481C10 10.1094 10.8954 11.0048 12 11.0048Z"></path></svg> Growth Opportunities
               </div>
               <ul class="insight-list" id="growth-insights"></ul>
             </div>
@@ -364,14 +378,14 @@
           <!-- Competitive Pricing Analysis Section -->
           <div
             class="card"
-            style="margin-top: 20px; border: 2px solid var(--accent)"
+            style="margin-top: 20px; border: 1px solid var(--accent)"
           >
             <div
               style="
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 16px;
+                margin-bottom: 0px;
                 flex-wrap: wrap;
                 gap: 12px;
               "
@@ -381,7 +395,7 @@
                   class="section-title"
                   style="color: var(--accent); font-size: 18px"
                 >
-                  💎 AI-Powered Competitive Pricing
+                  <svg style="width: 20px; fill: var(--accent);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20C16.4183 20 20 16.4183 20 12ZM22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM13.5003 8C13.8278 8.43606 14.0625 8.94584 14.175 9.5H16V11H14.175C13.8275 12.7117 12.3142 14 10.5 14H10.3107L14.0303 17.7197L12.9697 18.7803L8 13.8107V12.5H10.5C11.4797 12.5 12.3131 11.8739 12.622 11H8V9.5H12.622C12.3131 8.62611 11.4797 8 10.5 8H8V6.5H16V8H13.5003Z"></path></svg>AI-Powered Competitive Pricing
                 </div>
                 <div class="muted" style="font-size: 13px; margin-top: 4px">
                   AI finds truly similar products (not just similar prices)
@@ -402,8 +416,7 @@
                     gap: 6px;
                     font-size: 13px;
                     cursor: pointer;
-                    padding: 6px 12px;
-                    background: #f5f5f5;
+                    padding: 6px 12px 6px 8px;
                     border-radius: 4px;
                     border: 1px solid var(--border);
                   "
@@ -415,20 +428,22 @@
                       cursor: pointer;
                       width: 16px;
                       height: 16px;
-                      accent-color: var(--accent);
                     "
                   />
                   <span style="color: var(--text)"
-                    >🌐 Include Amazon, Etsy, Flipkart</span
+                    >Include Amazon, Etsy, Flipkart</span
                   >
                 </label>
                 <button
                   id="load-pricing-btn"
                   onclick="loadCompetitivePricing()"
                   style="
-                    padding: 8px 16px;
+                  display: flex;
+                  align-items: center;
+                  gap: 8px;
+                    padding: 4px 12px;
                     background: var(--accent);
-                    color: white;
+                    color: var(--card);
                     border: none;
                     border-radius: 2px;
                     cursor: pointer;
@@ -436,7 +451,7 @@
                     font-size: 13px;
                   "
                 >
-                  🤖 Analyze with AI
+                  <svg style="width: 20px; fill: var(--card);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.6144 17.7956 11.492 15.7854C12.2731 13.9966 13.6789 12.5726 15.4325 11.7942L17.8482 10.7219C18.6162 10.381 18.6162 9.26368 17.8482 8.92277L15.5079 7.88394C13.7092 7.08552 12.2782 5.60881 11.5105 3.75894L10.6215 1.61673C10.2916.821765 9.19319.821767 8.8633 1.61673L7.97427 3.75892C7.20657 5.60881 5.77553 7.08552 3.97685 7.88394L1.63658 8.92277C.868537 9.26368.868536 10.381 1.63658 10.7219L4.0523 11.7942C5.80589 12.5726 7.21171 13.9966 7.99275 15.7854L8.8704 17.7956C9.20776 18.5682 10.277 18.5682 10.6144 17.7956ZM19.4014 22.6899 19.6482 22.1242C20.0882 21.1156 20.8807 20.3125 21.8695 19.8732L22.6299 19.5353C23.0412 19.3526 23.0412 18.7549 22.6299 18.5722L21.9121 18.2532C20.8978 17.8026 20.0911 16.9698 19.6586 15.9269L19.4052 15.3156C19.2285 14.8896 18.6395 14.8896 18.4628 15.3156L18.2094 15.9269C17.777 16.9698 16.9703 17.8026 15.956 18.2532L15.2381 18.5722C14.8269 18.7549 14.8269 19.3526 15.2381 19.5353L15.9985 19.8732C16.9874 20.3125 17.7798 21.1156 18.2198 22.1242L18.4667 22.6899C18.6473 23.104 19.2207 23.104 19.4014 22.6899Z"></path></svg> Analyze with AI
                 </button>
               </div>
             </div>
@@ -465,13 +480,10 @@
               <div class="grid-2" style="gap: 12px; margin-bottom: 16px">
                 <div
                   style="
-                    background: linear-gradient(
-                      135deg,
-                      var(--accent) 0%,
-                      #7e57c2 100%
-                    );
+                    border: 1px solid var(--border);
+                    background: none;
                     padding: 16px;
-                    border-radius: 2px;
+                    border-radius: 16px;
                     color: white;
                   "
                 >
@@ -499,10 +511,10 @@
                 </div>
                 <div
                   style="
-                    background: #f5f5f5;
-                    padding: 16px;
-                    border-radius: 2px;
                     border: 1px solid var(--border);
+                    background: none;
+                    padding: 16px;
+                    border-radius: 16px;
                   "
                 >
                   <div
@@ -540,10 +552,10 @@
               <!-- Price Positioning -->
               <div
                 class="card"
-                style="background: #f9f9f9; margin-bottom: 16px"
+                style="background: none; margin-bottom: 16px"
               >
                 <div style="display: flex; align-items: center; gap: 12px">
-                  <div style="font-size: 32px">📊</div>
+                  <div style="font-size: 32px"><svg style="width: 32px; fill: var(--text);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.80577 5.20006L7.00505 7.99958L11.1913 2.13881C11.5123 1.6894 12.1369 1.58531 12.5863 1.90631C12.6761 1.97045 12.7546 2.04901 12.8188 2.13881L17.0051 7.99958L21.2043 5.20006C21.6639 4.89371 22.2847 5.01788 22.5911 5.47741C22.7228 5.67503 22.7799 5.91308 22.7522 6.14895L21.109 20.1164C21.0497 20.62 20.6229 20.9996 20.1158 20.9996H3.8943C3.38722 20.9996 2.9604 20.62 2.90115 20.1164L1.25792 6.14895C1.19339 5.60045 1.58573 5.10349 2.13423 5.03896C2.37011 5.01121 2.60816 5.06832 2.80577 5.20006ZM12.0051 14.9996C13.1096 14.9996 14.0051 14.1042 14.0051 12.9996C14.0051 11.895 13.1096 10.9996 12.0051 10.9996C10.9005 10.9996 10.0051 11.895 10.0051 12.9996C10.0051 14.1042 10.9005 14.9996 12.0051 14.9996Z"></path></svg></div>
                   <div style="flex: 1">
                     <div
                       style="
@@ -596,7 +608,7 @@
                     display: grid;
                     grid-template-columns: repeat(
                       auto-fill,
-                      minmax(200px, 1fr)
+                      minmax(250px, 1fr)
                     );
                     gap: 12px;
                   "
@@ -621,7 +633,7 @@
               id="pricing-error"
               style="display: none; text-align: center; padding: 30px"
             >
-              <div style="font-size: 32px; margin-bottom: 12px">⚠️</div>
+              <div style="font-size: 32px; margin-bottom: 12px; fill: var(--text);"><svg style="width: 40px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z"></path></svg></div>
               <div class="muted" id="pricing-error-message"></div>
               <button
                 onclick="loadCompetitivePricing()"
@@ -629,9 +641,9 @@
                   margin-top: 12px;
                   padding: 8px 16px;
                   background: var(--accent);
-                  color: white;
+                  color: var(--card);
                   border: none;
-                  border-radius: 2px;
+                  border-radius: 20em;
                   cursor: pointer;
                   font-weight: 600;
                 "
@@ -646,8 +658,8 @@
           class="insights-error card"
           style="display: none; text-align: center; padding: 40px"
         >
-          <div style="font-size: 48px; margin-bottom: 16px">⚠️</div>
-          <div class="section-title">Failed to Generate Insights</div>
+          <div style="font-size: 32px; margin-bottom: 12px; fill: var(--text);"><svg style="width: 40px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z"></path></svg></div>
+              <div class="section-title">Failed to Generate Insights</div>
           <div class="muted" id="error-message" style="margin-top: 8px"></div>
           <button
             onclick="loadInsights()"
@@ -655,9 +667,9 @@
               margin-top: 16px;
               padding: 10px 20px;
               background: var(--accent);
-              color: white;
+              color: var(--card);
               border: none;
-              border-radius: 2px;
+              border-radius: 20em;
               cursor: pointer;
               font-weight: 600;
             "
@@ -854,15 +866,15 @@
         if (analysis.external_market) {
           const externalDiv = document.createElement('div');
           externalDiv.className = 'card';
-          externalDiv.style.cssText = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 16px; padding: 16px;';
+          externalDiv.style.cssText = 'border: none; background: none; color: var(--text); margin-bottom: 16px; padding: 0;';
           externalDiv.innerHTML = `
-            <div style="font-weight: 600; font-size: 16px; margin-bottom: 12px;">🌐 External Market Pricing</div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; font-size: 13px;">
-              <div><strong>Amazon India:</strong><br>${analysis.external_market.amazon_range || 'N/A'}</div>
-              <div><strong>Etsy India:</strong><br>${analysis.external_market.etsy_range || 'N/A'}</div>
-              <div><strong>Flipkart:</strong><br>${analysis.external_market.flipkart_range || 'N/A'}</div>
+            <div style="font-weight: 600; font-size: 20px; margin-bottom: 8px;">External Market Pricing</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; font-size: 20px;">
+              <div><strong style="font-size: 16px; font-weight: 500; color: var(--muted);">Amazon India</strong><br>${analysis.external_market.amazon_range || 'N/A'}</div>
+              <div><strong style="font-size: 16px; font-weight: 500; color: var(--muted);">Etsy India</strong><br>${analysis.external_market.etsy_range || 'N/A'}</div>
+              <div><strong style="font-size: 16px; font-weight: 500; color: var(--muted);">Flipkart</strong><br>${analysis.external_market.flipkart_range || 'N/A'}</div>
             </div>
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 13px; line-height: 1.5;">
+            <div style="margin-top: 12px; padding-top: 4px; border-top: 1px solid var(--border); font-size: 14px; line-height: 1.1;">
               ${analysis.external_market.recommendation || 'Your pricing is competitive with external markets.'}
             </div>
           `;
@@ -881,24 +893,24 @@
           noProducts.style.display = 'none';
 
           grid.innerHTML = analysis.similar_products.map(product => `
-            <div class="product-card" style="background: white; border: 1px solid var(--border); border-radius: 2px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
-              ${product.similarity_score ? `<div style="position: absolute; top: 8px; right: 8px; z-index: 1; background: rgba(0,0,0,0.8); color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">🤖 ${product.similarity_score}% match</div>` : ''}
-              <div style="position: relative; padding-top: 100%; background: #f5f5f5;">
+            <div class="product-card" style="background: var(--bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
+              ${product.similarity_score ? `<div style="position: absolute; top: 8px; right: 8px; z-index: 1; background: var(--bg); color: var(--text); padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${product.similarity_score}% match</div>` : ''}
+              <div style="position: relative; padding-top: 100%; background: var(--muted);">
                 ${product.img_url ? `<img src="${product.img_url}" alt="${product.title}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">` : '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; opacity: 0.3;">🎨</div>'}
               </div>
               <div style="padding: 12px;">
                 <div style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${product.title}">${product.title}</div>
-                ${product.similarity_reason ? `<div style="font-size: 11px; color: #666; margin-bottom: 6px; line-height: 1.3;">${product.similarity_reason}</div>` : ''}
+                ${product.similarity_reason ? `<div style="font-size: 12px; color: var(--muted); margin-bottom: 6px; line-height: 1.3;">${product.similarity_reason}</div>` : ''}
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                  <div style="font-size: 18px; font-weight: 700; color: var(--accent);">₹${product.price.toFixed(2)}</div>
-                  <div style="font-size: 11px; padding: 2px 6px; border-radius: 2px; ${product.price_difference > 0 ? 'background: #ffe0b2; color: #f57c00;' : 'background: #b2dfdb; color: #00796b;'}">
+                  <div style="font-size: 20px; font-weight: 700; color: var(--accent);">₹${product.price.toFixed(2)}</div>
+                  <div style="font-size: 12px; padding: 2px 6px; border-radius: 2px; ${product.price_difference > 0 ? 'background: #ffe0b2; color: #f57c00;' : 'background: #b2dfdb; color: #00796b;'}">
                     ${product.price_difference > 0 ? '+' : ''}${product.price_difference.toFixed(1)}%
                   </div>
                 </div>
-                <div style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">by ${product.artist_name}</div>
-                <div style="display: flex; align-items: center; gap: 4px; font-size: 11px;">
+                <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">by ${product.artist_name}</div>
+                <div style="display: flex; align-items: center; gap: 4px; font-size: 12px;">
                   ${product.reviews_count > 0 ? `
-                    <span style="color: #ffa726;">⭐</span>
+                    <span style="color: #ffa726;"><svg style="width: 12px; fill: #ffa726;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"></path></svg></span>
                     <span style="color: var(--text);">${product.avg_rating}</span>
                     <span style="color: var(--muted);">(${product.reviews_count})</span>
                   ` : '<span style="color: var(--muted);">No reviews yet</span>'}
