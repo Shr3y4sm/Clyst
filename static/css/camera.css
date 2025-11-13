@@ -91,25 +91,35 @@ main {
 }
 
 .btn {
-	width: 50px;
-	height: 50px;
+	width: fit-content;
+	height: 40px;
 	align-items: center;
 	justify-content: center;
-	padding: 6px 12px;
-	background: #181818bb;
+	padding: 8px 16px;
+	background: var(--card);
 	backdrop-filter: blur(2px);
-	color: #fff;
-	border-radius: 50%;
+	color: var(--text);
+	fill: var(--text);
 }
 
 .btn svg {
-	width: 40px;
-	height: 40px;
-	fill: #fff;
+	width: 20px;
+	height: 20px;
+	fill: inherit;
 }
 
 .btn:hover {
 	opacity: 0.4;
+}
+
+.retake-btn {
+	border: 1px solid var(--text);
+}
+
+.submit-btn {
+	background: var(--text);
+	fill: var(--card);
+	color: var(--card);
 }
 
 video {
@@ -123,6 +133,7 @@ img {
 	min-height: 300px;
 	margin-top: 10px;
 	object-fit: cover;
+	border-radius: 20px;
 }
 .info {
 	margin-top: 8px;

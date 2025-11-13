@@ -101,13 +101,13 @@
               </div>
               {% elif current_user.is_authenticated and (not profile_user or
               current_user.id == profile_user.id) %}
-              <div class="btn promote-btn profile-verify">
+              <a href="{{ url_for('verify_otp') }}" style="text-decoration: none;"
+                    ><div class="btn promote-btn profile-verify">
                 <span
-                  ><a href="{{ url_for('verify_otp') }}"
-                    >Become Verified Artisan</a
-                  ></span
+                  >Become Verified Artisan</span
                 >
-              </div>
+              </div></a
+                  >
               {% endif %}
 
               <!-- Artisan Rating -->
