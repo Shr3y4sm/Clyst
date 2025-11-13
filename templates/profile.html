@@ -311,6 +311,7 @@
       Mail{% if unread_count and unread_count > 0 %} &#0149; {{ unread_count }}
       {% endif %}
     </button>
+    <button class="tab-button analytics" onclick="location.href='{{ url_for('analytics_dashboard') }}'" >YOUR ANALYTICS</a>
     {% endif %}
             </div>
             <div class="tab-content">

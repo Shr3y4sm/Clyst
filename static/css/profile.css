@@ -404,6 +404,16 @@ h1 {
 	color: var(--text);
 	border-bottom: 1px solid var(--muted);
 }
+
+.analytics {
+	margin: 8px 0 8px 8px;
+	padding: 4px 12px;
+	border-radius: 16px;
+	border: 1px solid var(--muted);
+}
+.analytics:hover {
+	opacity: 0.5;
+}
 /* Grid Layouts */
 .posts-grid,
 .products-grid {
