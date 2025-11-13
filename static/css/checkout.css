@@ -1,0 +1,115 @@
+.user-location {
+	padding: 20px;
+	border-radius: 20px 20px 0 0;
+	border-bottom: 3px dashed var(--border);
+}
+
+.items-card {
+	padding: 20px;
+	border-radius: 0 0 20px 20px;
+	border-top: none;
+}
+
+.items-card h3 {
+	margin: 0 0 12px 0;
+}
+
+.form {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.form-group {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.contacts {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.form-input {
+	width: 100%;
+	margin: 4px 0 0 0;
+	padding: 4px 12px;
+	border: light-dark(#ddd, #222) 1px solid;
+	border-radius: 20em;
+	font-size: 16px;
+	transition: all 0.2s;
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+
+.form-input:focus {
+	outline: none;
+	border-color: light-dark(#ddd, #222);
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+
+.form-input[type="file"] {
+	padding: 8px 12px;
+	background: light-dark(#dbdbdb, #2a2a2a);
+	border: light-dark(#ddd, #222) 1px solid;
+	cursor: pointer;
+}
+
+.form-input[type="file"]:hover {
+	border-color: light-dark(#ddd, #222);
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+
+.form-textarea {
+	width: 100%;
+	padding: 4px 12px;
+	border: light-dark(#ddd, #222) 1px solid;
+	border-radius: 16px;
+	margin: 4px 0 0 0;
+	font-size: 16px;
+	font-family: inherit;
+	resize: vertical;
+	min-height: 20px;
+	transition: all 0.2s;
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+
+.form-textarea:focus {
+	outline: none;
+	border-color: light-dark(#ddd, #222);
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+
+.cart-item {
+	border: none;
+	box-shadow: none;
+	max-height: 300px;
+	overflow-y: scroll;
+	border-top: 1px solid var(--border);
+	border-bottom: 1px solid var(--border);
+}
+
+.cart-item:hover {
+	box-shadow: none;
+}
+
+.item-info {
+	width: 100%;
+	padding: 8px 8px 8px 0;
+	border-bottom: 1px solid var(--border);
+}
+
+.item-info:last-child {
+	border-bottom: none;
+}
+
+.summary-row {
+	margin: 12px 0;
+}
+
+.checkout-actions {
+	justify-content: space-between;
+}

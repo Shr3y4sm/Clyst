@@ -16,6 +16,7 @@
     />
     <link rel="stylesheet" href="../static/css/styles.css" />
     <link rel="stylesheet" href="../static/css/cart.css" />
+    <link rel="stylesheet" href="../static/css/shop-cart.css" />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -101,11 +102,19 @@
 
         <div class="cart-summary">
           <div class="summary-card">
-            <h3>Your Order Summary</h3>
+            <h3 class="cart-header">Your Order Summary 
+                <button
+                  class="btn btn-secondary btn-danger"
+                  onclick="clearCart()"
+                >
+                  Clear Cart
+                </button></h3>
             <div class="cart-container">
               <div class="cart-items">
                 {% for item in cart_items %}
                 <div class="cart-item" data-item-id="{{ item.item_id }}">
+                  <div class="item-info">
+                    <div class="detail-of-item">
                   <div class="item-image">
                     {% if item.product.img_url %}
                     <img
@@ -126,29 +135,20 @@
                     </div>
                     {% endif %}
                   </div>
-
-                  <div class="item-info">
                     <div class="item-details">
                       <h3 class="item-title">{{ item.product.title }}</h3>
                       <p class="item-artist">
                         By {{ item.product.artist.name }}
                       </p>
+                      <label for="item-price">Price</label>
                       <p class="item-price">Rs.{{ item.product.price }}</p>
-                      <button
-                        class="btn btn-danger btn-secondary"
-                        onclick="removeItem('{{ item.item_id }}')"
-                        title="Remove item"
-                        type="button"
-                      >
-                        REMOVE ITEM
-                      </button>
-                    </div>
+                    </div></div>
 
                     <div class="item-quantity">
                       <label for="quantity-{{ item.item_id }}">Quantity</label>
                       <div class="quantity-controls">
                         <button
-                          class="quantity-btn"
+                          class="quantity-btn left"
                           onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int - 1 }})"
                           type="button"
                         >
@@ -168,7 +168,7 @@
                           onchange="updateQuantity('{{ item.item_id }}', this.value)"
                         />
                         <button
-                          class="quantity-btn"
+                          class="quantity-btn right"
                           onclick="updateQuantity('{{ item.item_id }}', {{ item.quantity|int + 1 }})"
                           type="button"
                         >
@@ -189,6 +189,15 @@
                         item.product.price) }}</span
                       >
                     </div>
+                    
+                      <button
+                        class="btn btn-remove btn-secondary"
+                        onclick="removeItem('{{ item.item_id }}')"
+                        title="Remove item"
+                        type="button"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z"></path></svg>
+                      </button>
                   </div>
                 </div>
                 {% endfor %}
@@ -209,12 +218,6 @@
               </div>
 
               <div class="checkout-actions">
-                <button
-                  class="btn btn-secondary btn-danger"
-                  onclick="clearCart()"
-                >
-                  Clear Cart
-                </button>
                 <button class="btn btn-secondary" onclick="continueShopping()">
                   Continue Shopping
                 </button>

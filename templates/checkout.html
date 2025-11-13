@@ -16,6 +16,7 @@
     />
     <link rel="stylesheet" href="../static/css/styles.css" />
     <link rel="stylesheet" href="../static/css/cart.css" />
+    <link rel="stylesheet" href="../static/css/checkout.css" />
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -88,8 +89,10 @@
       <div class="main-content">
         {% if cart_items %}
         <form method="POST" class="cart-summary" style="gap: 16px">
-          <div class="summary-card">
+          <div class="summary-card user-location">
             <h3>Shipping Details</h3>
+            <div class="form">
+              <div class="contacts">
             <div class="form-group">
               <label class="form-label">Full Name</label>
               <input
@@ -109,11 +112,11 @@
                 value="{{ shipping_phone }}"
                 required
               />
-            </div>
+            </div></div>
             <div class="form-group">
               <label class="form-label">Address</label>
               <textarea
-                class="form-input"
+                class="form-textarea"
                 name="shipping_address"
                 rows="3"
                 required
@@ -121,30 +124,26 @@
 {{ shipping_address }}</textarea
               >
             </div>
+            </div>
           </div>
 
-          <div class="summary-card">
+          <div class="summary-card items-card">
             <h3>Order Summary</h3>
             {% for item in cart_items %}
             <div
               class="cart-item"
-              style="padding: 8px 0; border-bottom: 1px solid #eee"
             >
               <div class="item-info">
-                <div class="item-details">
                   <div class="item-title" style="font-weight: 600">
                     {{ item.product.title }}
                   </div>
                   <div class="item-artist">
-                    By {{ item.product.artist.name }}
+                    {{ item.product.artist.name }}
                   </div>
-                </div>
-                <div class="item-quantity" style="text-align: right">
                   <div>x {{ item.quantity }}</div>
                   <div style="font-weight: 600">
                     Rs. {{ '%.2f'|format(item.quantity * item.product.price) }}
                   </div>
-                </div>
               </div>
             </div>
             {% endfor %}
