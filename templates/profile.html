@@ -49,7 +49,8 @@
           {% endif %}
         </div>
 
-        <div id="google_translate_element" class="translate-element"></div>
+        <div class="nav-actions">
+        <div id="google_translate_element" class="translate-element"></div></div>
       </div>
 
       <div class="mobile-menu" id="mobileMenu">
@@ -163,11 +164,27 @@
               </div>
             </div>
               <div class="info-item">
-                <div class="info-label">Joined on</div>
+                {% if current_user.is_authenticated and current_user.id ==
+            profile_user.id %}
+                 <span>
+                  <a href="#" onclick="confirmDeleteAccount(event)" class="btn btn-primary delete-account-btn">DELETE ACCOUNT</a>
+                </span>
+                {% else %}
+                <!-- <div class="info-label">Joined on</div>
                 <div class="info-value">
                   {% if profile_user %} {{ profile_user.created_at }} {% else %}
                   {{ current_user.created_at }} {% endif %}
-                </div>
+                </div> -->
+                <span>
+                  <a
+                    href="#"
+                    id="follow-btn" class="btn btn-primary"
+                    onclick="toggleFollow(event, {{ profile_user.id }})"
+                  >
+                    {% if is_following %}UNFOLLOW{% else %}FOLLOW{% endif %}
+                  </a>
+                </span>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -550,16 +567,24 @@
         </div>
         <div class="modal-body">
           {% if profile_user %}
-            <p><strong>Email:</strong> {{ profile_user.email }}</p>
-            <p><strong>Phone:</strong> {{ profile_user.phone or 'Not provided' }}</p>
+            <div class="info-label">Email</div> <div class="info-value">{{ profile_user.email }}</div>
+            <div class="info-label" style="margin-top: 12px;">Phone</div> <div class="info-value">{{ profile_user.phone or 'Not provided' }}</div>
           {% else %}
-            <p><strong>Email:</strong> {{ current_user.email }}</p>
-            <p><strong>Phone:</strong> {{ current_user.phone or 'Not provided' }}</p>
+            <div class="info-label">Email</div> <div class="info-value">{{ current_user.email }}</div>
+            <div class="info-label" style="margin-top: 12px;">Phone</div> <div class="info-value">{{ current_user.phone or 'Not provided' }}</div>
           {% endif %} {% if profile_user %} {% if profile_user.location %}
-                <p><strong>Location:</strong> {{ profile_user.location }}</p>
+                <div class="info-label" style="margin-top: 12px;">Location</div> <div class="info-value">{{ profile_user.location }}</div>
                 {% endif %} {% else %} {% if current_user.location %}
-                <p><strong>Location:</strong>{{ current_user.location }}</p>
+                <div class="info-label" style="margin-top: 12px;">Location</div><div class="info-value">{{ current_user.location }}</div>
                 {% endif %} {% endif %}
+                
+                  {% if profile_user %} 
+                <div class="info-label" style="margin-top: 12px;">Joined on</div>
+                <div class="info-value">{{ profile_user.created_at }}
+                </div> {% else %}
+                <div class="info-label" style="margin-top: 12px;">Joined on</div>
+                <div class="info-value">{{ current_user.created_at }}
+                </div> {% endif %}
         </div>
       </div>
     </div>
@@ -1159,9 +1184,10 @@
       .modal-content {
         background: var(--card);
         border: 1px solid var(--border);
-        padding: 20px;
         border-radius: 24px;
         width: 90%;
+        padding: 0;
+        margin-bottom: 0;
         max-width: 500px;
         max-height: 90vh;
         overflow-y: auto;
@@ -1178,12 +1204,12 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-        padding-bottom: 16px;
+        padding: 8px 16px;
         border-bottom: 1px solid var(--border);
       }
 
       .modal-header h2 {
+        font-weight: 600;
         color: var(--text);
       }
 

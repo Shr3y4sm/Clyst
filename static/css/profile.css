@@ -172,6 +172,12 @@ h1 {
 	margin: 20px 0;
 }
 
+.delete-account-btn {
+	background-color: #ef233c;
+	color: #222;
+	text-decoration: none;
+}
+
 .follow {
 	display: flex;
 	align-items: center;
@@ -546,7 +552,7 @@ h1 {
 .profile-verify {
 	border-color: light-dark(#003d38, #57ffd8);
 	color: light-dark(#003d38, #57ffd8);
-	margin-bottom: 0;
+	margin-bottom: 4px;
 }
 
 .profile-verify:hover {
@@ -720,8 +726,7 @@ button {
 	border-radius: 24px;
 	width: 90%;
 	max-width: 500px;
-	max-height: 90vh;
-	overflow-y: auto;
+	max-height: fit-content;
 	transform: translateY(20px);
 	transition: transform 0.3s ease;
 	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -735,14 +740,16 @@ button {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 20px;
-	padding-bottom: 16px;
 	border-bottom: 1px solid var(--border);
 }
 
 .modal-header h2 {
 	color: var(--text);
 	margin: 0;
+}
+
+.modal-body {
+	padding: 12px 16px;
 }
 
 .close-btn {
