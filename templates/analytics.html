@@ -68,7 +68,13 @@
       }
 
       .chart {
-        height: 220px;
+        height: 260px;
+        max-height: 260px;
+        display: block;
+        width: 100%;
+      }
+      .apexcharts-canvas {
+        width: 100% !important;
       }
       .legend {
         display: flex;
@@ -162,6 +168,12 @@
         margin-left: -1em;
         margin-right: 0.5em;
       }
+      .charts{
+        grid-template-columns: 1fr;
+      }
+      .charts svg{
+        max-width: 100%;
+      }
 
       @keyframes spin {
         to {
@@ -251,10 +263,10 @@
           </div>
         </div>
 
-        <div class="grid-2">
+        <div class="grid-2 charts">
           <div class="card">
             <div class="section-title">Views (last 30 days)</div>
-            <canvas id="viewsChart" class="chart"></canvas>
+              <div id="viewsChart" style="height: 260px; width: 100%; display: block;"></div>
             <div class="legend">
               <span><i class="pv"></i>Product views</span>
               <span><i class="pr"></i>Profile views</span>
@@ -262,7 +274,7 @@
           </div>
           <div class="card">
             <div class="section-title">Revenue (last 30 days)</div>
-            <canvas id="revenueChart" class="chart"></canvas>
+            <div id="revenueChart" style="height: 260px; width: 100%; display: block;"></div>
             <div class="sub">
               Orders: {{ total_orders }} • Gross: ₹ {{
               '%.2f'|format(total_revenue) }} • Paid: ₹ {{
@@ -681,50 +693,130 @@
       <!-- End Insights Tab -->
     </div>
 
-    <!-- lightweight charts without external libs -->
+    <!-- charts powered by ApexCharts -->
+    <script src="https://unpkg.com/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
     <script>
       const days = {{ days|tojson }};
       const pv = {{ product_views_daily|tojson }};
       const pr = {{ profile_views_daily|tojson }};
       const rev = {{ revenue_daily|tojson }};
 
-      function miniLineChart(canvas, labels, series, colors) {
-        const ctx = canvas.getContext('2d');
-        const w = canvas.width = canvas.clientWidth; const h = canvas.height = canvas.clientHeight;
-        const pad = 26;
-        const max = Math.max(1, ...series.flat());
-        // axes
-        ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border');
-        ctx.beginPath(); ctx.moveTo(pad, h-pad); ctx.lineTo(w-pad, h-pad); ctx.moveTo(pad, pad); ctx.lineTo(pad, h-pad); ctx.stroke();
-        // y ticks
-        ctx.fillStyle = '#eeeeee';
-        ctx.font = '12px Poppins,sans-serif';
-        const steps = 3;
-        for (let i=0;i<=steps;i++) { const y = h-pad - (i/steps)*(h-2*pad); const val = Math.round((i/steps)*max); ctx.fillText(val, 4, y+4); ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w-pad, y); ctx.stroke(); }
-        // series
-        series.forEach((arr, idx) => {
-          const color = colors[idx];
-          ctx.strokeStyle = color; ctx.fillStyle = color;
-          ctx.beginPath();
-          arr.forEach((v, i) => {
-            const x = pad + i*(w-2*pad)/(labels.length-1);
-            const y = h-pad - (v/max)*(h-2*pad);
-            if (i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          });
-          ctx.stroke();
-          // points
-          arr.forEach((v, i) => {
-            const x = pad + i*(w-2*pad)/(labels.length-1);
-            const y = h-pad - (v/max)*(h-2*pad);
-            ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI*2); ctx.fill();
-          });
-        });
+      // Read CSS variables for consistent coloring (sanitize project's light-dark placeholders)
+      const css = getComputedStyle(document.documentElement);
+      const _rawAccent = (css.getPropertyValue('--accent') || '').trim();
+      const _rawMuted = (css.getPropertyValue('--muted') || '').trim();
+      const _rawText = (css.getPropertyValue('--text') || '').trim();
+      function cleanColor(raw, fallback) {
+        if (!raw) return fallback;
+        // project uses a `light-dark(...)` placeholder which isn't a valid CSS color at runtime
+        if (raw.indexOf('light-dark') !== -1) return fallback;
+        return raw;
       }
+      const accent = cleanColor(_rawAccent, '#ff6b6b');
+      const mutedColor = cleanColor(_rawMuted, '#888');
+      const textColor = cleanColor(_rawText, '#fff');
+      const green = '#4db6ac';
+      const purple = '#7e57c2';
 
-      const accent = getComputedStyle(document.documentElement).getPropertyValue('accent') || '#ff6b6b';
-      miniLineChart(document.getElementById('viewsChart'), days, [pv, pr], [accent, '#4db6ac']);
-      miniLineChart(document.getElementById('revenueChart'), days, [rev], ['#7e57c2']);
+      // Format days for x-axis: show `Mon dd` (e.g. "Oct 15")
+      const formattedDays = (Array.isArray(days) ? days : []).map(d => {
+        const dt = new Date(d);
+        if (isNaN(dt)) return String(d);
+        return dt.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+      });
 
+      // Debug logging removed in production
+
+      // Small-data fallback: if all series are empty or zero, show a friendly message
+      const allZero = arr => Array.isArray(arr) && arr.every(v => Number(v) === 0);
+      const noDateLabels = !Array.isArray(formattedDays) || formattedDays.length === 0;
+
+      if (noDateLabels || (allZero(pv) && allZero(pr) && allZero(rev))) {
+        const msg = '<div style="padding:18px;color:var(--muted);">Not enough data to render charts yet.</div>';
+        const vEl = document.getElementById('viewsChart');
+        const rEl = document.getElementById('revenueChart');
+        if (vEl) vEl.innerHTML = msg;
+        if (rEl) rEl.innerHTML = msg;
+      } else {
+        // coerce data to numbers and provide fallbacks for colors
+        const pvData = (pv || []).map(v => Number(v) || 0);
+        const prData = (pr || []).map(v => Number(v) || 0);
+        const revData = (rev || []).map(v => Number(v) || 0);
+
+        const accentColor = (accent && accent.length) ? accent : '#ff6b6b';
+        const profileColor = green;
+
+        // Views chart (line chart with two series)
+        const showMarkers = (pvData.some(v => v > 0) || prData.some(v => v > 0));
+        const viewsChartOptions = {
+          series: [
+            { name: 'Product views', data: pvData },
+            { name: 'Profile views', data: prData }
+          ],
+          chart: { type: 'line', height: 260, toolbar: { show: false }, sparkline: { enabled: false } },
+          colors: [accentColor, profileColor],
+          stroke: { curve: 'smooth', width: 3 },
+          markers: { size: 0, strokeWidth: 0 },
+          xaxis: { categories: formattedDays, labels: { style: { colors: mutedColor }, maxHeight: 100 }, axisBorder: { show: false }, axisTicks: { show: false } },
+          yaxis: { labels: { style: { colors: mutedColor } } },
+          grid: { borderColor: 'rgba(255,255,255,0.03)' },
+          legend: { labels: { colors: mutedColor }, position: 'top' },
+          tooltip: {
+            theme: 'dark',
+            shared: true,
+            intersect: false,
+            x: {
+              formatter: function(value, { dataPointIndex }) {
+                if (typeof dataPointIndex === 'number' && formattedDays[dataPointIndex]) return formattedDays[dataPointIndex];
+                return value || '';
+              }
+            },
+            y: { formatter: (val) => Math.round(val) }
+          }
+        };
+
+        // Revenue chart (bar chart)
+        const revenueChartOptions = {
+          series: [{ name: 'Revenue', data: revData }],
+          chart: { type: 'bar', height: 260, toolbar: { show: false }, sparkline: { enabled: false } },
+          colors: [purple],
+          plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
+          dataLabels: { enabled: false },
+          xaxis: { categories: formattedDays, labels: { style: { colors: mutedColor }, maxHeight: 100 }, axisBorder: { show: false }, axisTicks: { show: false } },
+          yaxis: { labels: { style: { colors: mutedColor }, formatter: (val) => '₹' + Math.round(val) } },
+          grid: { borderColor: 'rgba(255,255,255,0.03)' },
+          legend: { labels: { colors: mutedColor }, position: 'top' },
+          tooltip: {
+            theme: 'dark',
+            x: {
+              // Apex passes the category `value` and an options object; use dataPointIndex
+              formatter: function(value, { dataPointIndex }) {
+                if (typeof dataPointIndex === 'number' && formattedDays[dataPointIndex]) return formattedDays[dataPointIndex];
+                // fallback to original value or a friendly empty string
+                return value || '';
+              }
+            },
+            y: { formatter: (val) => '₹' + val.toFixed(2) }
+          }
+        };
+
+        // Render charts
+        const viewsChart = new ApexCharts(document.getElementById('viewsChart'), viewsChartOptions);
+        const revenueChart = new ApexCharts(document.getElementById('revenueChart'), revenueChartOptions);
+        viewsChart.render();
+        revenueChart.render();
+
+        // Force charts to fill containers after render
+        setTimeout(() => {
+          document.querySelectorAll('.apexcharts-canvas').forEach(el => {
+            el.style.width = '100%';
+            el.style.maxWidth = '100%';
+          });
+        }, 100);
+      }
+    </script>
+
+    <script>
       // Tab switching
       const tabBtns = document.querySelectorAll('.tab-btn');
       const tabContents = document.querySelectorAll('.tab-content');
@@ -933,5 +1025,6 @@
         }
       }
     </script>
+    
   </body>
 </html>
