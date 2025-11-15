@@ -706,6 +706,7 @@
       const _rawAccent = (css.getPropertyValue('--accent') || '').trim();
       const _rawMuted = (css.getPropertyValue('--muted') || '').trim();
       const _rawText = (css.getPropertyValue('--text') || '').trim();
+      const _rawBorder = (css.getPropertyValue('--border') || '').trim();
       function cleanColor(raw, fallback) {
         if (!raw) return fallback;
         // project uses a `light-dark(...)` placeholder which isn't a valid CSS color at runtime
@@ -715,6 +716,7 @@
       const accent = cleanColor(_rawAccent, '#ff6b6b');
       const mutedColor = cleanColor(_rawMuted, '#888');
       const textColor = cleanColor(_rawText, '#fff');
+      const borderColor = cleanColor(_rawBorder, 'rgba(255,255,255,0.1)');
       const green = '#4db6ac';
       const purple = '#7e57c2';
 
@@ -759,7 +761,7 @@
           markers: { size: 0, strokeWidth: 0 },
           xaxis: { categories: formattedDays, labels: { style: { colors: mutedColor }, maxHeight: 100 }, axisBorder: { show: false }, axisTicks: { show: false } },
           yaxis: { labels: { style: { colors: mutedColor } } },
-          grid: { borderColor: 'rgba(255,255,255,0.03)' },
+          grid: { borderColor: borderColor },
           legend: { labels: { colors: mutedColor }, position: 'top' },
           tooltip: {
             theme: 'dark',
@@ -784,7 +786,7 @@
           dataLabels: { enabled: false },
           xaxis: { categories: formattedDays, labels: { style: { colors: mutedColor }, maxHeight: 100 }, axisBorder: { show: false }, axisTicks: { show: false } },
           yaxis: { labels: { style: { colors: mutedColor }, formatter: (val) => '₹' + Math.round(val) } },
-          grid: { borderColor: 'rgba(255,255,255,0.03)' },
+          grid: { borderColor: borderColor },
           legend: { labels: { colors: mutedColor }, position: 'top' },
           tooltip: {
             theme: 'dark',
