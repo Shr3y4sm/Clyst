@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Users - Admin</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <style>
+      .admin-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 20px;
+      }
+
+      .admin-header {
+        background: var(--card);
+        padding: 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+
+      .admin-header h1 {
+        margin: 0 0 8px 0;
+        color: var(--text);
+      }
+
+      .admin-nav {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .admin-nav a {
+        padding: 10px 20px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .admin-nav a:hover {
+        background: var(--accent);
+        color: light-dark(white, black);
+      }
+
+      .users-table {
+        background: var(--card);
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th {
+        background: var(--bg);
+        padding: 16px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text);
+        border-bottom: 2px solid var(--border);
+      }
+
+      td {
+        padding: 16px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      tr:hover {
+        background: var(--bg);
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .badge-verified {
+        background: light-dark(#28a745, #1e7e34);
+        color: white;
+      }
+
+      .badge-pending {
+        background: light-dark(#ff9800, #ff9800);
+        color: white;
+      }
+
+      .badge-admin {
+        background: light-dark(#007bff, #0056b3);
+        color: white;
+      }
+
+      .btn {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        margin: 0 4px;
+        transition: all 0.2s;
+      }
+
+      .btn-success {
+        background: light-dark(#28a745, #1e7e34);
+        color: white;
+      }
+
+      .btn-danger {
+        background: light-dark(#dc3545, #c82333);
+        color: white;
+      }
+
+      .btn-view {
+        background: var(--accent);
+        color: light-dark(white, black);
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-container">
+      <div class="admin-header">
+        <h1>👥 Manage Users</h1>
+      </div>
+
+      <div class="admin-nav">
+        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin_users') }}">Manage Users</a>
+        <a href="{{ url_for('home') }}">Back to Site</a>
+      </div>
+
+      <div class="users-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Location</th>
+              <th>Posts</th>
+              <th>Products</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for stat in user_stats %}
+            <tr>
+              <td>{{ stat.user.id }}</td>
+              <td>
+                {{ stat.user.name }} {% if stat.user.is_admin %}
+                <span class="badge badge-admin">Admin</span>
+                {% endif %}
+              </td>
+              <td>{{ stat.user.email }}</td>
+              <td>{{ stat.user.location or 'N/A' }}</td>
+              <td>{{ stat.posts }}</td>
+              <td>{{ stat.products }}</td>
+              <td>
+                {% if stat.user.is_verified %}
+                <span class="badge badge-verified">✓ Verified</span>
+                {% elif stat.user.verification_photo %}
+                <span class="badge badge-pending">Pending</span>
+                {% else %}
+                <span style="color: var(--muted)">Not verified</span>
+                {% endif %}
+              </td>
+              <td>
+                <a
+                  href="{{ url_for('view_profile', user_id=stat.user.id) }}"
+                  class="btn btn-view"
+                  >View</a
+                >
+
+                {% if stat.user.verification_photo and not stat.user.is_verified
+                %}
+                <button
+                  class="btn btn-success"
+                  onclick="verifyUser({{ stat.user.id }}, '{{ stat.user.name }}')"
+                >
+                  Verify
+                </button>
+                <button
+                  class="btn btn-danger"
+                  onclick="rejectVerification({{ stat.user.id }}, '{{ stat.user.name }}')"
+                >
+                  Reject
+                </button>
+                {% endif %} {% if not stat.user.is_admin and stat.user.id !=
+                current_user.id %}
+                <button
+                  class="btn btn-danger"
+                  onclick="banUser({{ stat.user.id }}, '{{ stat.user.name }}')"
+                >
+                  Ban
+                </button>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      async function verifyUser(userId, userName) {
+        if (!confirm(`Verify ${userName}?`)) return;
+
+        try {
+          const response = await fetch(`/admin/verify_user/${userId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        } catch (error) {
+          alert("Failed to verify user");
+          console.error(error);
+        }
+      }
+
+      async function rejectVerification(userId, userName) {
+        if (!confirm(`Reject verification for ${userName}?`)) return;
+
+        try {
+          const response = await fetch(`/admin/reject_verification/${userId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        } catch (error) {
+          alert("Failed to reject verification");
+          console.error(error);
+        }
+      }
+
+      async function banUser(userId, userName) {
+        if (
+          !confirm(
+            `Are you sure you want to ban ${userName}? This will permanently delete their account and all content.`
+          )
+        )
+          return;
+
+        try {
+          const response = await fetch(`/admin/ban_user/${userId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        } catch (error) {
+          alert("Failed to ban user");
+          console.error(error);
+        }
+      }
+    </script>
+  </body>
+</html>

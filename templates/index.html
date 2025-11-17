@@ -171,12 +171,12 @@ fill="currentColor" viewBox="0 0 24 24" >
             <div class="title">
               <h3 class="post-title">{{ post.post_title }}</h3>
             {% if current_user.is_authenticated and current_user.id == post.artist_id %}
-                <button type="button" class="action-btn edit-btn" onclick="openEditPostModal('{{ post.post_id }}', '{{ post.post_title | replace("'", "\\'") }}', '{{ post.description | replace("'", "\\'") }}', '{{ post.media_url }}', {{ post.is_promoted | lower }})">
+                <button type="button" class="action-btn edit-btn" onclick='openEditPostModal({{ post.post_id }}, {{ post.post_title|tojson }}, {{ post.description|tojson }}, {{ post.media_url|tojson }}, {{ post.is_promoted|tojson }})'>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M15.7279 9.57627L14.3137 8.16206L5 17.4758V18.89H6.41421L15.7279 9.57627ZM17.1421 8.16206L18.5563 6.74785L17.1421 5.33363L15.7279 6.74785L17.1421 8.16206ZM7.24264 20.89H3V16.6474L16.435 3.21233C16.8256 2.82181 17.4587 2.82181 17.8492 3.21233L20.6777 6.04075C21.0682 6.43128 21.0682 7.06444 20.6777 7.45497L7.24264 20.89Z"></path></svg>
                 </button>
               {% endif %}
             </div>
-            <p class="post-description">{{ post.description|safe }}</p>
+            <p class="post-description">{{ post.description }}</p>
           </div>
 
           {% if post.media_url %}
@@ -514,12 +514,17 @@ fill="currentColor" viewBox="0 0 24 24" >
         const postId = btn.getAttribute('data-post-id');
         if (!postId) return;
         const commentsEl = document.getElementById('comments-' + postId);
-        const formEl = document.querySelector(`form.comment-section[action*="/comment/${postId}"]`);
+        const postCard = btn.closest('.post-card');
+        const formEl = postCard ? postCard.querySelector('.comment-section') : null;
+        
         if (commentsEl) commentsEl.classList.toggle('open');
         if (formEl) formEl.classList.toggle('open');
+        
         // Scroll into view when opening
         if (commentsEl && commentsEl.classList.contains('open')) {
-          commentsEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+          setTimeout(() => {
+            commentsEl.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+          }, 100);
         }
       }
 
@@ -608,6 +613,17 @@ fill="currentColor" viewBox="0 0 24 24" >
 
       // Edit post modal functionality
       function openEditPostModal(postId, title, description, mediaUrl, isPromoted) {
+        // Escape HTML entities for safe insertion into template
+        const escapeHtml = (str) => {
+          const div = document.createElement('div');
+          div.textContent = str || '';
+          return div.innerHTML;
+        };
+        
+        const escapedTitle = escapeHtml(title);
+        const escapedDescription = escapeHtml(description);
+        const escapedMediaUrl = escapeHtml(mediaUrl);
+        
         // Create modal HTML
         const modal = document.createElement('div');
         modal.className = 'modal';
@@ -624,16 +640,16 @@ fill="currentColor" viewBox="0 0 24 24" >
               <input type="hidden" name="post_id" value="${postId}">
               <div class="form-group">
                 <label for="post_title">Post Title</label>
-                <input type="text" id="post_title" name="post_title" value="${title}" required>
+                <input type="text" id="post_title" name="post_title" required>
               </div>
               <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" name="description" required>${description}</textarea>
+                <textarea id="description" name="description" required></textarea>
               </div>
               <div class="form-group">
                 <label for="media">Image (leave empty to keep current)</label>
                 <input type="file" id="media" name="media" accept="image/*">
-                ${mediaUrl ? `<img src="${mediaUrl}" alt="Current image" class="preview-image">` : ''}
+                ${mediaUrl ? `<img src="${escapedMediaUrl}" alt="Current image" class="preview-image">` : ''}
               </div>
               <div class="modal-footer">
                 <button type="button" onclick="closeEditPostModal()" class="btn btn-secondary">Cancel</button>
@@ -645,6 +661,11 @@ fill="currentColor" viewBox="0 0 24 24" >
 
         // Add modal to page
         document.body.appendChild(modal);
+        
+        // Set values after DOM insertion to avoid escaping issues
+        document.getElementById('post_title').value = title;
+        document.getElementById('description').value = description;
+        
         document.body.style.overflow = 'hidden';
 
         // Show modal with animation
