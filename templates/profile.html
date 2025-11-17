@@ -212,9 +212,53 @@
                     ></path>
                   </svg>
                 </button>
+                {% if not profile_user or profile_user.id == current_user.id %}
+                <button
+                  id="editBioBtn"
+                  class="say-aloud-btn"
+                  title="Edit About Section"
+                  style="margin-left: 8px;"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    fill="#000000"
+                    viewBox="0 0 256 256"
+                  >
+                    <path
+                      d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"
+                    ></path>
+                  </svg>
+                </button>
+                {% endif %}
               </h3>
             </div>
-            <p id="narrativeText">{{ portfolio_narrative }}</p>
+            <p id="narrativeText" style="white-space: pre-wrap;">{{ portfolio_narrative }}</p>
+            
+            <!-- Edit Bio Form (hidden by default) -->
+            {% if not profile_user or profile_user.id == current_user.id %}
+            <div id="bioEditForm" style="display: none; margin-top: 15px;">
+              <textarea 
+                id="bioTextarea" 
+                style="width: 100%; min-height: 120px; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"
+                maxlength="500"
+                placeholder="Write a catchy bio that showcases your unique artisan style..."
+              >{{ portfolio_narrative }}</textarea>
+              <div style="display: flex; gap: 10px; margin-top: 10px; align-items: center;">
+                <button id="saveBioBtn" class="btn btn-primary" style="padding: 8px 16px; background: light-dark(#003d38, #57ffd8); color: light-dark(#fff, #000); border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                  Save Bio
+                </button>
+                <button id="cancelBioBtn" class="btn btn-secondary" style="padding: 8px 16px; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; cursor: pointer;">
+                  Cancel
+                </button>
+                <button id="regenerateBioBtn" class="btn btn-info" style="padding: 8px 16px; background: light-dark(#57ffd8, #003d38); color: light-dark(#000, #fff); border: none; border-radius: 6px; cursor: pointer;">
+                  🔄 Regenerate AI Bio
+                </button>
+                <span id="charCount" style="margin-left: auto; color: var(--muted); font-size: 13px;">0/500</span>
+              </div>
+            </div>
+            {% endif %}
 
             <div class="narrative-meta">
               <div class="narrative-stats">
@@ -970,6 +1014,119 @@
 
          if (speakBtn) {
            speakBtn.addEventListener('click', speakNarrative);
+         }
+
+         // Bio editing functionality
+         const editBioBtn = document.getElementById('editBioBtn');
+         const bioEditForm = document.getElementById('bioEditForm');
+         const narrativeText = document.getElementById('narrativeText');
+         const bioTextarea = document.getElementById('bioTextarea');
+         const saveBioBtn = document.getElementById('saveBioBtn');
+         const cancelBioBtn = document.getElementById('cancelBioBtn');
+         const regenerateBioBtn = document.getElementById('regenerateBioBtn');
+         const charCount = document.getElementById('charCount');
+
+         if (editBioBtn && bioEditForm) {
+           // Update character count
+           function updateCharCount() {
+             const length = bioTextarea.value.length;
+             charCount.textContent = `${length}/500`;
+             charCount.style.color = length > 450 ? '#dc3545' : '#666';
+           }
+
+           // Show edit form
+           editBioBtn.addEventListener('click', function() {
+             bioEditForm.style.display = 'block';
+             narrativeText.style.display = 'none';
+             bioTextarea.value = narrativeText.textContent.trim();
+             updateCharCount();
+             bioTextarea.focus();
+           });
+
+           // Cancel editing
+           cancelBioBtn.addEventListener('click', function() {
+             bioEditForm.style.display = 'none';
+             narrativeText.style.display = 'block';
+           });
+
+           // Update character count on input
+           bioTextarea.addEventListener('input', updateCharCount);
+
+           // Save bio
+           saveBioBtn.addEventListener('click', async function() {
+             const bioText = bioTextarea.value.trim();
+             
+             saveBioBtn.disabled = true;
+             saveBioBtn.textContent = 'Saving...';
+
+             try {
+               const response = await fetch('/update_bio', {
+                 method: 'POST',
+                 headers: {
+                   'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({ bio: bioText })
+               });
+
+               const data = await response.json();
+
+               if (data.success) {
+                 narrativeText.textContent = bioText;
+                 bioEditForm.style.display = 'none';
+                 narrativeText.style.display = 'block';
+                 
+                 // Show success message
+                 const successMsg = document.createElement('div');
+                 successMsg.style.cssText = 'position: fixed; top: 20px; right: 20px; background: light-dark(#003d38, #57ffd8); color: light-dark(white, black); padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 9999; font-weight: 600;';
+                 successMsg.textContent = '✓ Bio updated successfully!';
+                 document.body.appendChild(successMsg);
+                 setTimeout(() => successMsg.remove(), 3000);
+               } else {
+                 alert('Error: ' + data.message);
+               }
+             } catch (error) {
+               alert('Failed to update bio. Please try again.');
+               console.error('Error:', error);
+             } finally {
+               saveBioBtn.disabled = false;
+               saveBioBtn.textContent = 'Save Bio';
+             }
+           });
+
+           // Regenerate AI bio
+           regenerateBioBtn.addEventListener('click', async function() {
+             if (!confirm('This will clear your custom bio and regenerate a new AI bio based on your posts and products. Continue?')) {
+               return;
+             }
+
+             regenerateBioBtn.disabled = true;
+             regenerateBioBtn.textContent = '🔄 Regenerating...';
+
+             try {
+               const response = await fetch('/update_bio', {
+                 method: 'POST',
+                 headers: {
+                   'Content-Type': 'application/json',
+                 },
+                 body: JSON.stringify({ bio: '' })
+               });
+
+               const data = await response.json();
+
+               if (data.success) {
+                 // Reload page to show new AI-generated bio
+                 window.location.reload();
+               } else {
+                 alert('Error: ' + data.message);
+               }
+             } catch (error) {
+               alert('Failed to regenerate bio. Please try again.');
+               console.error('Error:', error);
+             } finally {
+               regenerateBioBtn.disabled = false;
+               regenerateBioBtn.textContent = '🔄 Regenerate AI Bio';
+             }
+           });
          }
 
          // Listen for Google Translate events

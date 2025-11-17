@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Clyst</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <style>
+      .admin-container {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 20px;
+      }
+
+      .admin-header {
+        background: var(--card);
+        padding: 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+
+      .admin-header h1 {
+        margin: 0 0 8px 0;
+        color: var(--text);
+        font-size: 28px;
+      }
+
+      .admin-header p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: var(--card);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .stat-card h3 {
+        margin: 0 0 8px 0;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
+      }
+
+      .stat-card .number {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .stat-card.pending {
+        border-color: light-dark(#ff9800, #ff9800);
+      }
+
+      .stat-card.pending .number {
+        color: light-dark(#ff9800, #ff9800);
+      }
+
+      .content-section {
+        background: var(--card);
+        padding: 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+      }
+
+      .content-section h2 {
+        margin: 0 0 16px 0;
+        color: var(--text);
+        font-size: 20px;
+      }
+
+      .content-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .content-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: var(--bg);
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+
+      .content-info {
+        flex: 1;
+      }
+
+      .content-info .title {
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 4px;
+      }
+
+      .content-info .meta {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .content-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .btn-danger {
+        background: light-dark(#dc3545, #c82333);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: light-dark(#c82333, #bd2130);
+      }
+
+      .btn-success {
+        background: light-dark(#28a745, #1e7e34);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: light-dark(#218838, #1c6e2e);
+      }
+
+      .btn-view {
+        background: var(--accent);
+        color: light-dark(white, black);
+      }
+
+      .btn-view:hover {
+        opacity: 0.8;
+      }
+
+      .admin-nav {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .admin-nav a {
+        padding: 10px 20px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+
+      .admin-nav a:hover {
+        background: var(--accent);
+        color: light-dark(white, black);
+      }
+
+      .verified-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        background: light-dark(#28a745, #1e7e34);
+        color: white;
+        border-radius: 4px;
+        font-size: 11px;
+        margin-left: 8px;
+      }
+
+      .admin-badge {
+        background: light-dark(#ff9800, #ff9800);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-container">
+      <div class="admin-header">
+        <h1>🛡️ Admin Dashboard</h1>
+        <p>Welcome back, {{ current_user.name }}</p>
+      </div>
+
+      <div class="admin-nav">
+        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin_users') }}">Manage Users</a>
+        <a href="{{ url_for('home') }}">Back to Site</a>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Total Users</h3>
+          <div class="number">{{ stats.users }}</div>
+        </div>
+        <div class="stat-card">
+          <h3>Total Posts</h3>
+          <div class="number">{{ stats.posts }}</div>
+        </div>
+        <div class="stat-card">
+          <h3>Total Products</h3>
+          <div class="number">{{ stats.products }}</div>
+        </div>
+        <div class="stat-card">
+          <h3>Reviews</h3>
+          <div class="number">{{ stats.reviews }}</div>
+        </div>
+        <div class="stat-card">
+          <h3>Comments</h3>
+          <div class="number">{{ stats.comments }}</div>
+        </div>
+        <div class="stat-card pending">
+          <h3>Pending Verifications</h3>
+          <div class="number">{{ stats.pending_verifications }}</div>
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Recent Posts</h2>
+        <div class="content-list">
+          {% for post in recent_posts %}
+          <div class="content-item">
+            <div class="content-info">
+              <div class="title">{{ post.post_title }}</div>
+              <div class="meta">
+                By {{ post.artist.name }} • {{ post.created_at }}
+              </div>
+            </div>
+            <div class="content-actions">
+              <a
+                href="{{ url_for('home') }}#post-{{ post.post_id }}"
+                class="btn btn-view"
+                >View</a
+              >
+              <button
+                class="btn btn-danger"
+                onclick="deletePost({{ post.post_id }})"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Recent Products</h2>
+        <div class="content-list">
+          {% for product in recent_products %}
+          <div class="content-item">
+            <div class="content-info">
+              <div class="title">
+                {{ product.title }} - Rs.{{ product.price }}
+              </div>
+              <div class="meta">
+                By {{ product.artist.name }} • {{ product.created_at }}
+              </div>
+            </div>
+            <div class="content-actions">
+              <a
+                href="{{ url_for('product_buy', product_id=product.product_id) }}"
+                class="btn btn-view"
+                >View</a
+              >
+              <button
+                class="btn btn-danger"
+                onclick="deleteProduct({{ product.product_id }})"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="content-section">
+        <h2>Recent Users</h2>
+        <div class="content-list">
+          {% for user in recent_users %}
+          <div class="content-item">
+            <div class="content-info">
+              <div class="title">
+                {{ user.name }} {% if user.is_verified %}
+                <span class="verified-badge">✓ Verified</span>
+                {% endif %} {% if user.is_admin %}
+                <span class="verified-badge admin-badge">Admin</span>
+                {% endif %}
+              </div>
+              <div class="meta">
+                {{ user.email }} • {{ user.location or 'No location' }}
+              </div>
+            </div>
+            <div class="content-actions">
+              <a
+                href="{{ url_for('view_profile', user_id=user.id) }}"
+                class="btn btn-view"
+                >View Profile</a
+              >
+              {% if not user.is_admin and user.id != current_user.id %}
+              <button
+                class="btn btn-danger"
+                onclick="banUser({{ user.id }}, '{{ user.name }}')"
+              >
+                Ban User
+              </button>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <script>
+      async function deletePost(postId) {
+        if (!confirm("Are you sure you want to delete this post?")) return;
+
+        try {
+          const response = await fetch(`/admin/delete_post/${postId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        } catch (error) {
+          alert("Failed to delete post");
+          console.error(error);
+        }
+      }
+
+      async function deleteProduct(productId) {
+        if (!confirm("Are you sure you want to delete this product?")) return;
+
+        try {
+          const response = await fetch(`/admin/delete_product/${productId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        } catch (error) {
+          alert("Failed to delete product");
+          console.error(error);
+        }
+      }
+
+      async function banUser(userId, userName) {
+        if (
+          !confirm(
+            `Are you sure you want to ban ${userName}? This will delete their account and all content.`
+          )
+        )
+          return;
+
+        try {
+          const response = await fetch(`/admin/ban_user/${userId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            alert(data.message);
+            location.reload();
+          } else {
+            alert("Error: " + data.message);
+          }
+        } catch (error) {
+          alert("Failed to ban user");
+          console.error(error);
+        }
+      }
+    </script>
+  </body>
+</html>

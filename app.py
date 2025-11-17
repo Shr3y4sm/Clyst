@@ -1,5 +1,5 @@
 # type: ignore[import]
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import os
 from dotenv import load_dotenv
 import natural_search
@@ -8,6 +8,7 @@ import uuid
 import firebase_config
 import firebase_admin
 from firebase_admin import auth
+from functools import lru_cache, wraps
 
 # Load environment variables from .env file
 load_dotenv()
@@ -29,6 +30,10 @@ from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import Integer, String, Text
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
+
+# Simple cache for expensive operations
+_portfolio_cache = {}
+_cache_timeout = 3600  # 1 hour
 
 app = Flask(__name__, static_folder='static')
 # Load configuration from config.py
@@ -59,6 +64,21 @@ login_manager.login_message_category = 'info'  # Optional: use bootstrap info ca
 @login_manager.user_loader
 def load_user(user_id):
     return db.get_or_404(User, user_id)
+
+
+# Admin decorator
+def admin_required(f):
+    """Decorator to require admin access for a route"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('login'))
+        if not current_user.is_admin:
+            flash('Access denied. Admin privileges required.', 'danger')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 class Base(DeclarativeBase):
@@ -159,6 +179,8 @@ class User(UserMixin, db.Model):
     is_verified: Mapped[bool] = mapped_column(db.Boolean, nullable=False, default=False, server_default='0')
     verification_photo: Mapped[Optional[str]] = mapped_column(db.String(255), nullable=True)
     verification_date: Mapped[Optional[str]] = mapped_column(db.String(250), nullable=True)
+    custom_bio: Mapped[Optional[str]] = mapped_column(db.Text, nullable=True)
+    is_admin: Mapped[bool] = mapped_column(db.Integer, nullable=False, default=0, server_default='0')
     posts = relationship("Posts", back_populates="artist")
     products = relationship("Product", back_populates="artist")
 
@@ -206,7 +228,9 @@ class Comments(db.Model):
     )
     content = db.Column(db.Text)
     created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
-
+    
+    # Relationship for eager loading
+    user = relationship("User", foreign_keys=[user_id])
 
 class PostLike(db.Model):
     __tablename__ = 'post_likes'
@@ -489,6 +513,38 @@ def save_hashtags_for_product(product_id, text):
             db.session.add(product_hashtag)
 
 
+def get_cached_portfolio_narrative(user_id, artist_name, posts_data, products_data, user_location):
+    """Get portfolio narrative with caching to avoid expensive AI calls"""
+    cache_key = f"portfolio_{user_id}"
+    current_time = datetime.now().timestamp()
+    
+    # Check if we have a valid cached version
+    if cache_key in _portfolio_cache:
+        cached_data, cache_time = _portfolio_cache[cache_key]
+        if current_time - cache_time < _cache_timeout:
+            return cached_data
+    
+    # Generate new narrative
+    from ai import generate_enhanced_portfolio_narrative
+    narrative = generate_enhanced_portfolio_narrative(
+        artist_name=artist_name,
+        posts=posts_data,
+        products=products_data,
+        user_location=user_location
+    )
+    
+    # Cache it
+    _portfolio_cache[cache_key] = (narrative, current_time)
+    return narrative
+
+
+def clear_portfolio_cache(user_id):
+    """Clear portfolio cache for a specific user when their content changes"""
+    cache_key = f"portfolio_{user_id}"
+    if cache_key in _portfolio_cache:
+        del _portfolio_cache[cache_key]
+
+
 def linkify_hashtags(text):
     """Convert hashtags in text to clickable links, safely escaping other HTML."""
     import re
@@ -498,7 +554,8 @@ def linkify_hashtags(text):
     # First escape any existing HTML to prevent injection
     escaped = escape(text)
     # Replace #hashtag with <a href="/hashtag/hashtag">#hashtag</a>
-    pattern = re.compile(r'#(\w+)\b')
+    # Updated pattern to require letter at start to avoid matching HTML entities like &#39;
+    pattern = re.compile(r'#([a-zA-Z]\w*)\b')
     def _repl(match: re.Match) -> str:
         tag = match.group(1)
         return f'<a href="/hashtag/{tag}" class="hashtag-link">#{tag}</a>'
@@ -1141,9 +1198,11 @@ def send_message(conversation_id: int):
 
 @app.route('/', methods=["GET", "POST"])
 def home():
+    from sqlalchemy.orm import joinedload
+    
     # Optional natural language query parsing for posts
     q = (request.args.get('q') or '').strip()
-    posts_query = db.select(Posts)
+    posts_query = db.select(Posts).options(joinedload(Posts.artist))
     if q:
         parsed = natural_search.parse_search_query(q)
         tokens = parsed.get('keywords', [])
@@ -1158,30 +1217,42 @@ def home():
                 (Posts.post_title.ilike(like)) | (Posts.description.ilike(like)) | (User.name.ilike(like))
             )
     result = db.session.execute(posts_query)
-    posts = result.scalars().all()
+    posts = result.unique().scalars().all()
 
-    # Load comments per post and attach a simple comments list (with author info)
-    for post in posts:
-            # Linkify hashtags in post description
-            if post.description:
-                post.description = linkify_hashtags(post.description)
+    # Bulk load all comments and users for all posts in one query
+    if posts:
+        post_ids = [p.post_id for p in posts]
         
-            comments_rows = db.session.execute(db.select(Comments).where(Comments.post_id == post.post_id)).scalars().all()
-            comments_data = []
-            for c in comments_rows:
-                author = db.session.get(User, c.user_id)
-                comments_data.append({
-                    'id': c.comment_id,
-                    'content': c.content,
-                    'created_at': c.created_at,
-                    'artist': {
-                        'name': getattr(author, 'name', 'Unknown') if author else 'Unknown',
-                        'email': getattr(author, 'email', '') if author else '',
-                        'id': getattr(author, 'id', None) if author else None,
-                    }
-                })
-            # Attach to post object so template can use post.comments
-            setattr(post, 'comments', comments_data)
+        # Get all comments with users in one query using joinedload
+        comments_with_users = db.session.execute(
+            db.select(Comments)
+            .options(joinedload(Comments.user))
+            .where(Comments.post_id.in_(post_ids))
+        ).unique().scalars().all()
+        
+        # Group comments by post_id
+        comments_by_post = {}
+        for c in comments_with_users:
+            if c.post_id not in comments_by_post:
+                comments_by_post[c.post_id] = []
+            author = c.user
+            comments_by_post[c.post_id].append({
+                'id': c.comment_id,
+                'content': c.content,
+                'created_at': c.created_at,
+                'artist': {
+                    'name': getattr(author, 'name', 'Unknown') if author else 'Unknown',
+                    'email': getattr(author, 'email', '') if author else '',
+                    'id': getattr(author, 'id', None) if author else None,
+                }
+            })
+        
+        # Attach comments to posts
+        for post in posts:
+            setattr(post, 'comments', comments_by_post.get(post.post_id, []))
+    else:
+        for post in posts:
+            setattr(post, 'comments', [])
 
     return render_template("index.html", posts=posts, current_user=current_user, q=q)
 
@@ -1219,22 +1290,38 @@ def products_page():
             except Exception:
                 pass
     
-    result = db.session.execute(prod_query)
-    products = result.scalars().all()
+    from sqlalchemy.orm import joinedload
     
-    # Attach avg rating and review count to each product
-    for product in products:
-            # Linkify hashtags in product description
-            if product.description:
-                product.description = linkify_hashtags(product.description)
+    result = db.session.execute(prod_query.options(joinedload(Product.artist)))
+    products = result.unique().scalars().all()
+    
+    # Bulk load review stats for all products in one query
+    if products:
+        product_ids = [p.product_id for p in products]
         
-            reviews_rows = db.session.execute(
-                db.select(ProductReview).where(ProductReview.product_id == product.product_id)
-            ).scalars().all()
-            total_rating = sum(int(r.rating or 0) for r in reviews_rows)
-            avg_rating = (total_rating / len(reviews_rows)) if reviews_rows else 0
+        # Get aggregated review data in one query
+        review_stats = db.session.execute(
+            db.select(
+                ProductReview.product_id,
+                db.func.avg(ProductReview.rating).label('avg_rating'),
+                db.func.count(ProductReview.review_id).label('review_count')
+            )
+            .where(ProductReview.product_id.in_(product_ids))
+            .group_by(ProductReview.product_id)
+        ).all()
+        
+        # Create a dict for quick lookup
+        stats_dict = {stat.product_id: (float(stat.avg_rating or 0), int(stat.review_count or 0)) for stat in review_stats}
+        
+        # Attach stats to products
+        for product in products:
+            avg_rating, review_count = stats_dict.get(product.product_id, (0.0, 0))
             setattr(product, 'avg_rating', avg_rating)
-            setattr(product, 'reviews_count', len(reviews_rows))
+            setattr(product, 'reviews_count', review_count)
+    else:
+        for product in products:
+            setattr(product, 'avg_rating', 0.0)
+            setattr(product, 'reviews_count', 0)
     
     # Apply sorting
     if sort_by == 'popular':
@@ -1308,12 +1395,15 @@ def login():
                 login_user(user)
                 print(f"[Auth] login_user successful for: {email}")
                 
+                # Redirect admin to dashboard
+                redirect_url = next_page or (url_for('admin_dashboard') if user.is_admin else url_for('home'))
+                
                 if request.is_json:
-                    return jsonify({'success': True, 'redirect': next_page or url_for('home')})
+                    return jsonify({'success': True, 'redirect': redirect_url})
                 
                 if next_page and next_page.startswith('/'):
                     return redirect(next_page)
-                return redirect(url_for('home'))
+                return redirect(redirect_url)
             else:
                 if request.is_json:
                     return jsonify({'success': False, 'error': 'Invalid Firebase token'}), 401
@@ -1326,9 +1416,10 @@ def login():
 
             if user and password and user.password_hash and check_password_hash(user.password_hash, password):
                 login_user(user)
+                # Redirect admin to dashboard
                 if next_page and next_page.startswith('/'):
                     return redirect(next_page)
-                return redirect(url_for('home'))
+                return redirect(url_for('admin_dashboard') if user.is_admin else url_for('home'))
             else:
                 flash('Invalid email or password')
 
@@ -1602,6 +1693,9 @@ def add_posts():
         try:
             db.session.commit()
             
+            # Clear portfolio cache when content changes
+            clear_portfolio_cache(current_user.id)
+            
             # Extract and save hashtags from title and description
             combined_text = f"{request.form['post_title']} {request.form['description']}"
             save_hashtags_for_post(post.post_id, combined_text)
@@ -1709,6 +1803,9 @@ def add_products():
 
         try:
             db.session.commit()
+            
+            # Clear portfolio cache when content changes
+            clear_portfolio_cache(current_user.id)
             
             # Extract and save hashtags from title and description
             combined_text = f"{request.form['product_name']} {request.form.get('description', '')}"
@@ -1818,6 +1915,8 @@ def delete_posts():
     post_to_delete = db.get_or_404(Posts, post_id)
     db.session.delete(post_to_delete)
     db.session.commit()
+    # Clear portfolio cache when content changes
+    clear_portfolio_cache(current_user.id)
     return redirect(url_for('home'))
 
 
@@ -1828,6 +1927,8 @@ def delete_products():
     product_to_delete = db.get_or_404(Product, product_id)
     db.session.delete(product_to_delete)
     db.session.commit()
+    # Clear portfolio cache when content changes
+    clear_portfolio_cache(current_user.id)
     return redirect(url_for('products_page'))
 
 
@@ -1864,12 +1965,13 @@ def calculate_artisan_rating(artist_id):
 @app.route("/profile")
 @login_required
 def profile():
+    # Redirect admin users to dashboard
+    if current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+    
     # Get current user's posts and products
     user_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == current_user.id)).scalars().all()
     user_products = db.session.execute(db.select(Product).where(Product.artist_id == current_user.id)).scalars().all()
-
-    # Generate portfolio narrative
-    from ai import generate_enhanced_portfolio_narrative
 
     # Convert posts to dictionaries for AI analysis
     posts_data = []
@@ -1892,13 +1994,18 @@ def profile():
             'created_at': product.created_at
         })
 
-    # Generate the portfolio narrative
-    portfolio_narrative = generate_enhanced_portfolio_narrative(
-        artist_name=current_user.name,
-        posts=posts_data,
-        products=products_data,
-        user_location=current_user.location
-    )
+    # Generate the portfolio narrative with caching
+    # Use custom bio if available, otherwise generate AI bio
+    if current_user.custom_bio:
+        portfolio_narrative = current_user.custom_bio
+    else:
+        portfolio_narrative = get_cached_portfolio_narrative(
+            user_id=current_user.id,
+            artist_name=current_user.name,
+            posts_data=posts_data,
+            products_data=products_data,
+            user_location=current_user.location
+        )
 
     # Calculate artisan rating
     artisan_rating = calculate_artisan_rating(current_user.id)
@@ -1941,7 +2048,8 @@ def profile():
             'unread_count': unread or 0
         })
 
-        orders = db.session.execute(
+    # Get user's orders
+    orders = db.session.execute(
         db.select(Order).where(Order.user_id == current_user.id).order_by(db.desc(Order.order_id))
     ).scalars().all()
 
@@ -1980,9 +2088,6 @@ def view_profile(user_id):
     user_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == user_id)).scalars().all()
     user_products = db.session.execute(db.select(Product).where(Product.artist_id == user_id)).scalars().all()
 
-    # Generate portfolio narrative
-    from ai import generate_enhanced_portfolio_narrative
-
     # Convert posts to dictionaries for AI analysis
     posts_data = []
     for post in user_posts:
@@ -2004,13 +2109,18 @@ def view_profile(user_id):
             'created_at': product.created_at
         })
 
-    # Generate the portfolio narrative
-    portfolio_narrative = generate_enhanced_portfolio_narrative(
-        artist_name=user.name,
-        posts=posts_data,
-        products=products_data,
-        user_location=user.location
-    )
+    # Generate the portfolio narrative with caching
+    # Use custom bio if available, otherwise generate AI bio
+    if user.custom_bio:
+        portfolio_narrative = user.custom_bio
+    else:
+        portfolio_narrative = get_cached_portfolio_narrative(
+            user_id=user_id,
+            artist_name=user.name,
+            posts_data=posts_data,
+            products_data=products_data,
+            user_location=user.location
+        )
 
     # Calculate artisan rating
     artisan_rating = calculate_artisan_rating(user_id)
@@ -2946,6 +3056,36 @@ def unfollow_user(user_id):
     })
 
 
+@app.route("/update_bio", methods=["POST"])
+@login_required
+def update_bio():
+    """Update user's custom bio"""
+    try:
+        data = request.get_json()
+        bio_text = data.get('bio', '').strip()
+        
+        # Limit bio length
+        if len(bio_text) > 500:
+            return jsonify({'success': False, 'message': 'Bio must be under 500 characters'}), 400
+        
+        # Update user's custom bio
+        current_user.custom_bio = bio_text if bio_text else None
+        db.session.commit()
+        
+        # Clear cache to regenerate AI bio if custom bio is removed
+        if not bio_text:
+            clear_portfolio_cache(current_user.id)
+        
+        return jsonify({
+            'success': True,
+            'message': 'Bio updated successfully',
+            'bio': bio_text
+        })
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 500
+
+
 @app.route("/hashtag/<tag_name>")
 def view_hashtag(tag_name):
     """View all posts and products with a specific hashtag"""
@@ -2992,6 +3132,194 @@ def view_hashtag(tag_name):
                           posts=posts, 
                           products=products,
                           current_user=current_user)
+
+
+# ============================================================================
+# ADMIN ROUTES - Content Moderation
+# ============================================================================
+
+@app.route("/admin/dashboard")
+@admin_required
+def admin_dashboard():
+    """Admin dashboard with moderation tools"""
+    # Get statistics
+    total_users = db.session.execute(db.select(db.func.count(User.id))).scalar()
+    total_posts = db.session.execute(db.select(db.func.count(Posts.post_id))).scalar()
+    total_products = db.session.execute(db.select(db.func.count(Product.product_id))).scalar()
+    total_reviews = db.session.execute(db.select(db.func.count(ProductReview.review_id))).scalar()
+    total_comments = db.session.execute(db.select(db.func.count(Comments.comment_id))).scalar()
+    pending_verifications = db.session.execute(
+        db.select(db.func.count(User.id)).where(
+            User.verification_photo.isnot(None),
+            User.is_verified == False
+        )
+    ).scalar()
+    
+    # Get recent users
+    recent_users = db.session.execute(
+        db.select(User).order_by(User.id.desc()).limit(10)
+    ).scalars().all()
+    
+    # Get recent posts
+    recent_posts = db.session.execute(
+        db.select(Posts).options(db.joinedload(Posts.artist)).order_by(Posts.post_id.desc()).limit(10)
+    ).scalars().all()
+    
+    # Get recent products
+    recent_products = db.session.execute(
+        db.select(Product).options(db.joinedload(Product.artist)).order_by(Product.product_id.desc()).limit(10)
+    ).scalars().all()
+    
+    return render_template("admin_dashboard.html",
+                         current_user=current_user,
+                         stats={
+                             'users': total_users,
+                             'posts': total_posts,
+                             'products': total_products,
+                             'reviews': total_reviews,
+                             'comments': total_comments,
+                             'pending_verifications': pending_verifications
+                         },
+                         recent_users=recent_users,
+                         recent_posts=recent_posts,
+                         recent_products=recent_products)
+
+
+@app.route("/admin/delete_post/<int:post_id>", methods=["POST"])
+@admin_required
+def admin_delete_post(post_id):
+    """Admin: Delete any post"""
+    post = db.get_or_404(Posts, post_id)
+    
+    # Delete associated data
+    db.session.execute(db.delete(PostHashtag).where(PostHashtag.post_id == post_id))
+    db.session.execute(db.delete(Comments).where(Comments.post_id == post_id))
+    db.session.execute(db.delete(PostLike).where(PostLike.post_id == post_id))
+    
+    db.session.delete(post)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Post deleted successfully'})
+
+
+@app.route("/admin/delete_product/<int:product_id>", methods=["POST"])
+@admin_required
+def admin_delete_product(product_id):
+    """Admin: Delete any product"""
+    product = db.get_or_404(Product, product_id)
+    
+    # Delete associated data
+    db.session.execute(db.delete(ProductHashtag).where(ProductHashtag.product_id == product_id))
+    db.session.execute(db.delete(ProductReview).where(ProductReview.product_id == product_id))
+    db.session.execute(db.delete(ProductView).where(ProductView.product_id == product_id))
+    
+    db.session.delete(product)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Product deleted successfully'})
+
+
+@app.route("/admin/delete_comment/<int:comment_id>", methods=["POST"])
+@admin_required
+def admin_delete_comment(comment_id):
+    """Admin: Delete any comment"""
+    comment = db.get_or_404(Comments, comment_id)
+    db.session.delete(comment)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Comment deleted successfully'})
+
+
+@app.route("/admin/delete_review/<int:review_id>", methods=["POST"])
+@admin_required
+def admin_delete_review(review_id):
+    """Admin: Delete any review"""
+    review = db.get_or_404(ProductReview, review_id)
+    db.session.delete(review)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': 'Review deleted successfully'})
+
+
+@app.route("/admin/ban_user/<int:user_id>", methods=["POST"])
+@admin_required
+def admin_ban_user(user_id):
+    """Admin: Ban/suspend a user account"""
+    if user_id == current_user.id:
+        return jsonify({'success': False, 'message': 'Cannot ban yourself'}), 400
+    
+    user = db.get_or_404(User, user_id)
+    
+    # Check if user is admin
+    if user.is_admin:
+        return jsonify({'success': False, 'message': 'Cannot ban admin users'}), 400
+    
+    # Delete all user content and account
+    db.session.execute(db.delete(Posts).where(Posts.artist_id == user_id))
+    db.session.execute(db.delete(Product).where(Product.artist_id == user_id))
+    db.session.execute(db.delete(Comments).where(Comments.user_id == user_id))
+    db.session.execute(db.delete(ProductReview).where(ProductReview.user_id == user_id))
+    db.session.execute(db.delete(PostLike).where(PostLike.user_id == user_id))
+    db.session.execute(db.delete(Follow).where((Follow.follower_id == user_id) | (Follow.followed_id == user_id)))
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': f'User {user.name} has been banned and all content deleted'})
+
+
+@app.route("/admin/verify_user/<int:user_id>", methods=["POST"])
+@admin_required
+def admin_verify_user(user_id):
+    """Admin: Approve verification request"""
+    user = db.get_or_404(User, user_id)
+    
+    if user.is_verified:
+        return jsonify({'success': False, 'message': 'User is already verified'}), 400
+    
+    user.is_verified = True
+    user.verification_date = date.today().strftime('%B %d, %Y')
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': f'{user.name} has been verified'})
+
+
+@app.route("/admin/reject_verification/<int:user_id>", methods=["POST"])
+@admin_required
+def admin_reject_verification(user_id):
+    """Admin: Reject verification request"""
+    user = db.get_or_404(User, user_id)
+    
+    # Clear verification photo
+    user.verification_photo = None
+    db.session.commit()
+    
+    return jsonify({'success': True, 'message': f'Verification request for {user.name} has been rejected'})
+
+
+@app.route("/admin/users")
+@admin_required
+def admin_users():
+    """Admin: View all users"""
+    users = db.session.execute(db.select(User).order_by(User.id.desc())).scalars().all()
+    
+    # Get user statistics
+    user_stats = []
+    for user in users:
+        posts_count = db.session.execute(
+            db.select(db.func.count(Posts.post_id)).where(Posts.artist_id == user.id)
+        ).scalar()
+        products_count = db.session.execute(
+            db.select(db.func.count(Product.product_id)).where(Product.artist_id == user.id)
+        ).scalar()
+        
+        user_stats.append({
+            'user': user,
+            'posts': posts_count,
+            'products': products_count
+        })
+    
+    return render_template("admin_users.html", current_user=current_user, user_stats=user_stats)
 
 
 @app.errorhandler(500)

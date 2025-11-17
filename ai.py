@@ -332,16 +332,37 @@ def translate_listing(content_type: str, title: str = '', description: str = '',
 
 def generate_portfolio_narrative(artist_name: str, posts: List[Dict], products: List[Dict]) -> str:
     """
-    Generate a basic portfolio narrative as fallback.
+    Generate a catchy marketing-focused bio as fallback.
     """
     if not posts and not products:
-        return f"Welcome to {artist_name}'s creative space. This collection is just beginning to take shape."
+        return f"✨ {artist_name} is curating a fresh collection of handcrafted treasures. Follow to be the first to discover new creations!"
     
     total_works = len(posts) + len(products)
-    posts_count = len(posts)
-    products_count = len(products)
     
-    return f"Welcome to {artist_name}'s artistic journey, a collection that weaves together {total_works} unique pieces into a compelling narrative of creativity and expression. This collection includes {posts_count} community-shared works that showcase the artist's creative process, alongside {products_count} carefully crafted pieces available for acquisition. Together, these works form a cohesive narrative that invites viewers to explore {artist_name}'s unique perspective and artistic voice."
+    # Try to extract themes from titles/descriptions
+    all_text = " ".join([p.get('post_title', '') + " " + p.get('post_description', '') for p in posts] + 
+                        [p.get('title', '') + " " + p.get('description', '') for p in products]).lower()
+    
+    # Detect craft types
+    craft_hints = []
+    if any(word in all_text for word in ['clay', 'ceramic', 'pottery', 'pot']):
+        craft_hints.append('hand-thrown ceramics')
+    if any(word in all_text for word in ['fabric', 'textile', 'weav', 'embroid', 'cloth']):
+        craft_hints.append('artisan textiles')
+    if any(word in all_text for word in ['wood', 'carv', 'timber']):
+        craft_hints.append('handcrafted woodwork')
+    if any(word in all_text for word in ['metal', 'brass', 'copper', 'silver', 'gold']):
+        craft_hints.append('metalwork artistry')
+    if any(word in all_text for word in ['paint', 'canvas', 'acrylic', 'watercolor']):
+        craft_hints.append('original paintings')
+    if any(word in all_text for word in ['jewel', 'necklace', 'bracelet', 'earring', 'ring']):
+        craft_hints.append('handmade jewelry')
+    
+    if craft_hints:
+        craft_desc = " and ".join(craft_hints[:2])
+        return f"🎨 {artist_name} transforms traditional craftsmanship into {craft_desc}. Discover {total_works} unique pieces where heritage meets contemporary design—each one crafted with passion and precision."
+    
+    return f"🎨 {artist_name} brings {total_works} handcrafted creations to life, blending artisan traditions with modern aesthetics. Every piece is made with care, perfect for those who value authentic, one-of-a-kind art."
 
 
 def generate_enhanced_portfolio_narrative(artist_name: str, posts: List[Dict], products: List[Dict], user_location: str = None) -> str:
@@ -368,9 +389,9 @@ def generate_enhanced_portfolio_narrative(artist_name: str, posts: List[Dict], p
         model = genai.GenerativeModel(
             model_name='gemini-2.5-pro',
             generation_config={
-                'temperature': 0.7,
+                'temperature': 0.8,
                 'top_p': 0.9,
-                'max_output_tokens': 500,
+                'max_output_tokens': 200,
             }
         )
         
@@ -405,24 +426,28 @@ def generate_enhanced_portfolio_narrative(artist_name: str, posts: List[Dict], p
         works_summary = f"Total works: {len(all_works)} (Posts: {len(posts)}, Products: {len(products)})"
         
         prompt = f"""
-You are an expert art curator and storyteller. Analyze this artist's portfolio and create a compelling "About This Collection" narrative that connects their works into a cohesive artistic story.
+You are a creative marketing copywriter for an artisan marketplace. Write a compelling, catchy "About" section that sells the artist's work.
 
 ARTIST: {artist_name}{location_context}
 {works_summary}
 
-ARTWORKS TO ANALYZE:
+ARTWORKS:
 {json.dumps(all_works, indent=2)}
 
-Create a narrative that:
-1. Welcomes visitors to the artist's creative journey
-2. Identifies key themes, styles, and artistic evolution
-3. Connects the works into a meaningful story
-4. Highlights the balance between community posts and marketplace products
-5. Invites viewers to explore the collection
-6. Uses engaging, professional language suitable for an art marketplace
-7. Keeps it concise but compelling (2-3 paragraphs max)
+Create a marketing-focused bio (2-3 punchy sentences, under 200 words) that:
 
-Focus on the artistic themes, creative evolution, and the story these works tell together. Make it feel personal and inspiring.
+1. Opens with a HOOK - something unique, intriguing, or impressive about their work
+2. Highlights what makes THIS artist special (analyze actual titles/descriptions for specific crafts, materials, themes)
+3. Uses action words and emotional language (craft, create, transform, blend, showcase, celebrate)
+4. Mentions their specialty clearly (e.g., "hand-thrown ceramics", "intricate jewelry", "upcycled textiles")
+5. If location is provided, weave it in naturally (e.g., "Kerala-inspired designs", "Bangalore-based artist")
+6. Ends with an invitation or value proposition ("Each piece tells a story", "Where tradition meets innovation")
+
+TONE: Confident, creative, engaging - like a gallery showcase or Etsy shop description
+AVOID: Generic phrases, clichés like "artistic journey", passive language
+FOCUS: What they make, why it's special, what customers get
+
+Write a bio that makes people want to explore their work!
 """
         
         # Generate AI response

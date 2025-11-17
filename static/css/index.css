@@ -280,13 +280,25 @@ h1 {
 }
 
 .comment-section {
-	display: flex;
+	display: none;
 	align-items: center;
 	justify-content: space-between;
 	padding: 10px 16px;
 	border-top: 1px solid var(--border);
 	border-bottom: 1px solid var(--border);
 	gap: 12px;
+}
+
+.comment-section.open {
+	display: flex;
+}
+
+.comments-container {
+	display: none;
+}
+
+.comments-container.open {
+	display: block;
 }
 
 .send-btn {
