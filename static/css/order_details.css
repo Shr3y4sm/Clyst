@@ -64,6 +64,14 @@ h1 {
 	align-items: center;
 }
 
+.only-status {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 2px;
+}
+
 .status {
 	padding: 4px 8px;
 	background: var(--muted);
@@ -129,5 +137,6 @@ h1 {
 }
 
 .checkout-actions {
+	justify-content: space-between;
 	margin: 12px 0 0 0;
 }

@@ -78,15 +78,21 @@
               <div class="ship-details">
                 <div class="text-info"><strong>Name</strong><p>{{ order.shipping_name }}</p></div>
                 <div class="text-info"><strong>Phone</strong><p>{{ order.shipping_phone }}</p></div>
-                <div class="text-info"><strong>Address</strong><p>{{ order.shipping_address }}</p></div>
+                <div class="text-info" style="width: 100%;"><strong>Address</strong><p>{{ order.shipping_address }}</p></div>
               </div>
               <div class="ship-details status-details">
                 <div class="text-info"><strong>Placed on</strong><br/><p>{{ order.created_at }}</p></div>
                 <div class="the-status">
+                  <div class="only-status">
+                    <strong>Status</strong>
                   <div class="text-info status {{ 'paid' if order.status == 'paid' or order.status == 'shipped' or order.status == 'delivered' else ('unpaid' if order.status == 'canceled' else '') }}"><p>{{ order.status|upper }}</p></div>
-                    {% if order.payment_status %}
+                    </div>
+                    <div class="only-status">
+                      {% if order.payment_status %}
+                  <strong>Payment</strong>
                       <div class="text-info status {{ 'paid' if order.payment_status == 'paid' else ('unpaid' if order.payment_status == 'unpaid' else '') }}"><p>{{ order.payment_status|upper }}</p></div>
-                    {% endif %}
+                    {% endif %}</div>
+                  
                   </div>
               </div>
             </div>

@@ -906,6 +906,15 @@ button {
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
+	gap: 0;
+}
+
+.orders-modal-body .product-title,
+.orders-modal-body .product-price,
+.orders-modal-body .product-meta,
+.orders-modal-body .text-info,
+.orders-modal-body .product-actions {
+	width: 145px;
 }
 
 .orders-modal-body .product-card {
@@ -919,6 +928,7 @@ button {
 }
 
 .orders-modal-body .status {
+	width: 80px;
 	padding: 4px 8px;
 	background: var(--muted);
 	color: var(--border);
@@ -937,6 +947,20 @@ button {
 .orders-modal-body .unpaid {
 	background: #ef233c;
 	color: white;
+}
+
+.orders-modal-body .header {
+	font-weight: 600;
+	font-size: 20px;
+}
+
+.text-info.status.header {
+	background: none;
+	color: var(--text);
+}
+
+.orders-modal-body .header-card {
+	background: var(--bg);
 }
 
 /* Inbox Icon Button */

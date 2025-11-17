@@ -514,13 +514,13 @@
                 
         {% if orders %}
         <div class="products-grid">
-          <div class="product-card">
-            <div class="product-title">Order No.</div>
-            <div class="product-price">Total Amount</div>
-            <div class="product-meta">Order Date</div>
-            <div class="text-info">Status</div>
-            <div class="text-info">Payment</div>
-            <div class="product-actions">Actions</div>
+          <div class="product-card header-card">
+            <div class="product-title header">Order No.</div>
+            <div class="product-price header">Total Amount</div>
+            <div class="product-meta header">Order Date</div>
+            <div class="text-info status header">Status</div>
+            <div class="text-info status header">Payment</div>
+            <div class="product-actions header">Actions</div>
           </div>
           {% for o in orders %}
           <div class="product-card">
@@ -576,9 +576,7 @@
                   </ul>
                 {% else %}
                   <div class="empty-state" style="padding: 40px 20px; text-align: center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3;">
-                      <path d="M21 4H3C2.44772 4 2 4.44772 2 5V19C2 19.5523 2.44772 20 3 20H21C21.5523 20 22 19.5523 22 19V5C22 4.44772 21.5523 4 21 4ZM20 18H4V6H20V18ZM6 8H18V10H6V8ZM6 12H18V14H6V12ZM6 16H14V18H6V16Z"></path>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width: 48px; height: 48px; margin: 0 auto 12px; opacity: 0.3;"><path d="M6.45455 19L2 22.5V4C2 3.44772 2.44772 3 3 3H21C21.5523 3 22 3.44772 22 4V18C22 18.5523 21.5523 19 21 19H6.45455ZM5.76282 17H20V5H4V18.3851L5.76282 17ZM11 10H13V12H11V10ZM7 10H9V12H7V10ZM15 10H17V12H15V10Z"></path></svg>
                     <h3 style="margin: 0 0 8px; font-size: 16px;">No conversations yet</h3>
                     <p style="margin: 0; font-size: 14px; color: var(--muted);">Your messages with buyers and sellers will appear here.</p>
                   </div>
