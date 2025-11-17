@@ -5,7 +5,7 @@
 	box-sizing: border-box;
 	color-scheme: light dark;
 	letter-spacing: -0.5px;
-	line-height: 1;
+	line-height: 1.2;
 	font-family: "Poppins", sans-serif;
 	transition: all 0.1s ease;
 }

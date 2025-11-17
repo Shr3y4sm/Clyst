@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="overflow: hidden;">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -130,11 +130,8 @@
             {% if product.is_sustainable %}
             <div class="sustainability-info">
               <span class="sustainability-badge-inline">
-                🌱 Sustainable Product
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.998 3V5C20.998 14.6274 15.6255 19 8.99805 19L7.0964 18.9999C7.3079 15.9876 8.24541 14.1648 10.6939 11.9989C11.8979 10.9338 11.7965 10.3189 11.2029 10.6721C7.1193 13.1016 5.09114 16.3862 5.00119 21.6302L4.99805 22H2.99805C2.99805 20.6373 3.11376 19.3997 3.34381 18.2682C3.1133 16.9741 2.99805 15.2176 2.99805 13C2.99805 7.47715 7.4752 3 12.998 3C14.998 3 16.998 4 20.998 3Z"></path></svg>{{ product.sustainability_score }}% Sustainable
               </span>
-              <span class="sustainability-score"
-                >Score: {{ product.sustainability_score }}%</span
-              >
             </div>
             {% if product.sustainability_reasons %}
             <div class="sustainability-reasons">
@@ -155,7 +152,7 @@
             <div class="ai-detection-warning">
               <div class="ai-warning-header">
                 <span class="ai-badge-inline">
-                  🤖 AI Generated Image Detected
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4H9V6H15V4H17V2H19V6H17V8H19V10H23V16H21V12H20V18H17V20H19V22H15V18H9V22H5V20H7V18H4V12H3V16H1V10H5V8H7V6H5V2H7V4ZM9 11V14H11V11H9ZM13 11V14H15V11H13Z"></path></svg> AI Generated Image Detected
                 </span>
                 <span class="ai-confidence"
                   >Confidence: {{ product.ai_confidence_score }}%</span

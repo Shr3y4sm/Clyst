@@ -288,7 +288,6 @@ h1 {
 	background: none;
 	border: none;
 	padding: 0;
-	margin: 0 0 0 8px; /* Add a small space to the left */
 	width: auto;
 	height: auto;
 	border-radius: 0;
@@ -366,7 +365,8 @@ h1 {
 #bioTextarea:focus {
 	outline: none;
 	border-color: light-dark(#003d38, #57ffd8) !important;
-	box-shadow: 0 0 0 3px light-dark(rgba(0, 61, 56, 0.1), rgba(87, 255, 216, 0.1));
+	box-shadow: 0 0 0 3px
+		light-dark(rgba(0, 61, 56, 0.1), rgba(87, 255, 216, 0.1));
 }
 
 #bioEditForm button {

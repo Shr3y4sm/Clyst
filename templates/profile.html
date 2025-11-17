@@ -212,27 +212,17 @@
                     ></path>
                   </svg>
                 </button>
+              </h3>
                 {% if not profile_user or profile_user.id == current_user.id %}
                 <button
                   id="editBioBtn"
                   class="say-aloud-btn"
                   title="Edit About Section"
-                  style="margin-left: 8px;"
+                  style="margin: 0;"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="#000000"
-                    viewBox="0 0 256 256"
-                  >
-                    <path
-                      d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"
-                    ></path>
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.8995 6.85453L17.1421 11.0972L7.24264 20.9967H3V16.754L12.8995 6.85453ZM14.3137 5.44032L16.435 3.319C16.8256 2.92848 17.4587 2.92848 17.8492 3.319L20.6777 6.14743C21.0682 6.53795 21.0682 7.17112 20.6777 7.56164L18.5563 9.68296L14.3137 5.44032Z"></path></svg>
                 </button>
                 {% endif %}
-              </h3>
             </div>
             <p id="narrativeText" style="white-space: pre-wrap;">{{ portfolio_narrative }}</p>
             
@@ -246,14 +236,14 @@
                 placeholder="Write a catchy bio that showcases your unique artisan style..."
               >{{ portfolio_narrative }}</textarea>
               <div style="display: flex; gap: 10px; margin-top: 10px; align-items: center;">
-                <button id="saveBioBtn" class="btn btn-primary" style="padding: 8px 16px; background: light-dark(#003d38, #57ffd8); color: light-dark(#fff, #000); border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                  Save Bio
-                </button>
                 <button id="cancelBioBtn" class="btn btn-secondary" style="padding: 8px 16px; background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; cursor: pointer;">
                   Cancel
                 </button>
                 <button id="regenerateBioBtn" class="btn btn-info" style="padding: 8px 16px; background: light-dark(#57ffd8, #003d38); color: light-dark(#000, #fff); border: none; border-radius: 6px; cursor: pointer;">
-                  🔄 Regenerate AI Bio
+                  <svg xmlns="http://www.w3.org/2000/svg" style="width: 20px;" viewBox="0 0 24 24" fill="currentColor"><path d="M4 12C4 16.4183 7.58172 20 12 20C14.5905 20 16.8941 18.7696 18.3574 16.8574L16 14.5H22V20.5L19.7812 18.2812C17.9493 20.5479 15.1444 22 12 22C6.47715 22 2 17.5228 2 12H4ZM11.5293 8.31934C11.7059 7.8935 12.2943 7.89349 12.4707 8.31934L12.7236 8.93066C13.1556 9.97346 13.9615 10.8062 14.9746 11.2568L15.6924 11.5762C16.1026 11.759 16.1026 12.3562 15.6924 12.5391L14.9326 12.877C13.9449 13.3162 13.1534 14.1194 12.7139 15.1279L12.4668 15.6934C12.2864 16.1075 11.7137 16.1075 11.5332 15.6934L11.2871 15.1279C10.8476 14.1193 10.0552 13.3163 9.06738 12.877L8.30762 12.5391C7.89744 12.3562 7.89741 11.759 8.30762 11.5762L9.02539 11.2568C10.0385 10.8062 10.8445 9.97348 11.2764 8.93066L11.5293 8.31934ZM12 2C17.5228 2 22 6.47715 22 12H20C20 7.58172 16.4183 4 12 4C9.40951 4 7.1059 5.23038 5.64258 7.14258L8 9.5H2V3.5L4.21875 5.71875C6.05073 3.45212 8.85558 2 12 2Z"></path></svg>Regenerate AI Bio
+                </button>
+                <button id="saveBioBtn" class="btn btn-primary" style="padding: 8px 16px; background: light-dark(#003d38, #57ffd8); color: light-dark(#fff, #000); border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                  Save Bio
                 </button>
                 <span id="charCount" style="margin-left: auto; color: var(--muted); font-size: 13px;">0/500</span>
               </div>
@@ -504,15 +494,7 @@
                 </div>
                 {% else %}
                 <div class="empty-state">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path
-                      d="M5 11.1005L7 9.1005L12.5 14.6005L16 11.1005L19 14.1005V5H5V11.1005ZM4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3ZM15.5 10C14.6716 10 14 9.32843 14 8.5C14 7.67157 14.6716 7 15.5 7C16.3284 7 17 7.67157 17 8.5C17 9.32843 16.3284 10 15.5 10Z"
-                    ></path>
-                  </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L21.5 6.5V17.5L12 23L2.5 17.5V6.5L12 1ZM4.5 7.65311V7.65788L12 12V20.689L19.5 16.3469V7.65311L12 3.311L4.5 7.65311Z"></path></svg>
                   {% if current_user.is_authenticated and current_user.id == profile_user.id %}
                   <h3>ADD PRODUCTS TO START</h3>
                   <p>Start selling your artwork in the marketplace</p>
@@ -532,6 +514,14 @@
                 
         {% if orders %}
         <div class="products-grid">
+          <div class="product-card">
+            <div class="product-title">Order No.</div>
+            <div class="product-price">Total Amount</div>
+            <div class="product-meta">Order Date</div>
+            <div class="text-info">Status</div>
+            <div class="text-info">Payment</div>
+            <div class="product-actions">Actions</div>
+          </div>
           {% for o in orders %}
           <div class="product-card">
               <h3 class="product-title">Order #{{ o.order_id }}</h3>
@@ -554,7 +544,8 @@
           {% endfor %}
         </div>
         {% else %}
-        <div class="empty-cart">
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4L6 2L3 4V19C3 20.6569 4.34315 22 6 22H20C21.6569 22 23 20.6569 23 19V16H21V4L18 2L15 4L12 2L9 4ZM19 16H7V19C7 19.5523 6.55228 20 6 20C5.44772 20 5 19.5523 5 19V5.07037L6 4.4037L9 6.4037L12 4.4037L15 6.4037L18 4.4037L19 5.07037V16ZM20 20H8.82929C8.93985 19.6872 9 19.3506 9 19V18H21V19C21 19.5523 20.5523 20 20 20Z"></path></svg>
           <h3>No orders yet</h3>
           <p>Start by exploring unique artworks in the marketplace.</p>
           <a href="{{ url_for('products_page') }}" class="btn btn-primary"

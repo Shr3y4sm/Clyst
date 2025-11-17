@@ -186,8 +186,8 @@ h1 {
 }
 
 .sustainability-badge-inline {
-	background: light-dark(#003d38, #57ffd8);
-	color: light-dark(#fff, #000);
+	background: linear-gradient(45deg, #086972 50%, #17b978);
+	color: white;
 	padding: 6px 12px;
 	border-radius: 20px;
 	font-size: 14px;
@@ -241,7 +241,7 @@ h1 {
    AI DETECTION WARNING
    ================================ */
 .ai-detection-warning {
-	background: light-dark(#fff3cd, #332701);
+	background: light-dark(#ffd3cd, #331801);
 	border: 2px solid light-dark(#ff6b6b, #ff4444);
 	border-radius: 8px;
 	padding: 16px;
@@ -250,14 +250,15 @@ h1 {
 
 .ai-warning-header {
 	display: flex;
-	align-items: center;
-	gap: 12px;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 8px;
 	margin-bottom: 8px;
 	flex-wrap: wrap;
 }
 
 .ai-badge-inline {
-	background: light-dark(#ff6b6b, #ff4444);
+	background: #cf0f1f;
 	color: #fff;
 	padding: 6px 12px;
 	border-radius: 20px;
@@ -268,16 +269,20 @@ h1 {
 	gap: 6px;
 }
 
+.ai-badge-inline svg {
+	width: 18px;
+}
+
 .ai-confidence {
 	font-size: 13px;
-	color: var(--text);
+	color: light-dark(#ff6b6b, #ffa0a0);
 	opacity: 0.8;
 }
 
 .ai-warning-message {
 	font-size: 14px;
 	color: var(--text);
-	line-height: 1.6;
+	line-height: 1.2;
 	margin: 8px 0;
 }
 
@@ -288,7 +293,7 @@ h1 {
 
 .ai-detection-details details {
 	background: light-dark(#fff, #1a1a1a);
-	border: 1px solid var(--border);
+	border: 1px solid light-dark(#ff6b6b, #ff4444);
 	border-radius: 8px;
 	padding: 12px;
 }
