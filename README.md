@@ -15,7 +15,7 @@ Clyst is a comprehensive web application that serves as both a social platform f
 - **Search & Discovery**: Natural language search with price filtering and rating display
 - **Portfolio Management**: AI-generated portfolio narratives for artist profiles
 - **Promote Product to Post**: Turn a marketplace product into a community post with one click and a Promoted badge
-- **Verification (Get Verified)**: Dedicated camera page to complete simple verification from profile
+- **Verification System**: Dedicated camera page to complete verification from profile with admin approval workflow
 - **Likes & Comments**: Like posts and participate in discussions via comments (login required to like or comment; buttons visible to guests)
 - **Artist Analytics Dashboard**: Comprehensive business intelligence dashboard for artists
   - Real-time KPI tracking (Views, Engagement, Sales, Revenue)
@@ -24,6 +24,13 @@ Clyst is a comprehensive web application that serves as both a social platform f
   - Top products and posts performance metrics
   - AI-powered business insights and recommendations
   - Competitive pricing analysis with market benchmarking
+- **Messaging System**: Direct messaging between buyers and sellers for product inquiries
+- **Follow System**: Follow your favorite artists and build a community network
+- **Hashtag System**: Organize and discover content through hashtags on posts and products
+- **Payment Integration**: Dummy payment gateway for order processing and simulation
+- **Admin Dashboard**: Comprehensive admin panel for platform management and moderation
+- **Sustainability Detection**: AI-powered classification of sustainable products with badges and scoring
+- **AI Image Detection**: Automated detection of AI-generated images to protect authentic artisan work
 
 ### AI-Powered Features
 - **Content Generation**: AI-powered title and description suggestions for posts and products using Google Gemini
@@ -34,6 +41,14 @@ Clyst is a comprehensive web application that serves as both a social platform f
 - **AI Business Insights**: Intelligent analysis of artist performance across products, marketing, pricing, and growth opportunities
 - **Competitive Pricing Analysis**: AI-powered product similarity matching with market benchmarking and optional external market research (Amazon, Etsy, Flipkart)
 - **Smart Analytics Dashboard**: Comprehensive analytics with KPIs, trends, sales by category, and AI-driven recommendations
+- **Sustainability Classification**: ML-based detection of sustainable products
+- **AI Image Detection**: Hybrid detection system to identify AI-generated images
+  - URL pattern analysis (40% weight) - detects AI service URLs (Midjourney, DALL-E, Stable Diffusion, etc.)
+  - Metadata analysis (35% weight) - EXIF data examination
+  - Visual pattern analysis (25% weight) - Statistical image analysis
+  - Confidence scoring with 40% threshold
+  - Warning badges (🤖) and transparency banners
+  - Detailed detection method display on product pages
 
 ### Advanced Search
 - **Natural Language Processing**: Search using phrases like "minimalist monochrome abstracts under ₹5k"
@@ -58,9 +73,13 @@ Clyst is a comprehensive web application that serves as both a social platform f
 - **Flask-SQLAlchemy 3.1.1**: Flask integration with SQLAlchemy
 - **Flask-Bootstrap5 0.1.dev1**: Bootstrap integration
 - **Flask-CKEditor 1.0.0**: Rich text editor
+- **Flask-Migrate**: Database migration management with Alembic
 - **Werkzeug 3.0.1**: WSGI toolkit with password hashing
 - **python-dotenv 1.0.1**: Environment variable management
 - **Groq API**: AI model integration for insights and competitive analysis (Llama 3.3 70B)
+- **Firebase Admin SDK**: User verification and authentication services
+- **Pillow**: Image processing for AI detection (optional)
+- **NumPy**: Statistical analysis for image detection (optional)
 
 ### Frontend
 - **HTML5/CSS3**: Modern web standards with CSS Grid and Flexbox
@@ -97,13 +116,25 @@ ClystProto/
 ├── templates/           # HTML templates
 │   ├── index.html       # Community feed with search functionality
 │   ├── products.html    # Marketplace with price filtering
-│   ├── add_posts.html   # Create post form with AI suggestions
-│   ├── add_products.html # Add product form with AI suggestions
-│   ├── profile.html     # User profile with portfolio narrative
-│   ├── analytics.html   # Analytics dashboard with AI insights
-│   ├── login.html       # Login page
-│   ├── register.html    # Registration page
-│   └── product_buy.html # Product purchase page
+   ├── add_posts.html   # Create post form with AI suggestions
+   ├── add_products.html # Add product form with AI suggestions
+   ├── profile.html     # User profile with portfolio narrative
+   ├── analytics.html   # Analytics dashboard with AI insights
+   ├── camera.html      # Verification photo capture page
+   ├── cart.html        # Shopping cart page
+   ├── checkout.html    # Order checkout page
+   ├── conversation.html # Direct messaging interface
+   ├── hashtag.html     # Hashtag feed page
+   ├── orders.html      # Order history page
+   ├── order_detail.html # Individual order details
+   ├── payment.html     # Payment processing page
+   ├── admin_dashboard.html # Admin dashboard
+   ├── admin_users.html # Admin user management
+   ├── login.html       # Login page
+   ├── register.html    # Registration page
+   ├── verify_otp.html  # OTP verification page
+   ├── product_buy.html # Product purchase page
+   └── 500.html         # Error page
 ├── static/
 │   ├── css/
 │   │   └── styles.css   # Global styles and common components
@@ -189,12 +220,14 @@ ClystProto/
 1. **Registration & Profile**
    - Create an account with email, name, phone, and location
    - Access your profile to manage posts and products
+   - Add custom bio for personalized portfolio narrative
 
 2. **Creating Posts**
    - Share artwork with the community
    - Upload images or provide image URLs
    - Use AI to generate engaging titles and descriptions
    - Translate content into multiple languages
+   - Add hashtags for better discoverability
    - Promote a product to a post: From your profile, click "Promote Product" on a product; you'll be taken to Create Post with fields pre-filled. Submitting creates a post with a Promoted tag in the feed.
 
 3. **Selling Products**
@@ -202,6 +235,9 @@ ClystProto/
    - Set prices and detailed descriptions
    - Use AI suggestions for better product listings
    - Manage your product inventory
+   - Add hashtags to categorize products
+   - Automatic sustainability classification with scoring
+   - Automatic AI-generated image detection with transparency warnings
 
 4. **Analytics Dashboard**
    - Access comprehensive analytics for your business
@@ -222,6 +258,13 @@ ClystProto/
 
 5. **Get Verified**
    - From your profile, click "Get verified now" to open the Camera page (`/camera`) and complete a simple verification step.
+   - Submit verification photo for admin review
+   - Get verified badge on profile once approved
+
+6. **Messaging & Networking**
+   - Receive and respond to buyer inquiries about products
+   - Build your follower base
+   - Follow other artists for inspiration
 
 ### Interacting with Posts (All Users)
 - Like a post: Click the Like button on any post. If you’re not logged in, you’ll be prompted to log in first.
@@ -268,11 +311,15 @@ Developer endpoints
    - Browse the marketplace with star ratings displayed on each product
    - Use natural language search (e.g., "abstract paintings under 5000")
    - View average ratings and review counts to make informed decisions
+   - Filter products by sustainability (🌱 badge)
+   - View AI-generated image warnings (🤖 badge)
+   - Discover content through hashtags
 
 2. **Search Features**
    - Search by keywords, artist names, or descriptions
    - Filter by price ranges
    - Use phrases like "landscape oil painting below 7500"
+   - Click on hashtags to find related content
 
 3. **Shopping Cart**
    - Add products to cart with custom quantities
@@ -285,13 +332,23 @@ Developer endpoints
    - Leave reviews with 1-5 star ratings
    - Read other buyers' reviews and ratings
    - Rate and review products in one unified interface
-   - Contact artists through their profiles
+   - Contact artists through messaging system
    - Use text-to-speech for accessibility
+   - View sustainability scores and reasons
+   - Check AI-generated image detection details
 
 5. **Order Management**
    - Complete checkout process for cart items
-   - Track order status (pending, completed, cancelled)
+   - Make payments through integrated payment gateway
+   - Track order status (pending, paid, shipped, delivered, cancelled)
    - View order history with details and pricing
+   - Cancel orders if needed
+
+6. **Social Features**
+   - Follow favorite artists
+   - Like and comment on posts
+   - Direct message sellers for product inquiries
+   - Engage with the community
 
 ## 🔍 Search Capabilities
 
@@ -385,6 +442,127 @@ The application features an advanced natural language search system that underst
 - **International**: English, Spanish, French, German, Chinese, Japanese, Korean, Russian, Greek, Hebrew, Arabic
 - **Script Support**: Devanagari, Bengali, Gurmukhi, Gujarati, Tamil, Telugu, Kannada, Malayalam, Arabic, CJK, Cyrillic, Greek, Hebrew
 
+### Sustainability & Authenticity Detection
+- **Sustainability Classification**: ML-based detection using MobileNetV2 + keyword analysis
+  - Automatic scoring on product creation
+  - 60% threshold for sustainable classification
+  - Detailed reasoning and keyword identification
+  - Visual badges (🌱) for sustainable products
+  - Filter capability in marketplace
+
+- **AI Image Detection**: Hybrid system to identify AI-generated images
+  - URL pattern analysis (detects AI service URLs)
+  - Metadata examination (EXIF data)
+  - Visual pattern analysis (statistical features)
+  - Confidence scoring with transparency warnings
+  - Visual badges (🤖) for AI-generated images
+  - Detailed detection information on product pages
+
+## 💬 Messaging System
+
+### Direct Messaging
+- **Buyer-Seller Communication**: Direct messaging for product inquiries
+- **Conversation Threading**: Organized conversations by product
+- **Message History**: Complete message history with timestamps
+- **Real-time Updates**: Last message timestamp tracking
+- **Attachment Support**: Share images and files in messages
+- **Read Receipts**: Track when messages are read
+
+### Features
+- Start conversations from product pages
+- View all active conversations
+- Message notifications
+- Product context in conversation view
+- Search and filter conversations
+
+## 👥 Social Features
+
+### Follow System
+- **Follow Artists**: Build your network of favorite creators
+- **Follower Count**: Track your follower base
+- **Following Feed**: See posts from artists you follow
+- **Mutual Follows**: Identify mutual connections
+- **Profile Display**: Follower/following counts on profiles
+
+### Post Interactions
+- **Like Posts**: One-click appreciation for artwork
+- **Comment System**: Engage in discussions on posts
+- **Comment Threading**: Organized conversation threads
+- **Delete Comments**: Remove your own comments
+- **User Attribution**: All interactions show user details
+
+### Hashtag System
+- **Hashtag Support**: Tag posts and products with hashtags
+- **Hashtag Pages**: Browse content by specific hashtags
+- **Multi-tag Support**: Add multiple hashtags per item
+- **Auto-linking**: Clickable hashtags in descriptions
+- **Discovery**: Find related content through hashtags
+- **Category Analysis**: Sales breakdown by hashtag categories
+
+## 🛒 E-Commerce Features
+
+### Shopping Cart
+- **Modern Cart System**: Session-based cart with persistence
+- **Quantity Management**: Adjust item quantities before checkout
+- **Price Calculation**: Automatic total price computation
+- **Remove Items**: Easy item removal from cart
+- **Cart Persistence**: Cart saved across sessions for logged-in users
+
+### Order Management
+- **Order Placement**: Complete checkout with shipping details
+- **Order Tracking**: Track order status through lifecycle
+- **Order History**: View all past orders with details
+- **Order Cancellation**: Cancel pending orders
+- **Status Updates**: Multiple order statuses (pending, paid, shipped, delivered, cancelled)
+
+### Payment System
+- **Payment Gateway**: Integrated dummy payment system for testing
+- **Payment Status Tracking**: Monitor payment completion
+- **Transaction References**: Unique transaction IDs
+- **Payment Simulation**: Test payment flows without real transactions
+- **Payment Methods**: Support for multiple payment methods
+- **Refund Tracking**: Payment refund status monitoring
+
+## 👨‍💼 Admin Features
+
+### Admin Dashboard
+- **Platform Overview**: System-wide statistics and metrics
+- **User Management**: View and manage all users
+- **Content Moderation**: Review and moderate posts, products, and comments
+- **Verification Approval**: Approve or reject user verification requests
+- **Order Management**: View and update order statuses
+
+### Moderation Tools
+- **Delete Content**: Remove inappropriate posts, products, comments, reviews
+- **Ban Users**: Suspend user accounts for violations
+- **Verify Users**: Manual verification badge assignment
+- **Review Management**: Moderate product reviews
+- **Bulk Actions**: Efficient management of multiple items
+
+### User Management
+- **User List**: Comprehensive view of all registered users
+- **Verification Queue**: Pending verification requests
+- **User Details**: View complete user profiles and activity
+- **Account Actions**: Ban, verify, or manage user accounts
+- **Activity Tracking**: Monitor user engagement and contributions
+
+## 🔐 Security & Verification
+
+### User Verification
+- **Camera Verification**: In-app photo capture for identity verification
+- **Admin Review**: Manual approval process for verification requests
+- **Verification Badge**: Visual indicator of verified status
+- **Profile Enhancement**: Verified users get enhanced credibility
+- **Verification Photos**: Secure storage of verification images
+
+### Security Features
+- **Password Hashing**: Werkzeug-based secure password storage
+- **Session Management**: Flask-Login for secure user sessions
+- **File Upload Security**: Filename sanitization and type validation
+- **CSRF Protection**: Built-in protection against cross-site request forgery
+- **Input Validation**: Server-side validation for all user inputs
+- **Unique Filenames**: UUID-based file naming to prevent conflicts
+
 ## 🎨 User Interface
 
 ### Design Philosophy
@@ -419,6 +597,11 @@ The application features an advanced natural language search system that underst
 - `phone`: Contact number (String, 20 chars)
 - `location`: User's location (String, 150 chars)
 - `created_at`: Account creation date (String, 250 chars)
+- `is_verified`: Verification status (Boolean, default False)
+- `verification_photo`: Path to verification photo (String, 255 chars)
+- `verification_date`: Date of verification (String, 250 chars)
+- `custom_bio`: Custom biography text (Text)
+- `is_admin`: Admin status flag (Boolean, default False)
 - **Relationships**: One-to-many with Posts and Products
 
 ### Posts Table
@@ -452,6 +635,13 @@ The application features an advanced natural language search system that underst
 - `img_url`: Product image URL or path (String, 255 chars)
 - `created_at`: Product creation date (String, 250 chars)
 - `is_promoted`: Promotion flag for product (Boolean) — currently used to track promotion state
+- `is_sustainable`: Sustainability classification flag (Integer, default 0)
+- `sustainability_score`: Sustainability percentage score (Float, 0-100)
+- `sustainability_reasons`: JSON string of sustainability reasons (Text)
+- `is_ai_generated`: AI-generated image detection flag (Integer, default 0)
+- `ai_confidence_score`: AI detection confidence percentage (Float, 0-100)
+- `ai_detection_method`: Detection method used (Text)
+- `ai_detection_details`: JSON string of detection details (Text)
 - **Relationships**: Many-to-one with User
 
 ### ProductComments Table
@@ -516,6 +706,42 @@ The application features an advanced natural language search system that underst
 - `profile_user_id`: Foreign key to users.id (CASCADE on delete)
 - `created_at`: View timestamp (String, 250 chars)
 
+### Conversation Table
+- `id`: Primary key (auto-increment)
+- `product_id`: Foreign key to products.product_id (nullable)
+- `buyer_id`: Foreign key to users.id
+- `seller_id`: Foreign key to users.id
+- `status`: Conversation status (String, 20 chars, default 'open')
+- `created_at`: Conversation creation date (String, 250 chars)
+- `last_message_at`: Timestamp of last message (String, 250 chars)
+- **Constraints**: Unique constraint on (product_id, buyer_id, seller_id)
+
+### Message Table
+- `id`: Primary key (auto-increment)
+- `conversation_id`: Foreign key to conversations.id
+- `sender_id`: Foreign key to users.id
+- `body`: Message content (Text)
+- `attachment_url`: Optional file attachment (String, 255 chars)
+- `created_at`: Message timestamp (String, 250 chars)
+- `read_at`: Message read timestamp (String, 250 chars)
+
+### Follow Table
+- `id`: Primary key (auto-increment)
+- `follower_id`: Foreign key to users.id (user who follows)
+- `followed_id`: Foreign key to users.id (user being followed)
+- `created_at`: Follow timestamp (String, 250 chars)
+- **Constraints**: Unique constraint on (follower_id, followed_id)
+
+### Payment Table
+- `id`: Primary key (auto-increment)
+- `order_id`: Foreign key to orders.order_id
+- `amount`: Payment amount (Numeric, 10 digits, 2 decimal places)
+- `status`: Payment status (String, 50 chars) - pending, completed, failed
+- `payment_method`: Payment method used (String, 50 chars)
+- `transaction_id`: External transaction reference (String, 255 chars)
+- `created_at`: Payment creation date (String, 250 chars)
+- `updated_at`: Payment updated date (String, 250 chars)
+
 
 ### Environment Setup
 ```bash
@@ -542,7 +768,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 - **Advanced AI**: More sophisticated content generation, image analysis and smart price assist for artisans
 - **Advanced Search**: Recommendation system based on browsing history and preferences
-- **Payment Integration**: Secure payment gateway integration for online transactions
+- **Payment Integration**: Real payment gateway integration (Stripe, PayPal, Razorpay) for online transactions
 - **Enhanced Analytics**: 
   - Conversion rate tracking (view-to-purchase)
   - Customer lifetime value analysis
@@ -555,6 +781,15 @@ This project is licensed under the MIT License - see the LICENSE file for detail
   - Seasonal trend analysis and predictions
   - Automated inventory recommendations
   - Dynamic pricing suggestions based on demand
+- **Mobile Apps**: Native iOS and Android applications
+- **Video Support**: Upload and display video content for products and posts
+- **Live Streaming**: Live art creation sessions and product showcases
+- **NFT Integration**: Mint and sell digital artwork as NFTs
+- **International Shipping**: Multi-currency and international shipping support
+- **Advanced Messaging**: Group chats, voice messages, video calls
+- **Gamification**: Badges, achievements, and artist levels
+- **Subscription Plans**: Premium features for verified artists
+- **API Access**: Public API for third-party integrations
 
 
 ---
