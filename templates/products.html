@@ -137,26 +137,54 @@
       </div>
       
       <div class="main-content">
-        <!-- ===== SORT OPTIONS ===== -->
-        <div class="sort-wrapper">
-          <label for="sort-select">Sort by</label></br>
-          <select id="sort-select" onchange="handleSortChange(this.value)">
-            <option value="newest" {{ 'selected' if sort_by == 'newest' else '' }}>Newest</option>
-            <option value="popular" {{ 'selected' if sort_by == 'popular' else '' }}>Popular</option>
-            <option value="price_low" {{ 'selected' if sort_by == 'price_low' else '' }}>Price: Low to High</option>
-            <option value="price_high" {{ 'selected' if sort_by == 'price_high' else '' }}>Price: High to Low</option>
-          </select>
+        <!-- ===== FILTERS AND SORT ===== -->
+        <div class="filter-sort-wrapper">
+          <!-- Sustainability Filter -->
+          <div class="filter-wrapper">
+            <label>
+              <input 
+                type="checkbox" 
+                id="sustainable-filter" 
+                onchange="handleFilterChange(this.checked)"
+                {{ 'checked' if show_sustainable_only else '' }}
+              />
+              <span>🌱 Show only sustainable products</span>
+            </label>
+          </div>
+          
+          <!-- Sort Options -->
+          <div class="sort-wrapper">
+            <label for="sort-select">Sort by</label></br>
+            <select id="sort-select" onchange="handleSortChange(this.value)">
+              <option value="newest" {{ 'selected' if sort_by == 'newest' else '' }}>Newest</option>
+              <option value="popular" {{ 'selected' if sort_by == 'popular' else '' }}>Popular</option>
+              <option value="price_low" {{ 'selected' if sort_by == 'price_low' else '' }}>Price: Low to High</option>
+              <option value="price_high" {{ 'selected' if sort_by == 'price_high' else '' }}>Price: High to Low</option>
+            </select>
+          </div>
         </div>
         {% if products %}
         <div class="products-grid">
           {% for product in products %}
           <div class="product-card" onclick='location.href = "{{ url_for('product_buy', product_id=product.product_id) }}";'>
             {% if product.img_url %}
-            <img
-              src="{{ product.img_url }}"
-              alt="{{ product.title }}"
-              class="product-image"
-            />
+            <div class="product-image-wrapper">
+              <img
+                src="{{ product.img_url }}"
+                alt="{{ product.title }}"
+                class="product-image"
+              />
+              {% if product.is_sustainable %}
+              <div class="sustainability-badge" title="Sustainable Product (Score: {{ product.sustainability_score }}%)">
+                🌱
+              </div>
+              {% endif %}
+              {% if product.is_ai_generated %}
+              <div class="ai-badge" title="AI Generated Image (Confidence: {{ product.ai_confidence_score }}%)">
+                🤖
+              </div>
+              {% endif %}
+            </div>
             {% else %}
             <div class="product-image placeholder">
               <i class="fas fa-image"></i>
@@ -505,7 +533,18 @@
       function handleSortChange(sortValue) {
         const url = new URL(window.location);
         url.searchParams.set('sort', sortValue);
-        window.location.href = url.toString();
+        window.location = url.toString();
+      }
+      
+      // Handle sustainability filter change
+      function handleFilterChange(isChecked) {
+        const url = new URL(window.location);
+        if (isChecked) {
+          url.searchParams.set('sustainable', '1');
+        } else {
+          url.searchParams.delete('sustainable');
+        }
+        window.location = url.toString();
       }
     </script>
     <script src="../static/js/app.js"></script>

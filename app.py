@@ -9,6 +9,8 @@ import firebase_config
 import firebase_admin
 from firebase_admin import auth
 from functools import lru_cache, wraps
+import sustainability_classifier
+import ai_image_detector
 
 # Load environment variables from .env file
 load_dotenv()
@@ -50,6 +52,17 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 ckeditor = CKEditor(app)
 Bootstrap(app)
+
+# Add custom Jinja2 filters
+@app.template_filter('from_json')
+def from_json_filter(value):
+    """Parse JSON string to Python object"""
+    if not value:
+        return []
+    try:
+        return json.loads(value)
+    except (json.JSONDecodeError, TypeError):
+        return []
 
 # Configure Flask-Login
 login_manager = LoginManager()
@@ -148,8 +161,11 @@ def allowed_file(filename):
 
 def save_uploaded_file(file, folder_name):
     if file and allowed_file(file.filename):
+        # Store original filename for AI detection
+        original_filename = file.filename
+        
         # Generate unique filename
-        filename = secure_filename(file.filename)
+        filename = secure_filename(original_filename)
         unique_filename = f"{uuid.uuid4()}_{filename}"
 
         # Create folder if it doesn't exist
@@ -160,10 +176,10 @@ def save_uploaded_file(file, folder_name):
         file_path = os.path.join(folder_path, unique_filename)
         file.save(file_path)
 
-        # Return URL path for database storage
+        # Return URL path for database storage and original filename for detection
         url_path = f"/static/uploads/{folder_name}/{unique_filename}"
-        return url_path
-    return None
+        return url_path, original_filename
+    return None, None
 
 
 class User(UserMixin, db.Model):
@@ -210,6 +226,13 @@ class Product(db.Model):
     img_url: Mapped[Optional[str]] = mapped_column(db.String(255))
     created_at: Mapped[Optional[str]] = mapped_column(db.String(250))
     is_promoted: Mapped[bool] = mapped_column(db.Boolean, default=False)
+    is_sustainable: Mapped[bool] = mapped_column(db.Integer, default=0)
+    sustainability_score: Mapped[Optional[float]] = mapped_column(db.Float, default=0.0)
+    sustainability_reasons: Mapped[Optional[str]] = mapped_column(db.Text, nullable=True)
+    is_ai_generated: Mapped[bool] = mapped_column(db.Integer, default=0)
+    ai_confidence_score: Mapped[Optional[float]] = mapped_column(db.Float, default=0.0)
+    ai_detection_method: Mapped[Optional[str]] = mapped_column(db.Text, nullable=True)
+    ai_detection_details: Mapped[Optional[str]] = mapped_column(db.Text, nullable=True)
 
 
 class Comments(db.Model):
@@ -1095,7 +1118,7 @@ def start_conversation():
         if 'attachment' in request.files:
             file = request.files['attachment']
             if file and file.filename:
-                uploaded = save_uploaded_file(file, 'messages')
+                uploaded, _ = save_uploaded_file(file, 'messages')
                 if uploaded:
                     attachment_url = uploaded
 
@@ -1178,7 +1201,7 @@ def send_message(conversation_id: int):
     if 'attachment' in request.files:
         file = request.files['attachment']
         if file and file.filename:
-            up = save_uploaded_file(file, 'messages')
+            up, _ = save_uploaded_file(file, 'messages')
             if up:
                 attachment_url = up
 
@@ -1262,8 +1285,14 @@ def products_page():
     # Optional natural language query parsing for products
     q = (request.args.get('q') or '').strip()
     sort_by = (request.args.get('sort') or 'newest').strip().lower()
+    show_sustainable_only = request.args.get('sustainable') == '1'
     
     prod_query = db.select(Product)
+    
+    # Apply sustainability filter if enabled
+    if show_sustainable_only:
+        prod_query = prod_query.where(Product.is_sustainable == 1)
+    
     if q:
         parsed = natural_search.parse_search_query(q)
         tokens = parsed.get('keywords', [])
@@ -1337,7 +1366,7 @@ def products_page():
         # Sort by product_id descending (most recent first)
         products.sort(key=lambda p: p.product_id, reverse=True)
     
-    return render_template('products.html', products=products, current_user=current_user, q=q, sort_by=sort_by)
+    return render_template('products.html', products=products, current_user=current_user, q=q, sort_by=sort_by, show_sustainable_only=show_sustainable_only)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -1656,10 +1685,10 @@ def add_posts():
         if 'post_image_file' in request.files:
             file = request.files['post_image_file']
             if file.filename != '':
-                uploaded_path = save_uploaded_file(file, 'posts')
+                uploaded_path, _ = save_uploaded_file(file, 'posts')
                 if uploaded_path:
                     media_url = uploaded_path
-                    
+        
         # For editing, keep existing image if no new one provided
         if not media_url and post:
             media_url = post.media_url
@@ -1762,14 +1791,16 @@ def add_products():
     if request.method == 'POST':
         # Handle image upload
         img_url = request.form.get('product_image', '')
+        original_filename = None
 
         # Check if file was uploaded
         if 'product_image_file' in request.files:
             file = request.files['product_image_file']
             if file.filename != '':
-                uploaded_path = save_uploaded_file(file, 'products')
+                uploaded_path, orig_name = save_uploaded_file(file, 'products')
                 if uploaded_path:
                     img_url = uploaded_path
+                    original_filename = orig_name
 
         # For editing, keep existing image if no new one provided
         if not img_url and product:
@@ -1810,6 +1841,30 @@ def add_products():
             # Extract and save hashtags from title and description
             combined_text = f"{request.form['product_name']} {request.form.get('description', '')}"
             save_hashtags_for_product(product.product_id, combined_text)
+            
+            # Classify product sustainability
+            classification = sustainability_classifier.classify_product_sustainability(
+                title=request.form['product_name'],
+                description=request.form.get('description', ''),
+                image_url=img_url
+            )
+            
+            # Update product with sustainability data
+            product.is_sustainable = 1 if classification['is_sustainable'] else 0
+            product.sustainability_score = classification['score']
+            product.sustainability_reasons = json.dumps(classification['reasons']) if classification['reasons'] else None
+            
+            # Detect AI-generated images
+            # Pass original filename if available for better detection
+            detection_url = original_filename if original_filename else img_url
+            ai_detection = ai_image_detector.detect_ai_image(detection_url)
+            
+            # Update product with AI detection data
+            product.is_ai_generated = 1 if ai_detection['is_ai_generated'] else 0
+            product.ai_confidence_score = ai_detection['confidence_score']
+            product.ai_detection_method = ai_detection['detection_method']
+            product.ai_detection_details = json.dumps(ai_detection['details']) if ai_detection['details'] else None
+            
             db.session.commit()
             
             # If it's an AJAX request, return JSON response
@@ -1925,10 +1980,22 @@ def delete_posts():
 def delete_products():
     product_id = request.args.get('product_id')
     product_to_delete = db.get_or_404(Product, product_id)
-    db.session.delete(product_to_delete)
-    db.session.commit()
-    # Clear portfolio cache when content changes
-    clear_portfolio_cache(current_user.id)
+    
+    # Security check: only allow owner or admin to delete
+    if product_to_delete.artist_id != current_user.id and not current_user.is_admin:
+        flash('You do not have permission to delete this product.', 'danger')
+        return redirect(url_for('products_page'))
+    
+    try:
+        db.session.delete(product_to_delete)
+        db.session.commit()
+        # Clear portfolio cache when content changes
+        clear_portfolio_cache(current_user.id)
+        flash('Product deleted successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Error deleting product. Please try again.', 'error')
+    
     return redirect(url_for('products_page'))
 
 
