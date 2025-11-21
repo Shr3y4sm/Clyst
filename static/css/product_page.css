@@ -39,7 +39,7 @@ h1 {
 	flex-direction: column;
 	justify-content: flex-start;
 	gap: 0;
-	overflow: scroll;
+	overflow-y: scroll;
 }
 
 .product-header {
@@ -188,19 +188,24 @@ h1 {
 .sustainability-badge-inline {
 	background: linear-gradient(45deg, #086972 50%, #17b978);
 	color: white;
-	padding: 6px 12px;
-	border-radius: 20px;
+	padding: 8px 20px 8px 16px;
+	border-radius: 20em;
 	font-size: 14px;
 	font-weight: 600;
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: 4px;
 }
 
-.sustainability-score {
-	font-size: 13px;
+.sustainability-badge-inline svg {
+	width: 36px;
+}
+
+.eco-perc {
+	font-size: 28px;
+	font-weight: 500;
+	line-height: 1;
 	color: var(--text);
-	opacity: 0.8;
 }
 
 .sustainability-reasons {

@@ -19,7 +19,7 @@
       }
 
       .admin-header h1 {
-        margin: 0 0 4px 0;
+        margin: 0;
         padding: 0;
         color: var(--text);
         font-size: 40px;
@@ -125,6 +125,11 @@
         margin-bottom: 4px;
       }
 
+      .prods.title{
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
       .content-info .meta {
         font-size: 13px;
         color: var(--muted);
@@ -171,6 +176,7 @@
 
       .admin-nav {
         display: flex;
+        justify-content: space-between;
         gap: 12px;
         margin: 0 20px 20px 20px;
       }
@@ -209,7 +215,10 @@
       }
 
       .price{
-        padding: 4px 8px;
+        margin: 0;
+        padding: 0;
+        background: none;
+        color: light-dark(#0e8d2c, #04c030);
         font-size: 14px;
       }
 
@@ -228,7 +237,6 @@
       </div>
 
       <div class="admin-nav">
-        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
         <a href="{{ url_for('admin_users') }}">Manage Users</a>
         <a href="{{ url_for('home') }}">Back to Site</a>
       </div>
@@ -290,8 +298,8 @@
           {% for product in recent_products %}
           <div class="content-item" onclick='location.href="{{ url_for('product_buy', product_id=product.product_id) }}"'>
             <div class="content-info">
-              <div class="title">
-                {{ product.title }} <span class="verified-badge price">Rs. {{ product.price }}</span>
+              <div class="prods title">
+                {{ product.title }}<br/><span class="verified-badge price">Rs. {{ product.price }}</span>
               </div>
               <div class="meta">
                 {{ product.artist.name }} • {{ product.created_at }}
