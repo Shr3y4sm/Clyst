@@ -44,6 +44,89 @@ svg {
 	gap: 20px;
 }
 
+.nav-actions {
+	position: relative;
+}
+
+select {
+	padding: 8px 28px 8px 12px;
+	background: var(--card);
+	color: var(--text);
+	font-size: 13px;
+	font-family: inherit;
+	cursor: pointer;
+	transition: all 0.2s;
+	appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 8px center;
+	min-width: 154px;
+	margin: 0;
+	border: light-dark(#ddd, #222) 1px solid;
+	border-radius: 8px;
+	font-size: 16px;
+	transition: all 0.2s;
+}
+select:hover {
+	border-color: var(--accent);
+	background-color: var(--bg);
+}
+
+select:focus {
+	outline: none;
+	border-color: var(--accent);
+	box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.1);
+}
+
+option {
+	display: flex;
+	justify-content: flex-start;
+	gap: 20px;
+	border: 2px solid var(--border);
+	background: var(--card);
+	padding: 10px;
+	transition: 0.4s;
+}
+option:first-of-type {
+	border-radius: 8px 8px 0 0;
+}
+option:last-of-type {
+	border-radius: 0 0 8px 8px;
+}
+
+::picker(select) {
+	border-radius: 20px;
+}
+
+option:not(option:last-of-type) {
+	border-bottom: none;
+}
+option:hover,
+option:focus {
+	background: var(--border);
+}
+option .icon {
+	font-size: 1.6rem;
+	text-box: trim-both cap alphabetic;
+}
+
+.nav-actions label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: fit-content;
+	border: 1px solid #00b4d8;
+	border-radius: 20em;
+	color: #00b4d8;
+	background: var(--card);
+	padding: 2px 8px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	margin-block: auto;
+	right: 4px;
+}
+
 .product-details,
 .profile-info {
 	width: 50%;
@@ -67,8 +150,8 @@ svg {
 	align-items: center;
 	justify-content: center;
 	color: var(--card);
-	font-size: 48px;
-	font-weight: bold;
+	font-size: 80px;
+	font-weight: 500;
 	margin: 0;
 }
 

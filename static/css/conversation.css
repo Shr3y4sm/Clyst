@@ -58,7 +58,7 @@
 .sender {
 	border: none;
 	align-items: flex-end;
-	background-color: var(--muted);
+	background-color: var(--accent);
 	border-radius: 12px 2px 12px 12px;
 }
 

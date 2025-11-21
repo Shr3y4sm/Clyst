@@ -134,7 +134,7 @@ nav#topNav {
 	font-size: 16px;
 	transition: color 0.2s;
 }
-a .nav-active {
+.nav-center .nav-active {
 	color: light-dark(#111, #fff);
 }
 .nav-center a:hover {
@@ -710,7 +710,6 @@ svg {
 	font-size: 16px;
 	transition: all 0.2s;
 }
-
 .sort-wrapper select:hover {
 	border-color: var(--accent);
 	background-color: var(--bg);
@@ -722,6 +721,38 @@ svg {
 	box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.1);
 }
 
+.sort-wrapper option {
+	display: flex;
+	justify-content: flex-start;
+	gap: 20px;
+	border: 2px solid var(--border);
+	background: var(--card);
+	padding: 10px;
+	transition: 0.4s;
+}
+.sort-wrapper option:first-of-type {
+	border-radius: 8px 8px 0 0;
+}
+
+.sort-wrapper option:last-of-type {
+	border-radius: 0 0 8px 8px;
+}
+
+::picker(select) {
+	border-radius: 20px;
+}
+
+.sort-wrapper option:not(option:last-of-type) {
+	border-bottom: none;
+}
+.sort-wrapper option:hover,
+.sort-wrapper option:focus {
+	background: var(--border);
+}
+.sort-wrapper option .icon {
+	font-size: 1.6rem;
+	text-box: trim-both cap alphabetic;
+}
 @media (max-width: 768px) {
 	.sort-wrapper {
 		margin-left: 20px;
