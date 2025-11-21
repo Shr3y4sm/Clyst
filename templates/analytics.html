@@ -18,9 +18,8 @@
         padding: 0 16px;
       }
       .title {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 16px;
+        font-size: 36px;
+        font-weight: 500;
         color: var(--text);
       }
       .muted {
@@ -39,6 +38,9 @@
         border-radius: 20px;
         padding: 16px;
       }
+      .charts .card{
+        padding: 0;
+      }
       .kpi .label {
         font-size: 12px;
         color: var(--muted);
@@ -46,9 +48,8 @@
         letter-spacing: 0.04em;
       }
       .kpi .value {
-        font-size: 24px;
-        font-weight: 700;
-        margin-top: 6px;
+        font-size: 32px;
+        font-weight: 500;
       }
 
       .grid-2 {
@@ -110,10 +111,17 @@
         color: var(--text);
         margin-bottom: 0;
       }
+
+      .charts .section-title{
+        margin: 20px 20px 0 20px;
+        font-size: 28px;
+        font-weight: 500;
+      }
+
       .sub {
-        font-size: 13px;
+        font-size: 15px;
         color: var(--muted);
-        margin-top: -4px;
+        margin: 0 20px 20px 20px;
       }
 
       /* Tab styles */
@@ -126,7 +134,7 @@
         border: none;
         padding: 12px 20px;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 500;
         color: var(--muted);
         cursor: pointer;
         border-bottom: 2px solid transparent;
@@ -265,15 +273,11 @@
 
         <div class="grid-2 charts">
           <div class="card">
-            <div class="section-title">Views (last 30 days)</div>
+            <div class="section-title">Views &#0149; Last 30 days</div>
               <div id="viewsChart" style="height: 260px; width: 100%; display: block;"></div>
-            <div class="legend">
-              <span><i class="pv"></i>Product views</span>
-              <span><i class="pr"></i>Profile views</span>
-            </div>
           </div>
           <div class="card">
-            <div class="section-title">Revenue (last 30 days)</div>
+            <div class="section-title">Revenue &#0149; Last 30 days</div>
             <div id="revenueChart" style="height: 260px; width: 100%; display: block;"></div>
             <div class="sub">
               Orders: {{ total_orders }} • Gross: ₹ {{
@@ -713,12 +717,12 @@
         if (raw.indexOf('light-dark') !== -1) return fallback;
         return raw;
       }
-      const accent = cleanColor(_rawAccent, '#ff6b6b');
+      const accent = cleanColor(_rawAccent, '#ff7b00');
       const mutedColor = cleanColor(_rawMuted, '#888');
       const textColor = cleanColor(_rawText, '#fff');
       const borderColor = cleanColor(_rawBorder, 'rgba(255,255,255,0.1)');
-      const green = '#4db6ac';
-      const purple = '#7e57c2';
+      const green = '#00b4d8';
+      const purple = '#00b4d8';
 
       // Format days for x-axis: show `Mon dd` (e.g. "Oct 15")
       const formattedDays = (Array.isArray(days) ? days : []).map(d => {
@@ -745,7 +749,7 @@
         const prData = (pr || []).map(v => Number(v) || 0);
         const revData = (rev || []).map(v => Number(v) || 0);
 
-        const accentColor = (accent && accent.length) ? accent : '#ff6b6b';
+        const accentColor = (accent && accent.length) ? accent : '#ff7b00';
         const profileColor = green;
 
         // Views chart (line chart with two series)
@@ -755,14 +759,14 @@
             { name: 'Product views', data: pvData },
             { name: 'Profile views', data: prData }
           ],
-          chart: { type: 'line', height: 260, toolbar: { show: false }, sparkline: { enabled: false } },
+          chart: { type: 'line', height: 260, toolbar: { show: false }, sparkline: { enabled: false }, fontFamily: 'Poppins, sans-serif'  },
           colors: [accentColor, profileColor],
-          stroke: { curve: 'smooth', width: 3 },
+          stroke: { width: 3, curve: 'smooth' },
           markers: { size: 0, strokeWidth: 0 },
-          xaxis: { categories: formattedDays, labels: { style: { colors: mutedColor }, maxHeight: 100 }, axisBorder: { show: false }, axisTicks: { show: false } },
+          xaxis: { categories: formattedDays, labels: { show: false}, axisBorder: { show: false }, axisTicks: { show: false } },
           yaxis: { labels: { style: { colors: mutedColor } } },
           grid: { borderColor: borderColor },
-          legend: { labels: { colors: mutedColor }, position: 'top' },
+          legend: { labels: { colors: mutedColor }, markers: {shape: "line"} , position: 'top', horizontalAlign: 'left', fontSize: '16px', itemMargin: {horizontal: 10} },
           tooltip: {
             theme: 'dark',
             shared: true,
@@ -780,11 +784,11 @@
         // Revenue chart (bar chart)
         const revenueChartOptions = {
           series: [{ name: 'Revenue', data: revData }],
-          chart: { type: 'bar', height: 260, toolbar: { show: false }, sparkline: { enabled: false } },
+          chart: { type: 'bar', height: 260, toolbar: { show: false }, sparkline: { enabled: false }, fontFamily: 'Poppins, sans-serif' },
           colors: [purple],
           plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
           dataLabels: { enabled: false },
-          xaxis: { categories: formattedDays, labels: { style: { colors: mutedColor }, maxHeight: 100 }, axisBorder: { show: false }, axisTicks: { show: false } },
+          xaxis: { categories: formattedDays, labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
           yaxis: { labels: { style: { colors: mutedColor }, formatter: (val) => '₹' + Math.round(val) } },
           grid: { borderColor: borderColor },
           legend: { labels: { colors: mutedColor }, position: 'top' },

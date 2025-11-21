@@ -186,7 +186,7 @@ h1 {
 .post-description {
 	margin: 0 0 4px 0;
 	color: var(--muted);
-	line-height: 1;
+	line-height: 1.2;
 }
 .post-info {
 	display: flex;
