@@ -173,8 +173,8 @@ ClystProto/
 4. **Configure environment variables**
    - Edit `config.py` to set your API keys:
    ```python
-   GEMINI_API_KEY = "your_gemini_api_key_here"
-   FLASK_SECRET_KEY = "your_secret_key_here"
+   GEMINI_API_KEY = "your_gemini_api_key_here" (gemini-2.5-pro)
+   FLASK_SECRET_KEY = "your_secret_key_here" (llama-3.3-70b-versatile)
    GROQ_API_KEY = "your_groq_api_key_here"
    ```
 
