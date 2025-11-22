@@ -784,12 +784,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Mobile Apps**: Native iOS and Android applications
 - **Video Support**: Upload and display video content for products and posts
 - **Live Streaming**: Live art creation sessions and product showcases
-- **NFT Integration**: Mint and sell digital artwork as NFTs
 - **International Shipping**: Multi-currency and international shipping support
 - **Advanced Messaging**: Group chats, voice messages, video calls
 - **Gamification**: Badges, achievements, and artist levels
-- **Subscription Plans**: Premium features for verified artists
-- **API Access**: Public API for third-party integrations
 
 
 ---
