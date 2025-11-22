@@ -102,14 +102,24 @@
         background: #4db6ac;
       }
 
+      .insight-card{
+        overflow: hidden;
+        padding: 0;
+      }
+
       .section-title {
         display: flex;
         align-items: center;
         gap: 4px;
-        font-size: 20px;
-        font-weight: 600;
+        font-size: 24px;
+        font-weight: 500;
         color: var(--text);
         margin-bottom: 0;
+      }
+
+      .insight-card .section-title{
+        padding: 12px 16px;
+        background-color: var(--border);
       }
 
       .charts .section-title{
@@ -132,22 +142,21 @@
       .tab-btn {
         background: transparent;
         border: none;
-        padding: 12px 20px;
+        padding: 12px;
         font-size: 14px;
         font-weight: 500;
         color: var(--muted);
         cursor: pointer;
-        border-bottom: 2px solid transparent;
+        border-bottom: none;
         transition: all 0.2s;
+        border-radius: 20em;
       }
       .tab-btn:hover {
         color: var(--text);
       }
       .tab-btn.active {
-        border-radius: 12px 12px 0 0;
         background-color: var(--border);
         color: var(--accent);
-        border-bottom-color: var(--accent);
       }
       .tab-content {
         margin-top: 16px;
@@ -160,13 +169,10 @@
       }
       .insight-list li {
         font-size: 16px;
-        padding: 12px 0;
-        border-bottom: 1px solid var(--border);
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
         line-height: 1.1;
         color: var(--text);
-      }
-      .insight-list li:last-child {
-        border-bottom: 0;
       }
       .insight-list li:before {
         color: var(--accent);
@@ -244,7 +250,7 @@
       <!-- Tab Navigation -->
       <div
         class="tab-nav"
-        style="margin-top: 20px; border-bottom: 1px solid var(--border)"
+        style="padding: 4px;overflow: hidden;background: var(--card);border-radius: 20em;width: fit-content;margin: 20px 0; border-bottom: none;"
       >
         <button class="tab-btn active" data-tab="overview">Overview</button>
         <button class="tab-btn" data-tab="insights">AI Insights</button>
@@ -347,12 +353,12 @@
             style="
               margin-bottom: 12px;
               background: none;
-              color: white;
+              color: var(--text);
               border: none;
               padding: 0;
             "
           >
-            <div style="font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0 0 4px 0;">
+            <div style="font-size: 18px; font-weight: 500; display: flex; align-items: center; gap: 8px; margin: 0 0 4px 0;">
               <svg style="width: 20px; fill: var(--text);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M17.0007 1.20825 18.3195 3.68108 20.7923 4.99992 18.3195 6.31876 17.0007 8.79159 15.6818 6.31876 13.209 4.99992 15.6818 3.68108 17.0007 1.20825ZM8.00065 4.33325 10.6673 9.33325 15.6673 11.9999 10.6673 14.6666 8.00065 19.6666 5.33398 14.6666.333984 11.9999 5.33398 9.33325 8.00065 4.33325ZM19.6673 16.3333 18.0007 13.2083 16.334 16.3333 13.209 17.9999 16.334 19.6666 18.0007 22.7916 19.6673 19.6666 22.7923 17.9999 19.6673 16.3333Z"></path></svg> AI-Powered Insights
             </div>
             <div style="opacity: 0.95">
@@ -362,30 +368,30 @@
           </div>
 
           <div class="grid-2">
-            <div class="card insight-card">
-              <div class="section-title" style="color: var(--accent)">
-               <svg style="width: 20px; fill: var(--accent);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.5021 5.92225 12 1 3.49793 5.92225 12 10.8445 20.5021 5.92225ZM2.5 7.6555V17.5L11 22.4211V12.5765L2.5 7.6555ZM13 22.4211 21.5 17.5V7.6555L13 12.5765V22.4211Z"></path></svg> Product Optimization
+            <div class="card insight-card" style="border-color: var(--accent);">
+              <div class="section-title" style="color: var(--accent); background-color: var(--border);">
+               Product Optimization
               </div>
               <ul class="insight-list" id="product-insights"></ul>
             </div>
-            <div class="card insight-card">
-              <div class="section-title" style="color: #4db6ac">
-                <svg style="width: 20px; fill: #4db6ac;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M21 13V20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V13H2V11L3 6H21L22 11V13H21ZM5 13V19H19V13H5ZM6 14H14V17H6V14ZM3 3H21V5H3V3Z"></path></svg>Marketing Strategy
+            <div class="card insight-card" style="border-color: #00b4d8;">
+              <div class="section-title" style="color: #00b4d8; background-color: #00b4d821;">
+                Marketing Strategy
               </div>
               <ul class="insight-list" id="marketing-insights"></ul>
             </div>
           </div>
 
           <div class="grid-2" style="margin-top: 12px">
-            <div class="card insight-card">
-              <div class="section-title" style="color: #7e57c2">
-                <svg style="width: 20px; fill: #7e57c2;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M14.0049 2.00281C18.4232 2.00281 22.0049 5.58453 22.0049 10.0028C22.0049 13.2474 20.0733 16.0409 17.2973 17.296C16.0422 20.0718 13.249 22.0028 10.0049 22.0028C5.5866 22.0028 2.00488 18.4211 2.00488 14.0028C2.00488 10.7587 3.9359 7.96554 6.71122 6.71012C7.96681 3.93438 10.7603 2.00281 14.0049 2.00281ZM11.0049 9.00281H9.00488V10.0028C7.62417 10.0028 6.50488 11.1221 6.50488 12.5028C6.50488 13.8283 7.53642 14.9128 8.84051 14.9975L9.00488 15.0028H11.0049L11.0948 15.0109C11.328 15.0532 11.5049 15.2573 11.5049 15.5028C11.5049 15.7483 11.328 15.9524 11.0948 15.9948L11.0049 16.0028H7.00488V18.0028H9.00488V19.0028H11.0049V18.0028C12.3856 18.0028 13.5049 16.8835 13.5049 15.5028C13.5049 14.1773 12.4733 13.0928 11.1693 13.0081L11.0049 13.0028H9.00488L8.91501 12.9948C8.68176 12.9524 8.50488 12.7483 8.50488 12.5028C8.50488 12.2573 8.68176 12.0532 8.91501 12.0109L9.00488 12.0028H13.0049V10.0028H11.0049V9.00281ZM14.0049 4.00281C12.2214 4.00281 10.6196 4.78097 9.52064 6.01629C9.68133 6.00764 9.84254 6.00281 10.0049 6.00281C14.4232 6.00281 18.0049 9.58453 18.0049 14.0028C18.0049 14.1655 18 14.327 17.9905 14.4873C19.2265 13.3885 20.0049 11.7866 20.0049 10.0028C20.0049 6.6891 17.3186 4.00281 14.0049 4.00281Z"></path></svg> Pricing Strategy
+            <div class="card insight-card" style="border-color: #02c39a;">
+              <div class="section-title" style="color: #02c39a; background-color: #02c39a21;">
+                Pricing Strategy
               </div>
               <ul class="insight-list" id="pricing-insights"></ul>
             </div>
-            <div class="card insight-card">
-              <div class="section-title" style="color: #ff9800">
-                <svg style="width: 20px; fill: #ff9800;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M8.49816 20.0048H15.5018C14.8432 21.5842 13.5794 22.848 12 23.5066C10.4206 22.848 9.15679 21.5842 8.49816 20.0048ZM18 14.8095L20 17.0778V19.0048H4V17.0778L6 14.8095V9.00481C6 5.52156 8.50442 2.55825 12 1.46002C15.4956 2.55825 18 5.52156 18 9.00481V14.8095ZM12 11.0048C13.1046 11.0048 14 10.1094 14 9.00481C14 7.90024 13.1046 7.00481 12 7.00481C10.8954 7.00481 10 7.90024 10 9.00481C10 10.1094 10.8954 11.0048 12 11.0048Z"></path></svg> Growth Opportunities
+            <div class="card insight-card" style="border-color: #ff7b00;">
+              <div class="section-title" style="color: #ff7b00; background-color: #ff7b0021;">
+                Growth Opportunities
               </div>
               <ul class="insight-list" id="growth-insights"></ul>
             </div>
@@ -463,7 +469,7 @@
                     border: none;
                     border-radius: 2px;
                     cursor: pointer;
-                    font-weight: 600;
+                    font-weight: 500;
                     font-size: 13px;
                   "
                 >
@@ -500,13 +506,12 @@
                     background: none;
                     padding: 16px;
                     border-radius: 16px;
-                    color: white;
+                    color: var(--muted);
                   "
                 >
                   <div
                     style="
                       font-size: 12px;
-                      opacity: 0.9;
                       text-transform: uppercase;
                       letter-spacing: 0.04em;
                     "
@@ -514,11 +519,11 @@
                     Your Average Price
                   </div>
                   <div
-                    style="font-size: 28px; font-weight: 700; margin-top: 4px"
+                    style="font-size: 28px; font-weight: 500; margin-top: 4px; color: var(--text);"
                   >
                     ₹<span id="your-avg-price">0</span>
                   </div>
-                  <div style="font-size: 12px; opacity: 0.85; margin-top: 4px">
+                  <div style="font-size: 12px; margin-top: 4px">
                     Range: ₹<span id="your-min-price">0</span> - ₹<span
                       id="your-max-price"
                       >0</span
@@ -546,7 +551,7 @@
                   <div
                     style="
                       font-size: 28px;
-                      font-weight: 700;
+                      font-weight: 500;
                       margin-top: 4px;
                       color: var(--text);
                     "
@@ -571,11 +576,11 @@
                 style="background: none; margin-bottom: 16px"
               >
                 <div style="display: flex; align-items: center; gap: 12px">
-                  <div style="font-size: 32px"><svg style="width: 32px; fill: var(--text);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.80577 5.20006L7.00505 7.99958L11.1913 2.13881C11.5123 1.6894 12.1369 1.58531 12.5863 1.90631C12.6761 1.97045 12.7546 2.04901 12.8188 2.13881L17.0051 7.99958L21.2043 5.20006C21.6639 4.89371 22.2847 5.01788 22.5911 5.47741C22.7228 5.67503 22.7799 5.91308 22.7522 6.14895L21.109 20.1164C21.0497 20.62 20.6229 20.9996 20.1158 20.9996H3.8943C3.38722 20.9996 2.9604 20.62 2.90115 20.1164L1.25792 6.14895C1.19339 5.60045 1.58573 5.10349 2.13423 5.03896C2.37011 5.01121 2.60816 5.06832 2.80577 5.20006ZM12.0051 14.9996C13.1096 14.9996 14.0051 14.1042 14.0051 12.9996C14.0051 11.895 13.1096 10.9996 12.0051 10.9996C10.9005 10.9996 10.0051 11.895 10.0051 12.9996C10.0051 14.1042 10.9005 14.9996 12.0051 14.9996Z"></path></svg></div>
+                  <div style="display: flex;font-size: 32px;align-items: center;"><svg style="width: 40px; fill: var(--text);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M2.80577 5.20006L7.00505 7.99958L11.1913 2.13881C11.5123 1.6894 12.1369 1.58531 12.5863 1.90631C12.6761 1.97045 12.7546 2.04901 12.8188 2.13881L17.0051 7.99958L21.2043 5.20006C21.6639 4.89371 22.2847 5.01788 22.5911 5.47741C22.7228 5.67503 22.7799 5.91308 22.7522 6.14895L21.109 20.1164C21.0497 20.62 20.6229 20.9996 20.1158 20.9996H3.8943C3.38722 20.9996 2.9604 20.62 2.90115 20.1164L1.25792 6.14895C1.19339 5.60045 1.58573 5.10349 2.13423 5.03896C2.37011 5.01121 2.60816 5.06832 2.80577 5.20006ZM12.0051 14.9996C13.1096 14.9996 14.0051 14.1042 14.0051 12.9996C14.0051 11.895 13.1096 10.9996 12.0051 10.9996C10.9005 10.9996 10.0051 11.895 10.0051 12.9996C10.0051 14.1042 10.9005 14.9996 12.0051 14.9996Z"></path></svg></div>
                   <div style="flex: 1">
                     <div
                       style="
-                        font-weight: 600;
+                        font-weight: 500;
                         font-size: 16px;
                         color: var(--text);
                       "
@@ -598,8 +603,8 @@
                   <div style="text-align: center">
                     <div
                       style="
-                        font-size: 24px;
-                        font-weight: 700;
+                        font-size: 28px;
+                        font-weight: 500;
                         color: var(--accent);
                       "
                       id="price-diff"
@@ -661,7 +666,7 @@
                   border: none;
                   border-radius: 20em;
                   cursor: pointer;
-                  font-weight: 600;
+                  font-weight: 500;
                 "
               >
                 Try Again
@@ -687,7 +692,7 @@
               border: none;
               border-radius: 20em;
               cursor: pointer;
-              font-weight: 600;
+              font-weight: 500;
             "
           >
             Try Again
@@ -966,13 +971,25 @@
           externalDiv.className = 'card';
           externalDiv.style.cssText = 'border: none; background: none; color: var(--text); margin-bottom: 16px; padding: 0;';
           externalDiv.innerHTML = `
-            <div style="font-weight: 600; font-size: 20px; margin-bottom: 8px;">External Market Pricing</div>
+            <div style="font-weight: 500; font-size: 28px; margin-bottom: 12px;">External Market Pricing</div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; font-size: 20px;">
-              <div><strong style="font-size: 16px; font-weight: 500; color: var(--muted);">Amazon India</strong><br>${analysis.external_market.amazon_range || 'N/A'}</div>
-              <div><strong style="font-size: 16px; font-weight: 500; color: var(--muted);">Etsy India</strong><br>${analysis.external_market.etsy_range || 'N/A'}</div>
-              <div><strong style="font-size: 16px; font-weight: 500; color: var(--muted);">Flipkart</strong><br>${analysis.external_market.flipkart_range || 'N/A'}</div>
+              <div style="display: flex; align-items:center; gap:12px; border: 1px solid var(--text); line-height: 1; border-radius: 12px; padding: 12px 24px;">
+                <svg fill="var(--text)" style="height:fit-content;" height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="87 292.9 256 255.9" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <style type="text/css"> .st0{display:none;} .st1{display:inline;} .st2{fill-rule:evenodd;clip-rule:evenodd;} </style> <g> <path class="st2" d="M306,500.1c-1.3,0-2.6,0.3-3.8,0.9c-1.4,0.6-2.8,1.2-4.1,1.7l-1.9,0.8l-2.5,1v0c-27.5,11.1-56.3,17.7-83,18.2 c-1,0-2,0-2.9,0c-42,0-76.2-19.5-110.8-38.6c-1.2-0.6-2.4-1-3.6-1c-1.6,0-3.1,0.6-4.3,1.7c-1.2,1.1-1.9,2.7-1.8,4.3 c0,2.1,1.1,4,2.7,5.3c32.4,28.2,68,54.3,115.8,54.4c0.9,0,1.9,0,2.8,0c30.4-0.7,64.8-11,91.5-27.7l0.2-0.1c3.5-2.1,7-4.5,10.3-7.1 c2-1.5,3.5-3.9,3.5-6.4C313.7,503.1,310,500.1,306,500.1z"></path> <path class="st2" d="M343,484.6L343,484.6c-0.1-2.7-0.7-4.7-1.8-6.4l-0.1-0.2l-0.1-0.2c-1.1-1.2-2.2-1.7-3.4-2.2 c-3.5-1.3-8.6-2.1-14.7-2.1c-4.4,0-9.3,0.4-14.2,1.5l0-0.3l-4.9,1.6l-0.1,0l-2.8,0.9v0.1c-3.3,1.4-6.2,3-9,5 c-1.7,1.3-3.1,3-3.2,5.6c0,1.4,0.7,3,1.9,4c1.2,1,2.6,1.3,3.8,1.3c0.3,0,0.6,0,0.8-0.1l0.2,0l0.2,0c2.4-0.5,5.9-0.8,10-1.4 c3.5-0.4,7.3-0.7,10.5-0.7c2.3,0,4.4,0.1,5.8,0.5c0.7,0.1,1.2,0.3,1.5,0.5c0.1,0,0.2,0.1,0.2,0.1c0.1,0.2,0.1,0.7,0.1,1.4 c0,2.7-1.1,7.7-2.7,12.6c-1.5,4.9-3.4,9.8-4.6,13.1c-0.3,0.8-0.5,1.6-0.5,2.5c0,1.3,0.5,2.9,1.6,4c1.1,1.1,2.6,1.5,3.8,1.5h0.1 c1.8,0,3.4-0.7,4.7-1.8c12.5-11.2,16.8-29.2,17-39.3L343,484.6z"></path> <path class="st2" d="M228.7,364.1c-7.3,0.6-15.8,1.1-24.3,2.2c-13,1.7-26,4-36.7,9.1c-20.9,8.5-35,26.5-35,53.1 c0,33.3,21.5,50.3,48.6,50.3c9,0,16.4-1.1,23.1-2.8c10.8-3.4,19.8-9.6,30.5-20.9c6.2,8.5,7.9,12.4,18.6,21.5 c2.8,1.1,5.7,1.1,7.9-0.6c6.8-5.7,18.7-15.8,24.9-21.5c2.8-2.3,2.3-5.7,0.6-8.5c-6.2-7.9-12.4-14.7-12.4-30v-50.8 c0-21.5,1.7-41.2-14.1-55.9c-13-11.9-33.3-16.4-49.2-16.4h-6.8c-28.8,1.7-59.3,14.1-66.1,49.7c-1.1,4.5,2.3,6.2,4.5,6.8l31.6,4 c3.4-0.6,5.1-3.4,5.6-6.2c2.8-12.4,13-18.7,24.3-19.8h2.3c6.8,0,14.1,2.8,18.1,8.5c4.5,6.8,4,15.8,4,23.7V364.1z M222.5,431.3 c-4,7.9-10.7,13-18.1,14.7c-1.1,0-2.8,0.6-4.5,0.6c-12.4,0-19.8-9.6-19.8-23.7c0-18.1,10.7-26.6,24.3-30.5 c7.3-1.7,15.8-2.3,24.3-2.3v6.8C228.7,409.9,229.3,420,222.5,431.3z"></path> </g> </g></svg>
+                <div style="display:flex; flex-direction:column;" ><strong style="font-size: 16px; font-weight: 500; color: #ff9900;">Amazon India</strong>
+                <p style="font-size:28px;">${analysis.external_market.amazon_range || 'N/A'}</p></div>
+              </div>
+              <div style="display: flex; align-items:center; gap:12px; border: 1px solid #eb6d20; line-height: 1; border-radius: 12px; padding: 12px 24px;">
+                <svg fill="var(--text)" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 97.75 97.75" xml:space="preserve"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path d="M48.875,0C21.882,0,0,21.883,0,48.875S21.882,97.75,48.875,97.75S97.75,75.867,97.75,48.875S75.868,0,48.875,0z M78.729,68.146c-0.556,4.598-1.133,9.192-1.649,13.795c-0.19,1.713-0.125,1.703-1.881,1.683 c-13.405-0.167-26.809-0.384-40.214-0.459c-4.803-0.028-9.607,0.289-14.412,0.44c-0.636,0.021-1.271,0.004-2.027,0.004 c0-1.336,0-2.629,0-4.129c1.713-0.338,3.529-0.674,5.334-1.063c0.742-0.16,1.478-0.392,2.181-0.674 c1.061-0.427,1.727-1.216,1.88-2.38c0.071-0.547,0.179-1.096,0.184-1.644c0.092-10.002,0.218-20.003,0.232-30.004 c0.009-6.213-0.15-12.425-0.252-18.636c-0.057-3.517-0.988-4.611-4.417-5.266c-1.457-0.277-2.93-0.497-4.372-0.833 c-0.348-0.083-0.843-0.506-0.871-0.81c-0.104-1.133-0.041-2.279-0.041-3.516c19.228,0.32,38.347,1.13,57.646-0.536 c-0.404,6.527-0.809,13.066-1.221,19.722c-1.169,0-2.239,0.093-3.277-0.049c-0.367-0.052-0.828-0.62-0.955-1.04 c-0.588-1.948-1.023-3.943-1.613-5.892c-0.346-1.132-0.812-2.241-1.346-3.299c-1.207-2.395-3.019-3.681-5.888-3.632 c-6.896,0.121-13.794,0.037-20.69,0.041c-1.754,0.002-1.806,0.06-1.808,1.778c-0.01,7.748-0.016,15.497-0.022,23.244 c-0.002,0.423,0,0.846,0,1.378c3.049,0,5.932,0.048,8.813-0.018c1.867-0.041,3.731-0.225,5.595-0.379 c2.549-0.211,3.455-0.955,4.096-3.415c0.48-1.846,0.91-3.705,1.326-5.567c0.164-0.734,0.498-1.072,1.303-1.015 c1.014,0.072,2.037,0.018,3.199,0.018c0,0.677,0.006,1.284,0,1.894c-0.062,7.271-0.141,14.542-0.164,21.813 c-0.004,0.967-0.228,1.352-1.266,1.357c-3.055,0.022-3.053,0.063-3.773-2.92c-0.26-1.072-0.521-2.146-0.803-3.211 c-0.647-2.455-2.479-3.359-4.783-3.435c-4.335-0.146-8.676-0.188-13.015-0.271c-0.118-0.002-0.237,0.063-0.47,0.125 c-0.021,0.481-0.063,0.979-0.064,1.476c-0.01,6.472-0.016,12.942-0.018,19.413c-0.003,4.021,1.512,5.972,5.546,6.086 c6.204,0.178,12.423,0.049,18.629-0.141c3.754-0.113,6.325-2.312,7.935-5.58c1.312-2.666,2.512-5.392,3.621-8.146 c0.49-1.221,1.129-1.787,2.451-1.584c0.573,0.09,1.174,0.015,1.98,0.015C79.141,64.745,78.934,66.445,78.729,68.146z"></path> </g> </g></svg>
+                <div style="display:flex; flex-direction:column;" ><strong style="font-size: 16px; font-weight: 500; color: #eb6d20">Etsy India</strong>
+                <p style="font-size:28px;">${analysis.external_market.etsy_range || 'N/A'}</p></div>
+              </div>
+              <div style="display: flex; align-items:center; gap:12px; border: 1px solid light-dark(#1f74ba, #f8d706); line-height: 1; border-radius: 12px; padding: 12px 24px;">
+                <svg fill="var(--text)" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M3.833 1.333a.993.993 0 0 0-.333.061V1c0-.551.449-1 1-1h14.667c.551 0 1 .449 1 1v.333H3.833zm17.334 2.334H2.833c-.551 0-1 .449-1 1V23c0 .551.449 1 1 1h7.3l1.098-5.645h-2.24c-.051 0-5.158-.241-5.158-.241l4.639-.327-.078-.366-1.978-.285 1.882-.158-.124-.449-3.075-.467s3.341-.373 3.392-.373h3.232l.247-1.331c.289-1.616.945-2.807 1.973-3.693 1.033-.892 2.344-1.332 3.937-1.332.643 0 1.053.151 1.231.463.118.186.201.516.279.859.074.352.14.671.095.903-.057.345-.461.465-1.197.465h-.253c-1.327 0-2.134.763-2.405 2.31l-.243 1.355h1.54c.574 0 .781.402.622 1.306-.17.941-.539 1.36-1.111 1.36H14.9L13.804 24h7.362c.551 0 1-.449 1-1V4.667a1 1 0 0 0-.999-1zM20.5 2.333A.334.334 0 0 0 20.167 2H3.833a.334.334 0 0 0-.333.333V3h17v-.667z"></path></g></svg>
+                <div style="display:flex; flex-direction:column;" ><strong style="font-size: 16px; font-weight: 500; color: #f09120">Flipkart</strong>
+                <p style="font-size:28px;">${analysis.external_market.flipkart_range || 'N/A'}</p></div>
+              </div>
             </div>
-            <div style="margin-top: 12px; padding-top: 4px; border-top: 1px solid var(--border); font-size: 14px; line-height: 1.1;">
+            <div style="margin-top: 16px; padding-bottom: 24px; border-bottom: 1px solid var(--border); font-size: 14px; line-height: 1.1;">
               ${analysis.external_market.recommendation || 'Your pricing is competitive with external markets.'}
             </div>
           `;
@@ -992,26 +1009,18 @@
 
           grid.innerHTML = analysis.similar_products.map(product => `
             <div class="product-card" style="background: var(--bg); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;">
-              ${product.similarity_score ? `<div style="position: absolute; top: 8px; right: 8px; z-index: 1; background: var(--bg); color: var(--text); padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;">${product.similarity_score}% match</div>` : ''}
-              <div style="position: relative; padding-top: 100%; background: var(--muted);">
+              ${product.similarity_score ? `<div style="position: absolute; top: 8px; right: 8px; z-index: 1; background: var(--bg); color: var(--text); padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${product.similarity_score}% match</div>` : ''}
+              <div style="position: relative; padding-top: 50%; background: var(--muted);">
                 ${product.img_url ? `<img src="${product.img_url}" alt="${product.title}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">` : '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; opacity: 0.3;">🎨</div>'}
               </div>
               <div style="padding: 12px;">
-                <div style="font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${product.title}">${product.title}</div>
+                <div style="font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${product.title}">${product.title}</div>
                 ${product.similarity_reason ? `<div style="font-size: 12px; color: var(--muted); margin-bottom: 6px; line-height: 1.3;">${product.similarity_reason}</div>` : ''}
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                  <div style="font-size: 20px; font-weight: 700; color: var(--accent);">₹${product.price.toFixed(2)}</div>
-                  <div style="font-size: 12px; padding: 2px 6px; border-radius: 2px; ${product.price_difference > 0 ? 'background: #ffe0b2; color: #f57c00;' : 'background: #b2dfdb; color: #00796b;'}">
+                  <div style="font-size: 20px; font-weight: 500; color: var(--accent);">₹${product.price.toFixed(2)}</div>
+                  <div style="font-size: 12px; padding: 2px 6px; border-radius: 20em; ${product.price_difference > 0 ? 'background: #ffe0b2; color: #f57c00;' : 'background: #aafff7; color: #005047;'}">
                     ${product.price_difference > 0 ? '+' : ''}${product.price_difference.toFixed(1)}%
                   </div>
-                </div>
-                <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">by ${product.artist_name}</div>
-                <div style="display: flex; align-items: center; gap: 4px; font-size: 12px;">
-                  ${product.reviews_count > 0 ? `
-                    <span style="color: #ffa726;"><svg style="width: 12px; fill: #ffa726;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z"></path></svg></span>
-                    <span style="color: var(--text);">${product.avg_rating}</span>
-                    <span style="color: var(--muted);">(${product.reviews_count})</span>
-                  ` : '<span style="color: var(--muted);">No reviews yet</span>'}
                 </div>
               </div>
             </div>

@@ -2120,6 +2120,134 @@ def profile():
         db.select(Order).where(Order.user_id == current_user.id).order_by(db.desc(Order.order_id))
     ).scalars().all()
 
+    # All Analytics Stuff
+    artist_id = current_user.id
+
+    # Helper: last N day labels matching our stored created_at format
+    def last_n_days(n: int):
+        days = []
+        for i in range(n - 1, -1, -1):
+            d = datetime.today().date() - timedelta(days=i)
+            days.append(d.strftime('%B %d, %Y'))
+        return days
+
+    from datetime import timedelta
+
+    # Views
+    product_views = db.session.execute(
+        db.select(ProductView).where(ProductView.artist_id == artist_id)
+    ).scalars().all()
+    profile_views = db.session.execute(
+        db.select(ProfileView).where(ProfileView.profile_user_id == artist_id)
+    ).scalars().all()
+
+    total_product_views = len(product_views)
+    total_profile_views = len(profile_views)
+
+    # Views trend (last 30 days)
+    days30 = last_n_days(30)
+    product_views_daily = [sum(1 for v in product_views if (v.created_at or '') == d) for d in days30]
+    profile_views_daily = [sum(1 for v in profile_views if (v.created_at or '') == d) for d in days30]
+
+    # Engagement
+    artist_posts = db.session.execute(db.select(Posts).where(Posts.artist_id == artist_id)).scalars().all()
+    post_ids = [p.post_id for p in artist_posts]
+    total_post_likes = 0
+    total_post_comments = 0
+    if post_ids:
+        total_post_likes = db.session.execute(
+            db.select(db.func.count(PostLike.id)).where(PostLike.post_id.in_(post_ids))
+        ).scalar() or 0
+        total_post_comments = db.session.execute(
+            db.select(db.func.count(Comments.comment_id)).where(Comments.post_id.in_(post_ids))
+        ).scalar() or 0
+
+    artist_products = db.session.execute(db.select(Product).where(Product.artist_id == artist_id)).scalars().all()
+    product_ids = [p.product_id for p in artist_products]
+    total_product_reviews = 0
+    total_product_comments = 0
+    if product_ids:
+        total_product_reviews = db.session.execute(
+            db.select(db.func.count(ProductReview.review_id)).where(ProductReview.product_id.in_(product_ids))
+        ).scalar() or 0
+        total_product_comments = db.session.execute(
+            db.select(db.func.count(ProductComments.comment_id)).where(ProductComments.product_id.in_(product_ids))
+        ).scalar() or 0
+
+    # Sales & revenue
+    oi_rows = []
+    total_orders = 0
+    paid_revenue = 0.0
+    total_revenue = 0.0
+    items_sold = 0
+
+    if product_ids:
+        # Join OrderItem -> Product -> Order
+        join_stmt = (
+            db.select(OrderItem, Order).join(Product, OrderItem.product_id == Product.product_id)
+            .join(Order, OrderItem.order_id == Order.order_id)
+            .where(Product.artist_id == artist_id)
+        )
+        result = db.session.execute(join_stmt).all()
+        # Aggregate
+        orders_seen = set()
+        for oi, order in result:
+            oi_rows.append({'oi': oi, 'order': order})
+            total_revenue += float(oi.total_price or 0)
+            items_sold += int(oi.quantity or 0)
+            if order.order_id not in orders_seen:
+                orders_seen.add(order.order_id)
+            if (order.payment_status or '').lower() == 'paid' or (order.status or '').lower() in {'paid', 'shipped', 'delivered'}:
+                paid_revenue += float(oi.total_price or 0)
+        total_orders = len(orders_seen)
+
+    # Revenue trend (last 30 days)
+    revenue_daily = []
+    for d in days30:
+        rev = 0.0
+        for row in oi_rows:
+            if (row['order'].created_at or '') == d and ((row['order'].payment_status or '').lower() == 'paid' or (row['order'].status or '').lower() in {'paid', 'shipped', 'delivered'}):
+                rev += float(row['oi'].total_price or 0)
+        revenue_daily.append(rev)
+
+    # Popular items
+    # Top products by views
+    top_product_views = {}
+    for v in product_views:
+        top_product_views[v.product_id] = top_product_views.get(v.product_id, 0) + 1
+    top_products_by_views = []
+    for pid, cnt in sorted(top_product_views.items(), key=lambda x: x[1], reverse=True)[:5]:
+        prod = db.session.get(Product, pid)
+        if prod:
+            top_products_by_views.append({'title': prod.title, 'count': cnt, 'id': pid})
+
+    # Top products by sales
+    sales_by_product = {}
+    for row in oi_rows:
+        oi, order = row['oi'], row['order']
+        sales_by_product[oi.product_id] = sales_by_product.get(oi.product_id, 0) + int(oi.quantity or 0)
+    top_products_by_sales = []
+    for pid, cnt in sorted(sales_by_product.items(), key=lambda x: x[1], reverse=True)[:5]:
+        prod = db.session.get(Product, pid)
+        if prod:
+            top_products_by_sales.append({'title': prod.title, 'count': cnt, 'id': pid})
+
+    # Top posts by engagement (likes + comments)
+    post_eng = []
+    for p in artist_posts:
+        likes = db.session.execute(db.select(db.func.count(PostLike.id)).where(PostLike.post_id == p.post_id)).scalar() or 0
+        comments = db.session.execute(db.select(db.func.count(Comments.comment_id)).where(Comments.post_id == p.post_id)).scalar() or 0
+        post_eng.append({'title': p.post_title or f'Post #{p.post_id}', 'score': (likes + comments), 'id': p.post_id})
+    top_posts_by_engagement = sorted(post_eng, key=lambda x: x['score'], reverse=True)[:5]
+
+    # KPIs
+    kpis = {
+        'views': total_product_views + total_profile_views,
+        'engagement': total_post_likes + total_post_comments + total_product_reviews + total_product_comments,
+        'sales': items_sold,
+        'revenue': paid_revenue
+    }
+
     return render_template("profile.html",
                            current_user=current_user,
                            profile_user=current_user,
@@ -2133,6 +2261,18 @@ def profile():
                            conversations=conversations,
                            unread_count=unread_count,
                            orders=orders,
+                           kpis=kpis,
+        days=days30,
+        product_views_daily=product_views_daily,
+        profile_views_daily=profile_views_daily,
+        revenue_daily=revenue_daily,
+        total_orders=total_orders,
+        total_revenue=total_revenue,
+        paid_revenue=paid_revenue,
+        items_sold=items_sold,
+        top_products_by_views=top_products_by_views,
+        top_products_by_sales=top_products_by_sales,
+        top_posts_by_engagement=top_posts_by_engagement,
                            firebase_config=firebase_config.FIREBASE_WEB_CONFIG)
 
 

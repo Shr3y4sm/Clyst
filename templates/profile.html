@@ -357,7 +357,7 @@
       Mail{% if unread_count and unread_count > 0 %} &#0149; {{ unread_count }}
       {% endif %}
     </button>
-    <button class="tab-button analytics" onclick="location.href='{{ url_for('analytics_dashboard') }}'" >YOUR ANALYTICS</a>
+    <button class="tab-button" onclick="showTab('analytics')"  >Analytics</a>
     {% endif %}
             </div>
             <div class="tab-content">
@@ -593,6 +593,32 @@
                     <p style="margin: 0; font-size: 14px; color: var(--muted);">Your messages with buyers and sellers will appear here.</p>
                   </div>
                 {% endif %}
+              </div>
+              <div id="analytics-tab" class="analytics-modal-body tab-panel" style="display: none;">
+                
+        <div class="kpi-grid">
+          <div class="card kpi">
+            <div class="label">Views</div>
+            <div class="value">{{ kpis.views }}</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Engagement</div>
+            <div class="value">{{ kpis.engagement }}</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Items Sold</div>
+            <div class="value">{{ kpis.sales }}</div>
+          </div>
+          <div class="card kpi">
+            <div class="label">Revenue</div>
+            <div class="value">₹ {{ '%.2f'|format(kpis.revenue) }}</div>
+          </div>
+        </div>
+          <div class="card" style="margin-top: 12px; padding: 0;">
+            <div class="section-title" style="margin: 20px 20px 0 20px; font-size: 28px; font-weight: 500; text-align: left;">Views &#0149; Last 30 days</div>
+              <div id="viewsChart" style="height: 260px; width: 100%; display: block;"></div>
+          </div>
+          <button style="margin-top: 12px;" class="btn btn-secondary" onclick="location.href='{{ url_for('analytics_dashboard') }}'">View detailed analytics</button>
               </div>
               {% endif %}
             </div>
@@ -1642,6 +1668,130 @@
       }
     </script>
     
+    <!-- charts powered by ApexCharts -->
+    <script src="https://unpkg.com/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
+    <script>
+      const days = {{ days|tojson }};
+      const pv = {{ product_views_daily|tojson }};
+      const pr = {{ profile_views_daily|tojson }};
+      const rev = {{ revenue_daily|tojson }};
+
+      // Read CSS variables for consistent coloring (sanitize project's light-dark placeholders)
+      const css = getComputedStyle(document.documentElement);
+      const _rawAccent = (css.getPropertyValue('--accent') || '').trim();
+      const _rawMuted = (css.getPropertyValue('--muted') || '').trim();
+      const _rawText = (css.getPropertyValue('--text') || '').trim();
+      const _rawBorder = (css.getPropertyValue('--border') || '').trim();
+      function cleanColor(raw, fallback) {
+        if (!raw) return fallback;
+        // project uses a `light-dark(...)` placeholder which isn't a valid CSS color at runtime
+        if (raw.indexOf('light-dark') !== -1) return fallback;
+        return raw;
+      }
+      const accent = cleanColor(_rawAccent, '#ff7b00');
+      const mutedColor = cleanColor(_rawMuted, '#888');
+      const textColor = cleanColor(_rawText, '#fff');
+      const borderColor = cleanColor(_rawBorder, 'rgba(255,255,255,0.1)');
+      const green = '#00b4d8';
+      const purple = '#00b4d8';
+
+      // Format days for x-axis: show `Mon dd` (e.g. "Oct 15")
+      const formattedDays = (Array.isArray(days) ? days : []).map(d => {
+        const dt = new Date(d);
+        if (isNaN(dt)) return String(d);
+        return dt.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+      });
+
+      // Debug logging removed in production
+
+      // Small-data fallback: if all series are empty or zero, show a friendly message
+      const allZero = arr => Array.isArray(arr) && arr.every(v => Number(v) === 0);
+      const noDateLabels = !Array.isArray(formattedDays) || formattedDays.length === 0;
+
+      if (noDateLabels || (allZero(pv) && allZero(pr) && allZero(rev))) {
+        const msg = '<div style="padding:18px;color:var(--muted);">Not enough data to render charts yet.</div>';
+        const vEl = document.getElementById('viewsChart');
+        const rEl = document.getElementById('revenueChart');
+        if (vEl) vEl.innerHTML = msg;
+        if (rEl) rEl.innerHTML = msg;
+      } else {
+        // coerce data to numbers and provide fallbacks for colors
+        const pvData = (pv || []).map(v => Number(v) || 0);
+        const prData = (pr || []).map(v => Number(v) || 0);
+        const revData = (rev || []).map(v => Number(v) || 0);
+
+        const accentColor = (accent && accent.length) ? accent : '#ff7b00';
+        const profileColor = green;
+
+        // Views chart (line chart with two series)
+        const showMarkers = (pvData.some(v => v > 0) || prData.some(v => v > 0));
+        const viewsChartOptions = {
+          series: [
+            { name: 'Product views', data: pvData },
+            { name: 'Profile views', data: prData }
+          ],
+          chart: { type: 'line', height: 260, toolbar: { show: false }, sparkline: { enabled: false }, fontFamily: 'Poppins, sans-serif'  },
+          colors: [accentColor, profileColor],
+          stroke: { width: 3, curve: 'smooth' },
+          markers: { size: 0, strokeWidth: 0 },
+          xaxis: { categories: formattedDays, labels: { show: false}, axisBorder: { show: false }, axisTicks: { show: false } },
+          yaxis: { labels: { style: { colors: mutedColor } } },
+          grid: { borderColor: borderColor },
+          legend: { labels: { colors: mutedColor }, markers: {shape: "line"} , position: 'top', horizontalAlign: 'left', fontSize: '16px', itemMargin: {horizontal: 10} },
+          tooltip: {
+            theme: 'dark',
+            shared: true,
+            intersect: false,
+            x: {
+              formatter: function(value, { dataPointIndex }) {
+                if (typeof dataPointIndex === 'number' && formattedDays[dataPointIndex]) return formattedDays[dataPointIndex];
+                return value || '';
+              }
+            },
+            y: { formatter: (val) => Math.round(val) }
+          }
+        };
+
+        // Revenue chart (bar chart)
+        const revenueChartOptions = {
+          series: [{ name: 'Revenue', data: revData }],
+          chart: { type: 'bar', height: 260, toolbar: { show: false }, sparkline: { enabled: false }, fontFamily: 'Poppins, sans-serif' },
+          colors: [purple],
+          plotOptions: { bar: { borderRadius: 6, columnWidth: '60%' } },
+          dataLabels: { enabled: false },
+          xaxis: { categories: formattedDays, labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+          yaxis: { labels: { style: { colors: mutedColor }, formatter: (val) => '₹' + Math.round(val) } },
+          grid: { borderColor: borderColor },
+          legend: { labels: { colors: mutedColor }, position: 'top' },
+          tooltip: {
+            theme: 'dark',
+            x: {
+              // Apex passes the category `value` and an options object; use dataPointIndex
+              formatter: function(value, { dataPointIndex }) {
+                if (typeof dataPointIndex === 'number' && formattedDays[dataPointIndex]) return formattedDays[dataPointIndex];
+                // fallback to original value or a friendly empty string
+                return value || '';
+              }
+            },
+            y: { formatter: (val) => '₹' + val.toFixed(2) }
+          }
+        };
+
+        // Render charts
+        const viewsChart = new ApexCharts(document.getElementById('viewsChart'), viewsChartOptions);
+        const revenueChart = new ApexCharts(document.getElementById('revenueChart'), revenueChartOptions);
+        viewsChart.render();
+        revenueChart.render();
+
+        // Force charts to fill containers after render
+        setTimeout(() => {
+          document.querySelectorAll('.apexcharts-canvas').forEach(el => {
+            el.style.width = '100%';
+            el.style.maxWidth = '100%';
+          });
+        }, 100);
+      }
+    </script>
     <script src="../static/js/app.js"></script>
   </body>
 </html>
