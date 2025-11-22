@@ -173,8 +173,8 @@ ClystProto/
 4. **Configure environment variables**
    - Edit `config.py` to set your API keys:
    ```python
-   GEMINI_API_KEY = "your_gemini_api_key_here"
-   FLASK_SECRET_KEY = "your_secret_key_here"
+   GEMINI_API_KEY = "your_gemini_api_key_here" (gemini-2.5-pro)
+   FLASK_SECRET_KEY = "your_secret_key_here" (llama-3.3-70b-versatile)
    GROQ_API_KEY = "your_groq_api_key_here"
    ```
 
@@ -784,12 +784,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - **Mobile Apps**: Native iOS and Android applications
 - **Video Support**: Upload and display video content for products and posts
 - **Live Streaming**: Live art creation sessions and product showcases
-- **NFT Integration**: Mint and sell digital artwork as NFTs
 - **International Shipping**: Multi-currency and international shipping support
 - **Advanced Messaging**: Group chats, voice messages, video calls
 - **Gamification**: Badges, achievements, and artist levels
-- **Subscription Plans**: Premium features for verified artists
-- **API Access**: Public API for third-party integrations
 
 
 ---
