@@ -2,6 +2,34 @@
 
 Clyst is a comprehensive web application that serves as both a social platform for artists to share their work and a marketplace for selling artwork. Built with Flask and featuring AI-powered content generation, natural language search, and multilingual support.
 
+## 📸 Screenshots
+
+### Home Feed
+![Home](screenshots/Home.png)
+
+### Marketplace
+![Marketplace](screenshots/Marketplace.png)
+
+### Add Post
+![Add Post](screenshots/Add_Post.png)
+
+### Add Product
+![Add Product](screenshots/Add_Product.png)
+
+### User Profile
+![Profile](screenshots/Profile.png)
+
+### Analytics Dashboard
+![Analytics 1](screenshots/Analytics1.png)
+![Analytics 2](screenshots/Analytics2.png)
+
+### AI Insights
+![Insights 1](screenshots/Insights1.png)
+![Insights 2](screenshots/Insights2.png)
+
+### Verification
+![Verify](screenshots/Verify.png)
+
 ## 🌟 Features
 
 ### Core Functionality
