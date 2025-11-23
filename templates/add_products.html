@@ -16,6 +16,76 @@
     />
     <link rel="stylesheet" href="../static/css/styles.css" />
     <link rel="stylesheet" href="../static/css/add.css" />
+    <style>
+      .voice-input-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+        align-items: center;
+      }
+      .voice-language-select {
+        flex: 1;
+        padding: 10px 14px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #f8f9fa;
+        color: #333;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .voice-language-select:hover {
+        border-color: #4CAF50;
+        background: white;
+      }
+      .voice-language-select:focus {
+        outline: none;
+        border-color: #4CAF50;
+        background: white;
+      }
+      .voice-input-btn {
+        padding: 10px 18px;
+        background: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .voice-input-btn:hover {
+        background: #45a049;
+        transform: scale(1.02);
+      }
+      .voice-input-btn.recording {
+        background: #f44336;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      .voice-input-btn.recording::after {
+        content: " Recording...";
+        font-size: 13px;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+      .voice-status {
+        font-size: 13px;
+        color: #4CAF50;
+        margin-top: 6px;
+        padding: 8px 12px;
+        background: #e8f5e9;
+        border-radius: 6px;
+        font-style: italic;
+        border-left: 3px solid #4CAF50;
+      }
+    </style>
   </head>
   <body>
     <!-- ===== NAVBAR ===== -->
@@ -173,6 +243,25 @@
 
               <div class="form-group prompt-group">
                 <label class="form-label"> Generate with AI</label>
+                <div class="voice-input-controls">
+                  <select id="voice_language" class="voice-language-select">
+                    <option value="en-IN">English</option>
+                    <option value="hi-IN">हिंदी (Hindi)</option>
+                    <option value="ta-IN">தமிழ் (Tamil)</option>
+                    <option value="te-IN">తెలుగు (Telugu)</option>
+                    <option value="bn-IN">বাংলা (Bengali)</option>
+                    <option value="mr-IN">मराठी (Marathi)</option>
+                    <option value="gu-IN">ગુજરાતી (Gujarati)</option>
+                    <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+                    <option value="ml-IN">മലയാളം (Malayalam)</option>
+                    <option value="pa-IN">ਪੰਜਾਬੀ (Punjabi)</option>
+                  </select>
+                  <button type="button" id="voice_input_btn" class="voice-input-btn" title="Voice Input">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                      <path d="M12 1C13.66 1 15 2.34 15 4V12C15 13.66 13.66 15 12 15C10.34 15 9 13.66 9 12V4C9 2.34 10.34 1 12 1ZM19 11C19 14.53 16.39 17.44 13 17.93V21H11V17.93C7.61 17.44 5 14.53 5 11H7C7 13.76 9.24 16 12 16C14.76 16 17 13.76 17 11H19Z"/>
+                    </svg>
+                  </button>
+                </div>
                 <div class="gen-input">
                 <input
                   type="text"
@@ -645,6 +734,134 @@
             resBox.innerHTML = `<div style=\"color:#c62828;\">Error translating.</div>`;
           }
         });
+
+        // Voice Input Feature
+        const voiceBtn = document.getElementById("voice_input_btn");
+        const voiceLangSelect = document.getElementById("voice_language");
+        const aiPromptInput = document.getElementById("ai_prompt");
+        let recognition = null;
+        let isRecording = false;
+
+        // Check browser support
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognition = new SpeechRecognition();
+          recognition.continuous = true;
+          recognition.interimResults = true;
+
+          recognition.onstart = () => {
+            isRecording = true;
+            voiceBtn.classList.add('recording');
+            voiceBtn.title = 'Recording... Click to stop';
+          };
+
+          recognition.onresult = (event) => {
+            // Get the final transcript (accumulate all results)
+            let transcript = '';
+            for (let i = 0; i < event.results.length; i++) {
+              if (event.results[i].isFinal) {
+                transcript += event.results[i][0].transcript + ' ';
+              }
+            }
+            transcript = transcript.trim();
+            
+            if (!transcript) return; // Skip if empty
+            
+            const selectedLang = voiceLangSelect.value;
+            
+            // If Indian language, we'll translate to English for AI
+            if (selectedLang !== 'en-IN') {
+              // Show original transcription first
+              const statusDiv = document.createElement('div');
+              statusDiv.className = 'voice-status';
+              statusDiv.innerHTML = `
+                <div style="margin-bottom: 8px;">
+                  <strong>📝 Your Input:</strong><br/>
+                  "${transcript}"
+                </div>
+                <div style="color: #666;">⏳ Translating to English...</div>
+              `;
+              aiPromptInput.parentElement.insertBefore(statusDiv, aiPromptInput.nextSibling);
+              
+              // Use Google Translate API (simple approach)
+              fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(transcript)}`)
+                .then(res => res.json())
+                .then(data => {
+                  const translatedText = data[0][0][0];
+                  aiPromptInput.value = translatedText;
+                  statusDiv.innerHTML = `
+                    <div style="margin-bottom: 8px;">
+                      <strong>📝 Your Input:</strong><br/>
+                      "${transcript}"
+                    </div>
+                    <div style="color: #2196F3;">
+                      <strong>🔄 English Translation:</strong><br/>
+                      "${translatedText}"
+                    </div>
+                    <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                      ✓ This English text will be sent to AI
+                    </div>
+                  `;
+                  setTimeout(() => statusDiv.remove(), 25000);
+                })
+                .catch(err => {
+                  console.error('Translation error:', err);
+                  // Fallback: just use the original text
+                  aiPromptInput.value = transcript;
+                  statusDiv.innerHTML = `
+                    <div style="margin-bottom: 8px;">
+                      <strong>📝 Your Input:</strong><br/>
+                      "${transcript}"
+                    </div>
+                    <div style="color: #ff9800;">
+                      ⚠️ Translation failed. Using original text.
+                    </div>
+                  `;
+                  setTimeout(() => statusDiv.remove(), 25000);
+                });
+            } else {
+              // English, use directly
+              aiPromptInput.value = transcript;
+              const statusDiv = document.createElement('div');
+              statusDiv.className = 'voice-status';
+              statusDiv.innerHTML = `
+                <div>
+                  <strong>📝 Your Input:</strong><br/>
+                  "${transcript}"
+                </div>
+              `;
+              aiPromptInput.parentElement.insertBefore(statusDiv, aiPromptInput.nextSibling);
+              setTimeout(() => statusDiv.remove(), 25000);
+            }
+          };
+
+          recognition.onerror = (event) => {
+            console.error('Speech recognition error:', event.error);
+            alert(`Voice input error: ${event.error}. Please try again.`);
+            isRecording = false;
+            voiceBtn.classList.remove('recording');
+            voiceBtn.title = 'Voice Input';
+          };
+
+          recognition.onend = () => {
+            isRecording = false;
+            voiceBtn.classList.remove('recording');
+            voiceBtn.title = 'Voice Input';
+          };
+
+          voiceBtn.addEventListener('click', () => {
+            if (isRecording) {
+              recognition.stop();
+            } else {
+              recognition.lang = voiceLangSelect.value;
+              recognition.start();
+            }
+          });
+        } else {
+          voiceBtn.disabled = true;
+          voiceBtn.style.opacity = '0.5';
+          voiceBtn.title = 'Voice input not supported in this browser. Please use Chrome or Edge.';
+        }
     </script>
   </body>
 </html>
