@@ -84,7 +84,7 @@
         <div class="form-group">
           <label for="otp">OTP [One-Time-Password]</label>
           <input type="password" id="otp" name="otp" pattern="[0-9]{4}" maxlength="4" required>
-          <small>Enter the 4-digit OTP</br>(For demo: use 1234)</small>
+          <small>Enter the 4-digit OTP</br></small>
         </div>
         {% endif %}
         <button type="submit" class="btn btn-primary">{{ 'Verify' if show_otp else 'Send OTP' }}</button>
