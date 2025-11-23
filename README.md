@@ -5,12 +5,15 @@ Clyst is a comprehensive web application that serves as both a social platform f
 ## 📸 Screenshots
 
 ### Home Feed
+
 ![Home](screenshots/Home.png)
 
 ### Marketplace
+
 ![Marketplace](screenshots/Marketplace.png)
 
 ### Add Post
+
 ![Add Post](screenshots/Add_Post.png)
 
 ### Add Product
