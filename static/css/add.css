@@ -285,26 +285,29 @@
 
 /* Image Upload Tabs */
 .image-upload-tabs {
+	padding: 4px;
+	background: var(--border);
+	overflow: hidden;
+	border-radius: 20em;
+	width: fit-content;
 	display: flex;
-	margin: 4px 0 4px 0;
-	border-bottom: 2px solid var(--border);
+	margin: 8px 0 0 0;
+	border: none;
 }
 
 .tab-btn {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	padding: 10px 20px 10px 10px;
-	border-radius: 8px 8px 0 0;
+	gap: 2px;
+	padding: 8px;
+	border-radius: 20em;
 	background: transparent;
 	border: none;
-	border-bottom: 2px solid transparent;
 	color: var(--muted);
 	font-size: 14px;
 	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s;
-	margin-bottom: -2px;
 	font-family: inherit;
 }
 
@@ -313,14 +316,13 @@
 }
 
 .tab-btn:hover {
-	color: var(--text);
-	background: var(--bg);
+	opacity: 0.5;
 }
 
 .tab-btn.active {
-	background: light-dark(#e6e6e6, #222222);
+	border: 1px solid var(--muted);
+	background: var(--bg);
 	color: var(--accent);
-	border-bottom-color: var(--accent);
 	font-weight: 600;
 }
 
