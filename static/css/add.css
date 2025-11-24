@@ -817,6 +817,107 @@ select.form-input {
 	border: 1px solid light-dark(#e5e7eb, #404040);
 }
 
+.voice-input-controls {
+	margin: 4px 0 8px 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.voice-language-select {
+	flex: 1;
+	padding: 8px 12px;
+	border: 2px solid transparent;
+	border-radius: 20em 0 0 20em;
+	font-size: 14px;
+	background: light-dark(#dbdbdb, #2a2a2a);
+	color: var(--text);
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+.voice-language-select:hover {
+	border-color: light-dark(#6930c3, #48bfe3);
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+.voice-language-select:focus {
+	outline: none;
+	border-color: light-dark(#6930c3, #48bfe3);
+	background: light-dark(#dbdbdb, #2a2a2a);
+}
+.voice-input-btn {
+	padding: 8px 16px 8px 12px;
+	background: linear-gradient(
+		-45deg,
+		#7400b8,
+		#6930c3,
+		#5e60ce,
+		#48bfe3,
+		#64dfdf
+	);
+	color: white;
+	border: none;
+	border-radius: 0 20em 20em 0;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	transition: all 0.3s ease;
+	font-weight: 500;
+	white-space: nowrap;
+}
+.voice-input-btn:hover {
+	background: linear-gradient(
+		-45deg,
+		#7400b8,
+		#6930c3,
+		#5e60ce,
+		#48bfe3,
+		#64dfdf
+	);
+	opacity: 0.5;
+}
+.voice-input-btn.recording {
+	background: linear-gradient(
+		-45deg,
+		#7400b8,
+		#6930c3,
+		#5e60ce,
+		#48bfe3,
+		#64dfdf
+	);
+	animation: pulse 1.5s ease-in-out infinite;
+}
+.voice-input-btn.recording::after {
+	content: " Recording...";
+	font-size: 13px;
+}
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+.voice-status {
+	min-width: fit-content;
+	font-size: 24px;
+	color: light-dark(#6930c3, #48bfe3);
+	margin-top: 6px;
+	padding: 8px 12px;
+	background: light-dark(rgba(219, 219, 219, 0.75), rgba(42, 42, 42, 0.85));
+	backdrop-filter: blur(5px);
+	border-radius: 8px;
+	border: 1px solid light-dark(#6930c3, #48bfe3);
+}
+
+.voice-status strong {
+	font-size: 16px;
+	font-weight: 600;
+}
+
 @media (max-width: 768px) {
 	.post {
 		flex-direction: column;

@@ -115,7 +115,7 @@ body {
 
 .not-registered {
 	text-align: center;
-	margin-top: 20px;
+	margin-top: 0;
 }
 
 .not-registered p {
@@ -130,14 +130,107 @@ body {
 
 /* Firebase Auth UI Styling */
 #firebaseui-auth-container {
-	margin-bottom: 24px;
+	min-width: 100%;
+	width: 100%;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 0;
+}
+
+.firebaseui-page-provider-sign-in,
+.firebaseui-page-select-tenant {
+	margin: 0;
+	background: inherit;
+	width: 100%;
+	min-width: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.firebaseui-card-content,
+.firebaseui-card-footer {
+	padding: 0;
+	width: 100%;
+}
+
+.firebaseui-card-content form {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.firebaseui-idp-list,
+.firebaseui-tenant-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	justify-content: center;
+}
+
+.firebaseui-idp-list > .firebaseui-list-item,
+.firebaseui-tenant-list > .firebaseui-list-item {
+	margin-bottom: 12px;
+	text-align: center;
+}
+
+.firebaseui-idp-button,
+.firebaseui-tenant-button {
+	direction: ltr;
+	font-weight: 500;
+	height: fit-content;
+	line-height: normal;
+	max-width: fit-content;
+	min-height: fit-content;
+	padding: 8px;
+	display: flex;
+	text-align: left;
+	gap: 8px;
+	width: fit-content;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.firebaseui-idp-icon-wrapper {
+	width: fit-content;
+	display: flex;
+	vertical-align: middle;
+	align-items: center;
+	justify-content: space-between;
+	flex-direction: row;
+}
+
+.firebaseui-idp-text {
+	width: 100%;
+	color: #fff;
+	display: table-cell;
+	font-size: 12px;
+	padding-left: 0;
+	line-height: 1.1;
+	text-transform: none;
+	vertical-align: middle;
+	margin: 0;
+}
+
+.firebaseui-idp-icon {
+	border: none;
+	display: inline-block;
+	height: 28px;
+	vertical-align: middle;
+	width: 28px;
 }
 
 .divider {
 	display: flex;
 	align-items: center;
 	text-align: center;
-	margin: 24px 0;
+	margin: 24px 0 0 0;
 	color: var(--muted);
 }
 
