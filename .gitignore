@@ -56,3 +56,4 @@ tests
 # API Keys and Configuration
 config.py
 .gitignore
+DEPLOY_QUICK.md
