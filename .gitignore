@@ -57,3 +57,4 @@ tests
 config.py
 .gitignore
 DEPLOY_QUICK.md
+FIREBASE_SETUP.md
