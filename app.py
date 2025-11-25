@@ -2773,7 +2773,7 @@ def complete_verification():
             f.write(base64.b64decode(photo_data))
         
         # Update user verification status
-        current_user.is_verified = False
+        current_user.is_verified = True
         current_user.verification_photo = filename
         current_user.verification_date = str(date.today())
         db.session.commit()
