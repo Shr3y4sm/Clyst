@@ -1670,6 +1670,7 @@
     
     <!-- charts powered by ApexCharts -->
     <script src="https://unpkg.com/apexcharts@3.45.1/dist/apexcharts.min.js"></script>
+    {% if current_user.is_authenticated and current_user.id == profile_user.id %}
     <script>
       const days = {{ days|tojson }};
       const pv = {{ product_views_daily|tojson }};
@@ -1792,6 +1793,7 @@
         }, 100);
       }
     </script>
+    {% endif %}
     <script src="../static/js/app.js"></script>
   </body>
 </html>
