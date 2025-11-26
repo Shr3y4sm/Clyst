@@ -770,3 +770,20 @@ svg {
 		min-width: 128px;
 	}
 }
+
+/* Hashtag Links */
+.hashtag-link {
+	text-decoration: none;
+	color: var(--card);
+	background: var(--accent);
+	padding: 2px 8px;
+	border-radius: 20em;
+	font-size: 12px;
+	transition: all 0.1s ease;
+	margin: 0 4px;
+}
+
+.hashtag-link:hover {
+	background: var(--muted);
+	color: var(--card);
+}

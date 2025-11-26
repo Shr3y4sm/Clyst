@@ -725,7 +725,7 @@
                             This English text will be sent to AI
                           </div>
                         `;
-                        setTimeout(() => statusDiv.remove(), 25000);
+                        setTimeout(() => statusDiv.remove(), 15000);
                       })
                       .catch(err => {
                         console.error('Translation error:', err);
@@ -740,7 +740,7 @@
                             Translation failed. Using original text.
                           </div>
                         `;
-                        setTimeout(() => statusDiv.remove(), 25000);
+                        setTimeout(() => statusDiv.remove(), 15000);
                       });
                   } else {
                     // English, use directly
@@ -754,7 +754,7 @@
                       </div>
                     `;
                     aiPromptInput.parentElement.insertBefore(statusDiv, aiPromptInput.nextSibling);
-                    setTimeout(() => statusDiv.remove(), 25000);
+                    setTimeout(() => statusDiv.remove(), 15000);
                   }
                 };
 

@@ -21,6 +21,10 @@ firebase-admin>=6.5.0
 gunicorn>=21.2.0
 psycopg2-binary>=2.9.0
 
-# AI Image Detection (optional for enhanced detection)
+# AI Image Detection - Basic (required)
 Pillow>=10.0.0
 numpy>=1.24.0
+
+# AI Image Detection - Enhanced (optional, uncomment for full capability)
+scipy>=1.11.0        # For FFT frequency domain analysis
+opencv-python>=4.8.0 # For edge detection and computer vision

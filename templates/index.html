@@ -172,7 +172,7 @@ fill="currentColor" viewBox="0 0 24 24" >
                 </button>
               {% endif %}
             </div>
-            <p class="post-description">{{ post.description }}</p>
+            <p class="post-description">{{ post.description|linkify_hashtags|safe }}</p>
           </div>
 
           {% if post.media_url %}

@@ -385,7 +385,7 @@
                       </div>
                       <h3 class="item-title">{{ post.post_title }}</h3>
                       <p class="item-description">
-                        {{ post.description[:100] }}{% if post.description|length > 100 %}...{% endif %}
+                        {{ post.description[:100]|linkify_hashtags|safe }}{% if post.description|length > 100 %}...{% endif %}
                       </p>
                       
                     <button
@@ -477,7 +477,7 @@
                       </div>
                       <h3 class="item-title">{{ product.title }}</h3>
                       <p class="item-description">
-                        {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                        {{ product.description[:100]|linkify_hashtags|safe }}{% if product.description|length > 100 %}...{% endif %}
                       </p>
                       <span class="item-price">Rs.{{ product.price }}</span>
                       <button
