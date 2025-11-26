@@ -176,9 +176,9 @@ def save_uploaded_file(file, folder_name):
         file_path = os.path.join(folder_path, unique_filename)
         file.save(file_path)
 
-        # Return URL path for database storage and original filename for detection
+        # Return URL path for database storage and full file path for AI detection
         url_path = f"/static/uploads/{folder_name}/{unique_filename}"
-        return url_path, original_filename
+        return url_path, file_path  # Return full file path instead of original filename
     return None, None
 
 
@@ -584,6 +584,10 @@ def linkify_hashtags(text):
         return f'<a href="/hashtag/{tag}" class="hashtag-link">#{tag}</a>'
     linked = pattern.sub(_repl, str(escaped))
     return Markup(linked)
+
+
+# Register linkify_hashtags as a Jinja2 filter
+app.jinja_env.filters['linkify_hashtags'] = linkify_hashtags
 
 
 # ========= Analytics dashboard =========
@@ -1797,10 +1801,10 @@ def add_products():
         if 'product_image_file' in request.files:
             file = request.files['product_image_file']
             if file.filename != '':
-                uploaded_path, orig_name = save_uploaded_file(file, 'products')
+                uploaded_path, file_path = save_uploaded_file(file, 'products')
                 if uploaded_path:
                     img_url = uploaded_path
-                    original_filename = orig_name
+                    original_filename = file_path  # Full file path for AI detection
 
         # For editing, keep existing image if no new one provided
         if not img_url and product:
