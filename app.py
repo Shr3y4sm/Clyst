@@ -1,6 +1,7 @@
 # type: ignore[import]
 from datetime import date, datetime, timedelta
 import os
+import tempfile
 from dotenv import load_dotenv
 import natural_search
 import ai
@@ -18,7 +19,7 @@ load_dotenv()
 # Initialize Firebase Admin SDK
 firebase_config.init_firebase_admin()
 from werkzeug.utils import secure_filename
-from flask import Flask, abort, render_template, redirect, url_for, flash, request, jsonify, session
+from flask import Flask, abort, render_template, redirect, url_for, flash, request, jsonify, session, send_from_directory
 import json
 # Type hints for better IDE support
 from typing import Optional, Dict, Any, List
@@ -38,6 +39,7 @@ _portfolio_cache = {}
 _cache_timeout = 3600  # 1 hour
 
 app = Flask(__name__, static_folder='static')
+IS_VERCEL = os.getenv('VERCEL') == '1' or os.getenv('VERCEL_ENV') is not None
 # Load configuration from config.py
 try:
     from config import GEMINI_API_KEY, FLASK_SECRET_KEY
@@ -45,10 +47,12 @@ except ImportError:
     GEMINI_API_KEY = None
     FLASK_SECRET_KEY = 'dev-secret-key-change-in-production'
 app.config['SECRET_KEY'] = FLASK_SECRET_KEY
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = os.path.join(tempfile.gettempdir(), 'clyst_uploads') if IS_VERCEL else os.path.join(app.root_path, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 app.config['SESSION_PERMANENT'] = True
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+db_path = os.path.join(tempfile.gettempdir(), 'clyst.db') if IS_VERCEL else os.path.join(app.instance_path, 'clyst.db')
 
 ckeditor = CKEditor(app)
 Bootstrap(app)
@@ -110,11 +114,10 @@ if os.getenv('FLASK_ENV') == 'production':
     if DATABASE_URL:
         app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL.replace('postgres://', 'postgresql://')
     else:
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clyst.db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 else:
     # Use SQLite for development (store DB in Flask instance folder)
     os.makedirs(app.instance_path, exist_ok=True)
-    db_path = os.path.join(app.instance_path, 'clyst.db')
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 
 # Initialize SQLAlchemy with the declarative base class
@@ -176,10 +179,18 @@ def save_uploaded_file(file, folder_name):
         file_path = os.path.join(folder_path, unique_filename)
         file.save(file_path)
 
-        # Return URL path for database storage and full file path for AI detection
-        url_path = f"/static/uploads/{folder_name}/{unique_filename}"
+        # Return a URL that works both on Vercel and in local development.
+        if IS_VERCEL:
+            url_path = url_for('uploaded_file', filename=f'{folder_name}/{unique_filename}')
+        else:
+            url_path = f"/static/uploads/{folder_name}/{unique_filename}"
         return url_path, file_path  # Return full file path instead of original filename
     return None, None
+
+
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 class User(UserMixin, db.Model):
