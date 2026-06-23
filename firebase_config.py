@@ -1,8 +1,15 @@
 # Firebase Authentication Configuration
-import firebase_admin
-from firebase_admin import credentials, auth
 import os
 import requests
+
+try:
+    import firebase_admin
+    from firebase_admin import auth
+    FIREBASE_ADMIN_AVAILABLE = True
+except Exception:
+    firebase_admin = None
+    auth = None
+    FIREBASE_ADMIN_AVAILABLE = False
 
 # Firebase Web SDK config (for frontend)
 # Load from environment variables to avoid exposing secrets in source code
@@ -19,6 +26,10 @@ FIREBASE_WEB_CONFIG = {
 # For development: uses Application Default Credentials or service account key
 def init_firebase_admin():
     """Initialize Firebase Admin SDK if not already initialized."""
+    if not FIREBASE_ADMIN_AVAILABLE:
+        print("[WARNING] Firebase Admin SDK unavailable; using REST fallback only")
+        return
+
     if not firebase_admin._apps:
         try:
             # Try to use Application Default Credentials first
@@ -34,6 +45,9 @@ def verify_firebase_token(id_token):
     Verify a Firebase ID token and return decoded claims.
     Returns None if verification fails.
     """
+    if not FIREBASE_ADMIN_AVAILABLE:
+        print("Token verification via Admin SDK unavailable; using REST fallback")
+
     try:
         decoded_token = auth.verify_id_token(id_token)
         return decoded_token
@@ -82,7 +96,7 @@ def delete_firebase_user(email: str = None, id_token: str = None):
     """
     # Try Admin SDK deletion by email first when initialized
     try:
-        if email and firebase_admin._apps:
+        if FIREBASE_ADMIN_AVAILABLE and email and firebase_admin._apps:
             try:
                 user_record = auth.get_user_by_email(email)
                 auth.delete_user(user_record.uid)

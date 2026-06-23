@@ -1,30 +1,22 @@
-google-generativeai>=0.7.0
 requests>=2.31.0
 Flask==3.0.0
 Flask-Bootstrap5==0.1.dev1
 Flask-CKEditor==1.0.0
-Flask-Gravatar==0.5.0
 Flask-Login==0.6.3
-Flask-Migrate>=4.0.7
 Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.38
-alembic>=1.13.2
 Werkzeug==3.0.1
 
 # Load env vars from .env
 python-dotenv>=1.0.1
 
-# Firebase Authentication
-firebase-admin>=6.5.0
-
-# Production dependencies
-gunicorn>=21.2.0
-psycopg2-binary>=2.9.0
+# Firebase Auth is optional at runtime and falls back to REST when the
+# Admin SDK is unavailable on Vercel.
 
 # AI Image Detection - Basic (required)
 Pillow>=10.0.0
 numpy>=1.24.0
 
-# AI Image Detection - Enhanced (optional, uncomment for full capability)
-scipy>=1.11.0        # For FFT frequency domain analysis
-opencv-python>=4.8.0 # For edge detection and computer vision
+# AI Image Detection - Enhanced analysis is optional and intentionally omitted
+# from the default Vercel bundle to keep deployment size under the function limit.
+# Install SciPy/OpenCV locally only if you need the advanced detection layers.
