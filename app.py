@@ -11,6 +11,28 @@ from functools import lru_cache, wraps
 import sustainability_classifier
 import ai_image_detector
 
+# Optional S3-backed uploads
+S3_BUCKET = os.getenv('S3_BUCKET')
+S3_REGION = os.getenv('S3_REGION') or os.getenv('AWS_REGION')
+S3_ENABLED = bool(S3_BUCKET)
+_s3_client = None
+def get_s3_client():
+    global _s3_client
+    if _s3_client is not None:
+        return _s3_client
+    try:
+        import boto3
+        _s3_client = boto3.client(
+            's3',
+            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+            region_name=S3_REGION
+        )
+        return _s3_client
+    except Exception:
+        _s3_client = None
+        return None
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -177,9 +199,32 @@ def save_uploaded_file(file, folder_name):
         folder_path = os.path.join(app.config['UPLOAD_FOLDER'], folder_name)
         os.makedirs(folder_path, exist_ok=True)
 
-        # Save file
+        # Save file locally first
         file_path = os.path.join(folder_path, unique_filename)
         file.save(file_path)
+
+        # If S3 configured, upload and return S3 URL
+        if S3_ENABLED:
+            try:
+                s3 = get_s3_client()
+                if s3:
+                    key = f"{folder_name}/{unique_filename}"
+                    # Upload and make public-read
+                    with open(file_path, 'rb') as fh:
+                        s3.put_object(Bucket=S3_BUCKET, Key=key, Body=fh, ACL='public-read')
+                    if S3_REGION:
+                        url_path = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{key}"
+                    else:
+                        url_path = f"https://{S3_BUCKET}.s3.amazonaws.com/{key}"
+                    # Optionally remove local copy
+                    try:
+                        os.remove(file_path)
+                    except Exception:
+                        pass
+                    return url_path, file_path
+            except Exception:
+                # fall back to local URL if upload fails
+                pass
 
         # Return a URL that works both on Vercel and in local development.
         if IS_VERCEL:
@@ -192,6 +237,10 @@ def save_uploaded_file(file, folder_name):
 
 @app.route('/uploads/<path:filename>')
 def uploaded_file(filename):
+    # If S3 is enabled and the filename looks like an S3 key, redirect
+    if S3_ENABLED and filename.startswith('http'):
+        from flask import redirect
+        return redirect(filename)
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
@@ -2784,14 +2833,38 @@ def complete_verification():
         # Ensure directory exists
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
         
-        # Save the image
+        # Save the image (to S3 if configured, else local)
         import base64
+        img_bytes = base64.b64decode(photo_data)
+
+        # Ensure local dir exists for temporary file
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, "wb") as f:
-            f.write(base64.b64decode(photo_data))
-        
+            f.write(img_bytes)
+
+        # If S3 enabled, upload and get URL
+        verification_url = None
+        if S3_ENABLED:
+            try:
+                s3 = get_s3_client()
+                if s3:
+                    key = f"verification/{filename}"
+                    s3.put_object(Bucket=S3_BUCKET, Key=key, Body=img_bytes, ACL='public-read')
+                    if S3_REGION:
+                        verification_url = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{key}"
+                    else:
+                        verification_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{key}"
+                    # try remove local file
+                    try:
+                        os.remove(filepath)
+                    except Exception:
+                        pass
+            except Exception:
+                verification_url = None
+
         # Update user verification status
         current_user.is_verified = True
-        current_user.verification_photo = filename
+        current_user.verification_photo = verification_url or filename
         current_user.verification_date = str(date.today())
         db.session.commit()
         

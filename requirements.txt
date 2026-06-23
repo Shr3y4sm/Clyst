@@ -16,6 +16,7 @@ python-dotenv>=1.0.1
 # AI Image Detection - Basic (required)
 Pillow>=10.0.0
 numpy>=1.24.0
+boto3>=1.26.0
 
 # AI Image Detection - Enhanced analysis is optional and intentionally omitted
 # from the default Vercel bundle to keep deployment size under the function limit.
