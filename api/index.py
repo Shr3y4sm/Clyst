@@ -22,3 +22,14 @@ except NameError:
 def handler(environ, start_response):
 	"""WSGI handler wrapper for Vercel."""
 	return application.wsgi_app(environ, start_response)
+
+# Ensure `app` and `application` names exist at module level for Vercel static detection
+try:
+	app  # noqa: F821
+except NameError:
+	app = application
+
+try:
+	application  # noqa: F821
+except NameError:
+	application = app
