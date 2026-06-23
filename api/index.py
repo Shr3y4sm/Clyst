@@ -11,3 +11,14 @@ except Exception as e:
 	@app.route("/")
 	def _import_error():
 		return Response("Import error during app startup. Check deployment logs for traceback.", status=500)
+
+# Expose a top-level WSGI application and a handler for Vercel's runtime detection.
+try:
+	application = app
+except NameError:
+	from flask import Flask
+	application = Flask(__name__)
+
+def handler(environ, start_response):
+	"""WSGI handler wrapper for Vercel."""
+	return application.wsgi_app(environ, start_response)
