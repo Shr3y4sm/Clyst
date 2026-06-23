@@ -7,8 +7,6 @@ import natural_search
 import ai
 import uuid
 import firebase_config
-import firebase_admin
-from firebase_admin import auth
 from functools import lru_cache, wraps
 import sustainability_classifier
 import ai_image_detector
@@ -25,7 +23,10 @@ import json
 from typing import Optional, Dict, Any, List
 from flask_bootstrap5 import Bootstrap
 from flask_ckeditor import CKEditor
-from flask_migrate import Migrate
+try:
+    from flask_migrate import Migrate
+except Exception:
+    Migrate = None
 # from flask_gravatar import Gravatar
 from flask_login import UserMixin, login_user, LoginManager, current_user, logout_user, login_required
 from flask_sqlalchemy import SQLAlchemy
@@ -125,7 +126,8 @@ db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
 # Initialize Flask-Migrate
-migrate = Migrate(app, db, compare_type=True, render_as_batch=True)
+if Migrate is not None:
+    migrate = Migrate(app, db, compare_type=True, render_as_batch=True)
 
 # Create database tables within app context if they don't exist
 with app.app_context():
